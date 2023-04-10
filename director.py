@@ -1,3 +1,4 @@
+import uuid
 import zmq
 from random import randrange
 from flask import Flask
@@ -8,7 +9,7 @@ from taskdef import *
 app = Flask(__name__)
 
 # Using a Shelve for persistence of the STATUS dict
-app.config['SHELVE_FILENAME'] = 'director'
+app.config['SHELVE_FILENAME'] = 'persistence'
 flask_shelve.init_app(app)
 
 # Prepare our context and socket to push jobs to workers 
@@ -26,7 +27,8 @@ def new_file(file_id):
   if file_id in STATUS:
     return f"Already have state for {file_id}", 400
   current = {}
-  for task in TASKS:
+  current['uuid'] = str(uuid.uuid4())
+  for task in [x.value for x in Tasks]:
     current[task] = State.INIT.value
     print(current)
     sender.send_string(f"{task} {file_id}")
@@ -38,7 +40,7 @@ def requeue_task(file_id, task):
   STATUS = flask_shelve.get_shelve()
   if not file_id in STATUS:
     return f"No such file_id {file_id}", 400
-  if not task in TASKS:
+  if not any(x for x in Tasks if x.value == task):
     return f"No such task {task}", 400
   sender.send_string(f"{task} {file_id}")
   return f"Sent to Work Queue: {task} {file_id}"
@@ -55,7 +57,7 @@ def update_inprogress(file_id, task):
   STATUS = flask_shelve.get_shelve()
   if not file_id in STATUS:
     return f"No such file_id {file_id}", 400
-  if not task in TASKS:
+  if not any(x for x in Tasks if x.value == task):
     return f"No such task {task}", 400
   current = STATUS[file_id]
   current[task] = State.PROG.value
@@ -67,7 +69,7 @@ def update_waiting(file_id, task):
   STATUS = flask_shelve.get_shelve()
   if not file_id in STATUS:
     return f"No such file_id {file_id}", 400
-  if not task in TASKS:
+  if not any(x for x in Tasks if x.value == task):
     return f"No such task {task}", 400
   current = STATUS[file_id]
   current[task] = State.WAIT.value
@@ -79,7 +81,7 @@ def update_complete(file_id, task):
   STATUS = flask_shelve.get_shelve()
   if not file_id in STATUS:
     return f"No such file_id {file_id}", 400
-  if not task in TASKS:
+  if not any(x for x in Tasks if x.value == task):
     return f"No such task {task}", 400
   current = STATUS[file_id]
   current[task] = State.COMP.value
@@ -91,7 +93,7 @@ def update_failed(file_id, task):
   STATUS = flask_shelve.get_shelve()
   if not file_id in STATUS:
     return f"No such file_id {file_id}", 400
-  if not task in TASKS:
+  if not any(x for x in Tasks if x.value == task):
     return f"No such task {task}", 400
   current = STATUS[file_id]
   current[task] = State.FAIL.value
@@ -103,7 +105,7 @@ def update_notavailable(file_id, task):
   STATUS = flask_shelve.get_shelve()
   if not file_id in STATUS:
     return f"No such file_id {file_id}", 400
-  if not task in TASKS:
+  if not any(x for x in Tasks if x.value == task):
     return f"No such task {task}", 400
   current = STATUS[file_id]
   current[task] = State.NA.value
