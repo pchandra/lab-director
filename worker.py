@@ -31,9 +31,9 @@ def _get_as_local_file(file_id, status):
         shutil.copyfile(src, dst)
     return dst
 
-def _run(file_id, task_type, filename):
+def _run(file_id, task_type, filename, status):
     api.mark_inprogress(file_id, task_type.value)
-    ret = runtask.execute[task_type](filename)
+    ret = runtask.execute[task_type](filename, status)
     data = json.dumps(ret).encode('ascii')
     api.mark_complete(file_id, task_type.value, data)
 
@@ -62,26 +62,26 @@ while True:
 
     # Key and BPM detection
     if task == Tasks.KBPM.value:
-        _run(file_id, Tasks.KBPM, filename)
+        _run(file_id, Tasks.KBPM, filename, status)
 
     # Stem separation
     elif task == Tasks.STEM.value:
         if _check_ready(file_id, task, status, Tasks.KBPM):
-            _run(file_id, Tasks.STEM, filename)
+            _run(file_id, Tasks.STEM, filename, status)
 
     # Track mastering
     elif task == Tasks.MAST.value:
-        _run(file_id, Tasks.MAST, filename)
+        _run(file_id, Tasks.MAST, filename, status)
 
     # Instrumental track from stems
     elif task == Tasks.INST.value:
         if _check_ready(file_id, task, status, Tasks.STEM):
-            _run(file_id, Tasks.INST, filename)
+            _run(file_id, Tasks.INST, filename, status)
 
     # Lyrics from vocals
     elif task == Tasks.LYRC.value:
         if _check_ready(file_id, task, status, Tasks.STEM):
-            _run(file_id, Tasks.LYRC, filename)
+            _run(file_id, Tasks.LYRC, filename, status)
 
     # MIDI track from stems
     elif task == Tasks.MIDI.value:

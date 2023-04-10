@@ -17,12 +17,12 @@ _task_bin[Tasks.LYRC] = '/usr/local/bin/whisper'
 _task_bin[Tasks.MIDI] = '/usr/local/bin/basic-pitch'
 _task_bin[Tasks.COVR] = '/bin/echo'
 
-def _run_key_bpm_finder(filebase):
+def _run_key_bpm_finder(filename, status):
     # Build the command line to run
     cmdline = []
     cmdline.append('/usr/local/bin/python3.9')
     cmdline.append(_task_bin[Tasks.KBPM])
-    cmdline.append(filebase)
+    cmdline.append(filename)
     # Execute the command
     process = subprocess.Popen(cmdline, 
                                stdout=subprocess.PIPE,
@@ -43,9 +43,10 @@ def _stems_for_model(model):
         stems.append("piano")
     return stems
 
-def _run_demucs(filebase):
+def _run_demucs(filename, status):
     model = _get_model()
     stems = _stems_for_model(model)
+    outbase = f"{WORK_DIR}/{model}/{os.path.basename(filename)}"
     # Build the command line to run
     cmdline = []
     cmdline.append(_task_bin[Tasks.STEM])
@@ -54,36 +55,68 @@ def _run_demucs(filebase):
                      "-o", WORK_DIR,
                      "--filename", "{track}-{stem}.{ext}"
                    ])
-    cmdline.append(filebase)
+    cmdline.append(filename)
     # Execute the command if we don't already have output
-    outbase = f"{WORK_DIR}/{model}/{os.path.basename(filebase)}"
-    stdout=None
+    outbase = f"{WORK_DIR}/{model}/{os.path.basename(filename)}"
+    stdout = None
+    stderr = None
+    if Tasks.STEM.value in status and State.COMP.value in status[Tasks.STEM.value] and "stdout" in status[Tasks.STEM.value][State.COMP.value]:
+        stdout=status[Tasks.STEM.value][State.COMP.value]["stdout"]
+        stderr=status[Tasks.STEM.value][State.COMP.value]["stderr"]
     if not os.path.exists(f"{outbase}-{stems[0]}.wav"):
         process = subprocess.Popen(cmdline,
                                    stdout=subprocess.PIPE,
-                                   stderr=subprocess.STDOUT,
+                                   stderr=subprocess.PIPE,
                                    universal_newlines=True)
-        stdout, _ = process.communicate()
+        stdout, stderr = process.communicate()
     # Build the dict to return to caller
-    ret = { "model": model, "stdout": stdout }
+    ret = { "model": model, "stdout": stdout, "stderr": stderr }
     ret[model] = {}
     for stem in stems:
         ret[model][stem] = f"{outbase}-{stem}.wav"
     return ret
 
-def _run_phaselimiter(filebase):
+def _run_phaselimiter(filename, status):
+    outfile = f"{WORK_DIR}/{os.path.basename(filename)}-mastered.wav"
+    # Build the command line to run
+    cmdline = []
+    cmdline.append(_task_bin[Tasks.MAST])
+    cmdline.extend([ "-reference", "-9",
+                     "-reference_mode", "loudness",
+                     "-ceiling_mode", "lowpass_true_peak",
+                     "-ceiling", "-0.5",
+                     "-mastering_mode", "mastering5",
+                     "mastering5_mastering_level", "0.7",
+                     "-input", filename,
+                     "-output", outfile
+                   ])
+    # Execute the command if we don't already have output
+    stdout = None
+    stderr = None
+    if Tasks.MAST.value in status and State.COMP.value in status[Tasks.MAST.value] and "stdout" in status[Tasks.MAST.value][State.COMP.value]:
+        stdout = status[Tasks.MAST.value][State.COMP.value]["stdout"]
+        stderr = status[Tasks.MAST.value][State.COMP.value]["stderr"]
+    if not os.path.exists(outfile):
+        process = subprocess.Popen(cmdline,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE,
+                                   universal_newlines=True)
+        stdout, stderr = process.communicate()
+    # Build the dict to return to caller
+    ret = { "stdout": stdout, "stderr": stderr }
+    ret["mastered"] = outfile
+    return ret
+
+def _run_wav_mixer(filename, status):
     time.sleep(30)
 
-def _run_wav_mixer(filebase):
+def _run_whisper(filename, status):
     time.sleep(30)
 
-def _run_whisper(filebase):
+def _run_basic_pitch(filename, status):
     time.sleep(30)
 
-def _run_basic_pitch(filebase):
-    time.sleep(30)
-
-def _run_dalle2(filebase):
+def _run_dalle2(filename, status):
     time.sleep(30)
 
 execute = {}
