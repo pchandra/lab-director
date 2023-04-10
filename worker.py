@@ -9,9 +9,6 @@ from taskdef import *
 import taskapi as api
 import runtask
 
-# Working directory for tools to operate
-WORK_DIR = '/tmp'
-
 # Setup ZeroMQ connection to receive tasks from the director
 context = zmq.Context()
 receiver = context.socket(zmq.PULL)
@@ -29,7 +26,7 @@ def _check_ready(file_id, task, status, dep):
 # XXX: REPLACE THIS with one that grabs an actual file
 def _get_as_local_file(file_id, status):
     src = os.environ.get('TESTFILE')
-    dst = WORK_DIR + f"/{status['uuid']}"
+    dst = runtask.WORK_DIR + f"/{status['uuid']}"
     if not os.path.exists(dst):
         shutil.copyfile(src, dst)
     return dst

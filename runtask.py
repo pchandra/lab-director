@@ -2,6 +2,10 @@ import time
 import json
 import subprocess
 from taskdef import *
+import taskapi as api
+
+# Working directory for tools to operate
+WORK_DIR = '/tmp'
 
 _task_bin = {}
 _task_bin[Tasks.KBPM] = '/Users/chandra/ll/co/key-bpm-finder/keymaster-json.py'
