@@ -143,8 +143,38 @@ def _run_wav_mixer(filename, status):
     return ret
 
 def _run_whisper(filename, status):
-    time.sleep(30)
-    return {}
+    model = _get_model()
+    outdir = f"{WORK_DIR}/{os.path.basename(filename)}-instrumental"
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+    # Build the command line to run
+    cmdline = []
+    cmdline.append(_task_bin[Tasks.LYRC])
+    cmdline.extend([ "--language", "en",
+                     "--model", "medium",
+                     "--output_dir", outdir
+                   ])
+    # Only use the vocals stem for this input
+    cmdline.append(status[Tasks.STEM.value][State.COMP.value][model]["vocals"])
+    # Execute the command if we don't already have output
+    stdout = None
+    stderr = None
+    if Tasks.LYRC.value in status and State.COMP.value in status[Tasks.LYRC.value] and "stdout" in status[Tasks.LYRC.value][State.COMP.value]:
+        stdout = status[Tasks.INST.value][State.COMP.value]["stdout"]
+        stderr = status[Tasks.INST.value][State.COMP.value]["stderr"]
+    if not os.path.exists(outdir + "/vocals.srt"):
+        # Connect stdin to prevent hang when in background
+        process = subprocess.Popen(cmdline,
+                                   stdin=subprocess.PIPE,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE,
+                                   universal_newlines=True)
+        stdout, stderr = process.communicate(input="\n\n\n\n\n")
+    # Build the dict to return to caller
+    ret = { "stdout": stdout, "stderr": stderr }
+    ret["json"] = json.load(outdir + "/vocals.json")
+    ret["srt"] = outdir + "/vocals.srt"
+    return ret
 
 def _run_basic_pitch(filename, status):
     time.sleep(30)
