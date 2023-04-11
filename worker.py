@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+from datetime import datetime
 import shutil
 import zmq
 from urllib.request import urlopen
@@ -33,7 +34,15 @@ def _get_as_local_file(file_id, status):
 
 def _run(file_id, task_type, filename, status):
     api.mark_inprogress(file_id, task_type.value)
+    start = time.time()
     ret = runtask.execute[task_type](filename, status)
+    stop = time.time()
+    ret['perf'] = {}
+    ret['perf']['start'] = datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S')
+    ret['perf']['stop'] = datetime.fromtimestamp(stop).strftime('%Y-%m-%d %H:%M:%S')
+    ret['perf']['time_start'] = start
+    ret['perf']['time_stop'] = stop
+    ret['perf']['time_elapsed'] = stop - start
     data = json.dumps(ret).encode('ascii')
     api.mark_complete(file_id, task_type.value, data)
 
