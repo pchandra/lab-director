@@ -112,16 +112,47 @@ def _run_phaselimiter(filename, status):
     return ret
 
 def _run_wav_mixer(filename, status):
-    time.sleep(30)
+    model = _get_model()
+    stems = _stems_for_model(model)
+    outfile = f"{WORK_DIR}/{os.path.basename(filename)}-instrumental.wav"
+    # Build the command line to run
+    cmdline = []
+    cmdline.append(_task_bin[Tasks.INST])
+    cmdline.extend([ "-o", outfile ])
+    # Add all the stems except the vocal track
+    stems.remove("vocals")
+    for stem in stems:
+        cmdline.append(status[Tasks.STEM.value][State.COMP.value][model][stem])
+    # Execute the command if we don't already have output
+    stdout = None
+    stderr = None
+    if Tasks.INST.value in status and State.COMP.value in status[Tasks.INST.value] and "stdout" in status[Tasks.INST.value][State.COMP.value]:
+        stdout = status[Tasks.INST.value][State.COMP.value]["stdout"]
+        stderr = status[Tasks.INST.value][State.COMP.value]["stderr"]
+    if not os.path.exists(outfile):
+        # Connect stdin to prevent hang when in background
+        process = subprocess.Popen(cmdline,
+                                   stdin=subprocess.PIPE,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE,
+                                   universal_newlines=True)
+        stdout, stderr = process.communicate(input="\n\n\n\n\n")
+    # Build the dict to return to caller
+    ret = { "stdout": stdout, "stderr": stderr }
+    ret["output"] = outfile
+    return ret
 
 def _run_whisper(filename, status):
     time.sleep(30)
+    return {}
 
 def _run_basic_pitch(filename, status):
     time.sleep(30)
+    return {}
 
 def _run_dalle2(filename, status):
     time.sleep(30)
+    return {}
 
 execute = {}
 execute[Tasks.KBPM] = _run_key_bpm_finder
