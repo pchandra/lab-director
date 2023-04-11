@@ -42,7 +42,7 @@ def index():
 def new_file(file_id):
   STATUS = flask_shelve.get_shelve()
   if file_id in STATUS:
-    return _msg(f"Already have state for {file_id}"), 400
+    return _msg(f"Item already exists: {file_id}"), 400
   current = {}
   current['id'] = file_id
   current['uuid'] = str(uuid.uuid4())
@@ -51,7 +51,7 @@ def new_file(file_id):
     current[task]['status'] = State.INIT.value
     sender.send_string(f"{task} {file_id}")
   STATUS[file_id] = current
-  return _msg(f"Sent to Work Queue: {task} {file_id}")
+  return _msg(f"Queued all initial tasks for: {file_id}")
 
 @app.route('/requeue/<file_id>/<task>')
 def requeue_task(file_id, task):
@@ -60,7 +60,7 @@ def requeue_task(file_id, task):
   if not ok:
     return msg
   sender.send_string(f"{task} {file_id}")
-  return _msg(f"Sent to Work Queue: {task} {file_id}")
+  return _msg(f"Re-queued task: {task} for: {file_id}")
 
 @app.route('/status/<file_id>')
 def file_status(file_id):
