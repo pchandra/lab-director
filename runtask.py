@@ -172,10 +172,10 @@ def _run_whisper(filename, status):
         stdout, stderr = process.communicate(input="\n\n\n\n\n")
     # Build the dict to return to caller
     ret = { "stdout": stdout, "stderr": stderr }
-    with open(outdir + "/vocals.json", "r") as f:
+    with open(outdir + f"/{os.path.basename(filename)}-vocals.json", "r") as f:
         ret["json"] = json.load(f)
     ret["srt"] = outdir + "/vocals.srt"
-    with open(outdir + "/vocals.txt", "r") as f:
+    with open(outdir + f"/{os.path.basename(filename)}-vocals.txt", "r") as f:
         ret["fulltext"] = f.readlines()
     return ret
 
