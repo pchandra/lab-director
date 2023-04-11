@@ -64,11 +64,13 @@ def _run_demucs(filename, status):
         stdout=status[Tasks.STEM.value][State.COMP.value]["stdout"]
         stderr=status[Tasks.STEM.value][State.COMP.value]["stderr"]
     if not os.path.exists(f"{outbase}-{stems[0]}.wav"):
+        # Connect stdin to prevent hang when in background
         process = subprocess.Popen(cmdline,
+                                   stdin=subprocess.PIPE,
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE,
                                    universal_newlines=True)
-        stdout, stderr = process.communicate()
+        stdout, stderr = process.communicate(input="\n\n\n\n\n")
     # Build the dict to return to caller
     ret = { "model": model, "stdout": stdout, "stderr": stderr }
     ret[model] = {}
@@ -97,14 +99,16 @@ def _run_phaselimiter(filename, status):
         stdout = status[Tasks.MAST.value][State.COMP.value]["stdout"]
         stderr = status[Tasks.MAST.value][State.COMP.value]["stderr"]
     if not os.path.exists(outfile):
+        # Connect stdin to prevent hang when in background
         process = subprocess.Popen(cmdline,
+                                   stdin=subprocess.PIPE,
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE,
                                    universal_newlines=True)
-        stdout, stderr = process.communicate()
+        stdout, stderr = process.communicate(input="\n\n\n\n\n")
     # Build the dict to return to caller
     ret = { "stdout": stdout, "stderr": stderr }
-    ret["mastered"] = outfile
+    ret["output"] = outfile
     return ret
 
 def _run_wav_mixer(filename, status):
