@@ -79,7 +79,7 @@ def _run_demucs(filename, status):
     return ret
 
 def _run_phaselimiter(filename, status):
-    outfile = f"{WORK_DIR}/{os.path.basename(filename)}-mastered.wav"
+    outfile = f"{WORK_DIR}/{os.path.basename(filename)}-{Tasks.MAST.value}.wav"
     # Build the command line to run
     cmdline = []
     cmdline.append(_task_bin[Tasks.MAST])
@@ -114,7 +114,7 @@ def _run_phaselimiter(filename, status):
 def _run_wav_mixer(filename, status):
     model = _get_model()
     stems = _stems_for_model(model)
-    outfile = f"{WORK_DIR}/{os.path.basename(filename)}-instrumental.wav"
+    outfile = f"{WORK_DIR}/{os.path.basename(filename)}-{Tasks.INST.value}.wav"
     # Build the command line to run
     cmdline = []
     cmdline.append(_task_bin[Tasks.INST])
@@ -144,7 +144,7 @@ def _run_wav_mixer(filename, status):
 
 def _run_whisper(filename, status):
     model = _get_model()
-    outdir = f"{WORK_DIR}/{os.path.basename(filename)}-instrumental"
+    outdir = f"{WORK_DIR}/{os.path.basename(filename)}-{Tasks.LYRC.value}"
     if not os.path.exists(outdir):
         os.makedirs(outdir)
     # Build the command line to run
@@ -174,6 +174,8 @@ def _run_whisper(filename, status):
     ret = { "stdout": stdout, "stderr": stderr }
     ret["json"] = json.load(outdir + "/vocals.json")
     ret["srt"] = outdir + "/vocals.srt"
+    with open(outdir + "/vocals.txt", "r") as f:
+        ret["fulltext"] = f.readlines()
     return ret
 
 def _run_basic_pitch(filename, status):
