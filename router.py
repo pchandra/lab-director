@@ -1,3 +1,4 @@
+import sys
 import os
 from datetime import datetime
 import time
@@ -30,6 +31,7 @@ queue = []
 # Switch messages forever
 _log("Starting up router with PID: %d" % pid)
 while True:
+    time.sleep(1)
     _log("Router is polling for new messages, queue depth: %d" % len(queue))
     socks = dict(poller.poll())
 
@@ -43,4 +45,4 @@ while True:
         address, empty, ready = backend.recv_multipart()
         job = queue.pop(0)
         _log("Worker %s reports as ready, sending task: %s" % (address.hex(), job))
-        backend.send_multipart([address,b'',queue.pop(0)])
+        backend.send_multipart([address, b'', job])
