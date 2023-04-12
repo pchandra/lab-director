@@ -162,7 +162,7 @@ def _run_whisper(filename, status):
     if Tasks.LYRC.value in status and State.COMP.value in status[Tasks.LYRC.value] and "stdout" in status[Tasks.LYRC.value][State.COMP.value]:
         stdout = status[Tasks.INST.value][State.COMP.value]["stdout"]
         stderr = status[Tasks.INST.value][State.COMP.value]["stderr"]
-    if not os.path.exists(outdir + "/vocals.srt"):
+    if not os.path.exists(outdir + f"/{os.path.basename(filename)}-vocals.txt"):
         # Connect stdin to prevent hang when in background
         process = subprocess.Popen(cmdline,
                                    stdin=subprocess.PIPE,
