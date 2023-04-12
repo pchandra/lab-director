@@ -16,7 +16,7 @@ flask_shelve.init_app(app)
 # Prepare our context and socket to push jobs to workers 
 context = zmq.Context()
 sender = context.socket(zmq.PUSH)
-sender.bind("tcp://*:2346")
+sender.connect("tcp://localhost:3456")
 
 def _msg(msg):
   return { "message": f"{msg}" }
