@@ -150,8 +150,8 @@ def _run_whisper(filename, status):
     # Build the command line to run
     cmdline = []
     cmdline.append(_task_bin[Tasks.LYRC])
-    cmdline.extend([ "--language", "en",
-                     "--model", "medium",
+    cmdline.extend([ "--model", "medium",
+                     #"--language", "en",
                      "--output_dir", outdir
                    ])
     # Only use the vocals stem for this input
