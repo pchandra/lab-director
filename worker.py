@@ -26,7 +26,7 @@ def _log(str):
 # Check if a different task is finished
 def _check_ready(file_id, task, status, dep):
     if status[dep.value]['status'] != State.COMP.value:
-        _log(f"Task \"{task}\" is waiting on \"{dep.value}\" for {file_id}... requeuing")
+        _log(f"Requeuing, task \"{task}\" is waiting on \"{dep.value}\" for {file_id}")
         api.mark_waiting(file_id, task)
         api.requeue(file_id, task)
         # Throttle this since we might be waiting a while
