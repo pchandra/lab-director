@@ -1,10 +1,12 @@
 import os
+import re
 import time
 import json
 import subprocess
 from taskdef import *
 import taskapi as api
 
+DEMUCS_MODEL="htdemucs_6s"
 # Working directory for tools to operate
 WORK_DIR = '/tmp'
 
@@ -34,7 +36,7 @@ def _run_key_bpm_finder(filename, status):
 def _get_model():
     # This is the model name we'll run, must be one of:
     #   htdemucs_6s htdemucs htdemucs_ft mdx mdx_extra hdemucs_mmi
-    return "htdemucs_6s"
+    return DEMUCS_MODEL
 
 def _stems_for_model(model):
     stems = [ "bass", "drums", "other", "vocals"]
@@ -58,8 +60,8 @@ def _run_demucs(filename, status):
     cmdline.append(filename)
     # Execute the command if we don't already have output
     outbase = f"{WORK_DIR}/{model}/{os.path.basename(filename)}"
-    stdout = None
-    stderr = None
+    stdout = ""
+    stderr = ""
     if Tasks.STEM.value in status and State.COMP.value in status[Tasks.STEM.value] and "stdout" in status[Tasks.STEM.value][State.COMP.value]:
         stdout=status[Tasks.STEM.value][State.COMP.value]["stdout"]
         stderr=status[Tasks.STEM.value][State.COMP.value]["stderr"]
@@ -70,9 +72,40 @@ def _run_demucs(filename, status):
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE,
                                    universal_newlines=True)
-        stdout, stderr = process.communicate(input="\n\n\n\n\n")
+        process.stdin.write("\n\n\n\n\n")
+        # Get the first line of output to extract the total number of models to run
+        line = process.stdout.readline()
+        stdout += line
+        p = re.compile('.*bag of ([\d]+) models')
+        m = p.match(line)
+        models_total = int(m.group(1))
+        models_done = 0
+        model_done = False
+        total_percent = 0
+        while True:
+            line = process.stderr.readline()
+            stderr += line
+            p = re.compile('[\s]*([\d]+)%')
+            m = p.match(line)
+            if m is not None:
+                model_percent = int(m.group(1))
+                if model_percent == 100:
+                    model_done = True
+                if model_percent != 100 and model_done == True:
+                    model_done = False
+                    models_done += 1
+                total_percent = (model_percent / models_total) + (models_done * (100 / models_total))
+                update = json.dumps({"percent": total_percent}).encode('ascii')
+                api.mark_inprogress(status['id'], Tasks.STEM.value, update)
+            if process.poll() is not None:
+                for line in process.stdout.readlines():
+                    stdout += line
+                for line in process.stderr.readlines():
+                    stderr += line
+                break
+
     # Build the dict to return to caller
-    ret = { "model": model, "stdout": stdout, "stderr": stderr }
+    ret = { "model": model, "command": { "stdout": stdout, "stderr": stderr } }
     ret[model] = {}
     for stem in stems:
         ret[model][stem] = f"{outbase}-{stem}.wav"
@@ -93,8 +126,8 @@ def _run_phaselimiter(filename, status):
                      "-output", outfile
                    ])
     # Execute the command if we don't already have output
-    stdout = None
-    stderr = None
+    stdout = ""
+    stderr = ""
     if Tasks.MAST.value in status and State.COMP.value in status[Tasks.MAST.value] and "stdout" in status[Tasks.MAST.value][State.COMP.value]:
         stdout = status[Tasks.MAST.value][State.COMP.value]["stdout"]
         stderr = status[Tasks.MAST.value][State.COMP.value]["stderr"]
@@ -105,9 +138,27 @@ def _run_phaselimiter(filename, status):
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE,
                                    universal_newlines=True)
-        stdout, stderr = process.communicate(input="\n\n\n\n\n")
+        process.stdin.write("\n\n\n\n\n")
+
+        percent = 0
+        while True:
+            line = process.stdout.readline()
+            stdout += line
+            p = re.compile('progression: ([\d.]+)')
+            m = p.match(line)
+            if m is not None:
+                percent = float(m.group(1)) * 100
+                update = json.dumps({"percent": percent}).encode('ascii')
+                api.mark_inprogress(status['id'], Tasks.MAST.value, update)
+            if process.poll() is not None:
+                for line in process.stdout.readlines():
+                    stdout += line
+                for line in process.stderr.readlines():
+                    stderr += line
+                break
+
     # Build the dict to return to caller
-    ret = { "stdout": stdout, "stderr": stderr }
+    ret = { "command": { "stdout": stdout, "stderr": stderr } }
     ret["output"] = outfile
     return ret
 
@@ -138,7 +189,7 @@ def _run_wav_mixer(filename, status):
                                    universal_newlines=True)
         stdout, stderr = process.communicate(input="\n\n\n\n\n")
     # Build the dict to return to caller
-    ret = { "stdout": stdout, "stderr": stderr }
+    ret = { "command": { "stdout": stdout, "stderr": stderr } }
     ret["output"] = outfile
     return ret
 
@@ -171,12 +222,12 @@ def _run_whisper(filename, status):
                                    universal_newlines=True)
         stdout, stderr = process.communicate(input="\n\n\n\n\n")
     # Build the dict to return to caller
-    ret = { "stdout": stdout, "stderr": stderr }
+    ret = { "command": { "stdout": stdout, "stderr": stderr } }
     with open(outdir + f"/{os.path.basename(filename)}-vocals.json", "r") as f:
         ret["json"] = json.load(f)
-    ret["srt"] = outdir + "/vocals.srt"
     with open(outdir + f"/{os.path.basename(filename)}-vocals.txt", "r") as f:
         ret["fulltext"] = f.readlines()
+    ret["output"] = outdir + f"/{os.path.basename(filename)}-vocals.srt"
     return ret
 
 def _run_basic_pitch(filename, status):
