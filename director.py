@@ -10,7 +10,7 @@ from taskdef import *
 app = Flask(__name__)
 
 # Using a Shelve for persistence of the STATUS dict
-app.config['SHELVE_FILENAME'] = 'persistence'
+app.config['SHELVE_FILENAME'] = 'saved-status'
 flask_shelve.init_app(app)
 
 # Prepare our context and socket to push jobs to workers 
