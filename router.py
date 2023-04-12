@@ -30,7 +30,7 @@ queue = []
 # Switch messages forever
 _log("Starting up router with PID: %d" % pid)
 while True:
-    _log("Router is polling for new messages")
+    _log("Router is polling for new messages, queue depth: %d" % len(queue))
     socks = dict(poller.poll())
 
     if socks.get(frontend) == zmq.POLLIN:
@@ -38,7 +38,6 @@ while True:
         task, file_id = message[0].split()
         _log("Frontend got task: %s" % message[0])
         queue.append(message[0])
-        _log("Queue depth is now %d" % len(queue))
 
     if len(queue) > 0 and socks.get(backend) == zmq.POLLIN:
         address, empty, ready = backend.recv_multipart()
