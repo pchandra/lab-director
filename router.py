@@ -29,8 +29,8 @@ def _log(str):
     sys.stdout.flush()
 
 with shelve.open(SHELVE_FILENAME) as store:
-    # Push and pop tasks here
-    queue = []
+    if not 'queue' in store:
+        store['queue'] = []
 
     # Switch messages forever
     _log("Starting up router with PID: %d" % pid)
