@@ -54,3 +54,4 @@ with shelve.open(SHELVE_FILENAME) as store:
             backend.send_multipart([address, b'', job])
         # Put the queue back into the shelf for persistence
         store['queue'] = queue
+        store.sync()
