@@ -1,32 +1,47 @@
+import os
+from datetime import datetime
 import time
 import zmq
 
-# frontend socket to collect messages from API
+# Frontend socket to collect messages from API
 context = zmq.Context()
 frontend = context.socket(zmq.PULL)
 frontend.bind("tcp://*:3456")
-# backend socket to distribute tasks to workers
+# Backend socket to distribute tasks to workers
 backend = context.socket(zmq.ROUTER)
 backend.bind("tcp://*:3457")
 
-# poll both sockets for messages
+# Poll both sockets for messages
 poller = zmq.Poller()
 poller.register(frontend, zmq.POLLIN)
 poller.register(backend, zmq.POLLIN)
 
-# push and pop work items here
+pid = os.getpid()
+
+# Logging helper
+def _log(str):
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    sys.stdout.write(f"[{timestamp}] [Router-{pid}] {str}\n")
+    sys.stdout.flush()
+
+# Push and pop tasks here
 queue = []
 
-# switch messages forever
+# Switch messages forever
+_log("Starting up router with PID: %d" % pid)
 while True:
-	socks = dict(poller.poll())
+    _log("Router is polling for new messages")
+    socks = dict(poller.poll())
 
-	if socks.get(frontend) == zmq.POLLIN:
-		message = frontend.recv_multipart()
-		print("FRONTEND %s" % message)
-		queue.append(message[0])
+    if socks.get(frontend) == zmq.POLLIN:
+        message = frontend.recv_multipart()
+        task, file_id = message[0].split()
+        _log("Frontend got task: %s" % message[0])
+        queue.append(message[0])
+        _log("Queue depth is now %d" % len(queue))
 
-	if len(queue) > 0 and socks.get(backend) == zmq.POLLIN:
-		address, empty, ready = backend.recv_multipart()
-		print("BACKEND %s %s" % (address, ready))
-		backend.send_multipart([address,b'',queue.pop(0)])
+    if len(queue) > 0 and socks.get(backend) == zmq.POLLIN:
+        address, empty, ready = backend.recv_multipart()
+        job = queue.pop(0)
+        _log("Worker %s reports as ready, sending task: %s" % (address.hex(), job))
+        backend.send_multipart([address,b'',queue.pop(0)])
