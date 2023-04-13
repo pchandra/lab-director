@@ -6,7 +6,7 @@ import subprocess
 from taskdef import *
 import taskapi as api
 
-DEMUCS_MODEL="htdemucs_6s"
+DEMUCS_MODEL="htdemucs_ft"
 # Working directory for tools to operate
 WORK_DIR = '/tmp'
 
@@ -45,6 +45,10 @@ def _stems_for_model(model):
         stems.append("piano")
     return stems
 
+def _progress(file_id, task_type, percent=0):
+    update = json.dumps({"percent": percent}).encode('ascii')
+    api.mark_inprogress(file_id, task_type.value, update)
+
 def _run_demucs(filename, status):
     model = _get_model()
     stems = _stems_for_model(model)
@@ -82,6 +86,7 @@ def _run_demucs(filename, status):
         models_done = 0
         model_done = False
         total_percent = 0
+        _progress(status['id'], Tasks.STEM, 0)
         while True:
             line = process.stderr.readline()
             stderr += line
@@ -95,13 +100,13 @@ def _run_demucs(filename, status):
                     model_done = False
                     models_done += 1
                 total_percent = (model_percent / models_total) + (models_done * (100 / models_total))
-                update = json.dumps({"percent": total_percent}).encode('ascii')
-                api.mark_inprogress(status['id'], Tasks.STEM.value, update)
+                _progress(status['id'], Tasks.STEM, total_percent)
             if process.poll() is not None:
                 for line in process.stdout.readlines():
                     stdout += line
                 for line in process.stderr.readlines():
                     stderr += line
+                _progress(status['id'], Tasks.STEM, 100)
                 break
 
     # Build the dict to return to caller
@@ -141,6 +146,7 @@ def _run_phaselimiter(filename, status):
         process.stdin.write("\n\n\n\n\n")
 
         percent = 0
+        _progress(status['id'], Tasks.MAST, 0)
         while True:
             line = process.stdout.readline()
             stdout += line
@@ -148,13 +154,13 @@ def _run_phaselimiter(filename, status):
             m = p.match(line)
             if m is not None:
                 percent = float(m.group(1)) * 100
-                update = json.dumps({"percent": percent}).encode('ascii')
-                api.mark_inprogress(status['id'], Tasks.MAST.value, update)
+                _progress(status['id'], Tasks.MAST, percent)
             if process.poll() is not None:
                 for line in process.stdout.readlines():
                     stdout += line
                 for line in process.stderr.readlines():
                     stderr += line
+                _progress(status['id'], Tasks.MAST, 100)
                 break
 
     # Build the dict to return to caller
@@ -202,7 +208,7 @@ def _run_whisper(filename, status):
     cmdline = []
     cmdline.append(_task_bin[Tasks.LYRC])
     cmdline.extend([ "--model", "medium",
-                     #"--language", "en",
+                     "--language", "en",
                      "--output_dir", outdir
                    ])
     # Only use the vocals stem for this input
