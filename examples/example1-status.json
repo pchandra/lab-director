@@ -1,0 +1,28 @@
+{
+    "coverart": {
+        "status": "initial"
+    },
+    "id": "123456",
+    "instrumental": {
+        "status": "waiting"
+    },
+    "key-bpm": {
+        "status": "in-progress"
+    },
+    "lyrics": {
+        "status": "waiting"
+    },
+    "mastering": {
+        "in-progress": {
+            "percent": 47.5
+        },
+        "status": "in-progress"
+    },
+    "midi": {
+        "status": "not-available"
+    },
+    "stems": {
+        "status": "waiting"
+    },
+    "uuid": "6b16177d-d52d-4782-ada9-14d64918ac34"
+}
