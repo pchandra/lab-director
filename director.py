@@ -53,6 +53,12 @@ def new_file(file_id):
   STATUS[file_id] = current
   return _msg(f"Queued all initial tasks for: {file_id}")
 
+@app.route('/stop')
+def stop_workers():
+  STATUS = flask_shelve.get_shelve()
+  sender.send_string(f"stop all")
+  return _msg("Sending command to stop all workers")
+
 @app.route('/requeue/<file_id>/<task>')
 def requeue_task(file_id, task):
   STATUS = flask_shelve.get_shelve()

@@ -62,15 +62,20 @@ def _run(file_id, task_type, filename, status):
 # Process tasks forever
 _log("Starting up worker with PID: %d" % pid)
 while True:
+    # Send 'ready' and then await a task assignment
     _log("Ready to accept new tasks")
     receiver.send(b"ready")
     message = receiver.recv_string()
     _log("Got task: %s" % message)
     tokens = message.split()
     task = tokens[0]
-    file_id = tokens[1]
+
+    # Detect if we're supposed to stop
+    if task == "stop":
+        break
 
     # Get the status for this file first
+    file_id = tokens[1]
     status = api.get_status(file_id)
 
     # Check that the task is legit before proceeding
