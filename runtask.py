@@ -2,6 +2,7 @@ import os
 import re
 import time
 import json
+import wave
 import subprocess
 from taskdef import *
 import taskapi as api
@@ -214,8 +215,8 @@ def _run_whisper(filename, status):
     # Only use the vocals stem for this input
     cmdline.append(status[Tasks.STEM.value][State.COMP.value][model]["vocals"])
     # Execute the command if we don't already have output
-    stdout = None
-    stderr = None
+    stdout = ""
+    stderr = ""
     if Tasks.LYRC.value in status and State.COMP.value in status[Tasks.LYRC.value] and "stdout" in status[Tasks.LYRC.value][State.COMP.value]:
         stdout = status[Tasks.INST.value][State.COMP.value]["stdout"]
         stderr = status[Tasks.INST.value][State.COMP.value]["stderr"]
@@ -226,7 +227,31 @@ def _run_whisper(filename, status):
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE,
                                    universal_newlines=True)
-        stdout, stderr = process.communicate(input="\n\n\n\n\n")
+        process.stdin.write("\n\n\n\n\n")
+
+        # Get duration of audio file
+        duration = 0
+        with wave.open(status[Tasks.STEM.value][State.COMP.value][model]["vocals"],'r') as f:
+            duration = f.getnframes() / f.getframerate()
+        percent = 0
+        _progress(status['id'], Tasks.LYRC, 0)
+        while True:
+            line = process.stdout.readline()
+            stdout += line
+            p = re.compile('.*--> ([\d]+):([\d]+)(\.[\d]+)\]')
+            m = p.match(line)
+            if m is not None:
+                timecode = int(m.group(1)) * 60 + int(m.group(2)) + float('0' + m.group(3))
+                percent = timecode / duration * 100
+                _progress(status['id'], Tasks.LYRC, percent)
+            if process.poll() is not None:
+                for line in process.stdout.readlines():
+                    stdout += line
+                for line in process.stderr.readlines():
+                    stderr += line
+                _progress(status['id'], Tasks.LYRC, 100)
+                break
+
     # Build the dict to return to caller
     ret = { "command": { "stdout": stdout, "stderr": stderr } }
     with open(outdir + f"/{os.path.basename(filename)}-vocals.json", "r") as f:
