@@ -5,12 +5,6 @@ from taskdef import *
 from . import helpers
 
 DEMUCS_BIN = '/usr/local/bin/demucs'
-DEMUCS_MODEL="htdemucs_6s"
-
-def _get_model():
-    # This is the model name we'll run, must be one of:
-    #   htdemucs_6s htdemucs htdemucs_ft mdx mdx_extra hdemucs_mmi
-    return DEMUCS_MODEL
 
 def _stems_for_model(model):
     stems = [ "bass", "drums", "other", "vocals"]
@@ -19,11 +13,11 @@ def _stems_for_model(model):
         stems.append("piano")
     return stems
 
-def execute(filename, status):
-    model = _get_model()
-    stems = _stems_for_model(model)
+def _run_demucs_model(filename, status, model, progress_start=0, progress_max=100):
     outbase = f"{helpers.WORK_DIR}/{model}/{os.path.basename(filename)}"
-    # Build the command line to run
+    stems = _stems_for_model(model)
+
+    # Build the command line to run the demucs model
     cmdline = []
     cmdline.append(DEMUCS_BIN)
     cmdline.extend([ "-d", "cpu",
@@ -32,55 +26,82 @@ def execute(filename, status):
                      "--filename", "{track}-{stem}.{ext}"
                    ])
     cmdline.append(filename)
-    # Execute the command if we don't already have output
+
+    # Run it
+    process = subprocess.Popen(cmdline,
+                               stdin=subprocess.PIPE,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE,
+                               universal_newlines=True)
+    process.stdin.write("\n\n\n\n\n")
+
+    # Variables to accumulate output
     stdout = ""
     stderr = ""
-    if Tasks.STEM.value in status and State.COMP.value in status[Tasks.STEM.value] and "stdout" in status[Tasks.STEM.value][State.COMP.value]:
-        stdout=status[Tasks.STEM.value][State.COMP.value]["stdout"]
-        stderr=status[Tasks.STEM.value][State.COMP.value]["stderr"]
-    if not os.path.exists(f"{outbase}-{stems[0]}.wav"):
-        # Connect stdin to prevent hang when in background
-        process = subprocess.Popen(cmdline,
-                                   stdin=subprocess.PIPE,
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE,
-                                   universal_newlines=True)
-        process.stdin.write("\n\n\n\n\n")
-        # Get the first line of output to extract the total number of models to run
-        line = process.stdout.readline()
-        stdout += line
-        p = re.compile('.*bag of ([\d]+) models')
+
+    # Get the first line of output to extract the total number of models to run
+    line = process.stdout.readline()
+    stdout += line
+    p = re.compile('.*bag of ([\d]+) models')
+    m = p.match(line)
+    models_total = int(m.group(1))
+    models_done = 0
+    model_done = False
+    total_percent = 0
+    helpers.setprogress(status['id'], Tasks.STEM, progress_start)
+    # Interesting output is in stderr, update percent as we go
+    while True:
+        line = process.stderr.readline()
+        stderr += line
+        p = re.compile('[\s]*([\d]+)%')
         m = p.match(line)
-        models_total = int(m.group(1))
-        models_done = 0
-        model_done = False
-        total_percent = 0
-        helpers.setprogress(status['id'], Tasks.STEM, 0)
-        while True:
-            line = process.stderr.readline()
-            stderr += line
-            p = re.compile('[\s]*([\d]+)%')
-            m = p.match(line)
-            if m is not None:
-                model_percent = int(m.group(1))
-                if model_percent == 100:
-                    model_done = True
-                if model_percent != 100 and model_done == True:
-                    model_done = False
-                    models_done += 1
-                total_percent = (model_percent / models_total) + (models_done * (100 / models_total))
-                helpers.setprogress(status['id'], Tasks.STEM, total_percent)
-            if process.poll() is not None:
-                for line in process.stdout.readlines():
-                    stdout += line
-                for line in process.stderr.readlines():
-                    stderr += line
-                helpers.setprogress(status['id'], Tasks.STEM, 100)
-                break
+        if m is not None:
+            model_percent = int(m.group(1))
+            if model_percent == 100:
+                model_done = True
+            if model_percent != 100 and model_done == True:
+                model_done = False
+                models_done += 1
+            total_percent = (model_percent / models_total) + (models_done * (100 / models_total))
+            helpers.setprogress(status['id'], Tasks.STEM, total_percent/(100/progress_max))
+        if process.poll() is not None:
+            for line in process.stdout.readlines():
+                stdout += line
+            for line in process.stderr.readlines():
+                stderr += line
+            helpers.setprogress(status['id'], Tasks.STEM, 100/(100/progress_max))
+            break
 
     # Build the dict to return to caller
     ret = { "model": model, "command": { "stdout": stdout, "stderr": stderr } }
     ret[model] = {}
     for stem in stems:
         ret[model][stem] = f"{outbase}-{stem}.wav"
+    return ret
+
+def _check_stems(demucs, model):
+    stems_found = {}
+    for stem in demucs[model].keys():
+        stemfile = demucs[model][stem]
+        if not helpers.is_silent(stemfile):
+            stems_found[stem] = stemfile
+    return stems_found
+
+def execute(filename, status):
+    ret = {}
+    # First run the 6 source model
+    ret['phase1'] = _run_demucs_model(filename, status, 'htdemucs_6s', progress_max = 50)
+    stems_found = _check_stems(ret['phase1'], 'htdemucs_6s')
+
+    # If no vocals, it's probably instrumental
+    ret['instrumental'] = "vocals" not in stems_found.keys()
+
+    # If no guitar or piano, run the higher quality 4 source model
+    if "guitar" not in stems_found.keys() and "piano" not in stems_found.keys():
+        ret['phase2'] = _run_demucs_model(filename, status, 'htdemucs_ft', progress_start = 50, progress_max = 100)
+        stems_found = _check_stems(ret['phase2'], 'htdemucs_ft')
+    else:
+        helpers.setprogress(status['id'], Tasks.STEM, 100)
+
+    ret['stems'] = stems_found
     return ret
