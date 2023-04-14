@@ -13,7 +13,7 @@ def _stems_for_model(model):
         stems.append("piano")
     return stems
 
-def _run_demucs_model(filename, status, model, progress_start=0, progress_max=100):
+def _run_demucs_model(filename, status, model, progress_start=0, progress_size=100):
     outbase = f"{helpers.WORK_DIR}/{model}/{os.path.basename(filename)}"
     stems = _stems_for_model(model)
 
@@ -63,13 +63,13 @@ def _run_demucs_model(filename, status, model, progress_start=0, progress_max=10
                 model_done = False
                 models_done += 1
             total_percent = (model_percent / models_total) + (models_done * (100 / models_total))
-            helpers.setprogress(status['id'], Tasks.STEM, total_percent/(100/progress_max))
+            helpers.setprogress(status['id'], Tasks.STEM, progress_start + total_percent/(100/progress_size))
         if process.poll() is not None:
             for line in process.stdout.readlines():
                 stdout += line
             for line in process.stderr.readlines():
                 stderr += line
-            helpers.setprogress(status['id'], Tasks.STEM, 100/(100/progress_max))
+            helpers.setprogress(status['id'], Tasks.STEM, progress_start + 100/(100/progress_size))
             break
 
     # Build the dict to return to caller
@@ -90,7 +90,7 @@ def _check_stems(demucs, model):
 def execute(filename, status):
     ret = {}
     # First run the 6 source model
-    ret['phase1'] = _run_demucs_model(filename, status, 'htdemucs_6s', progress_max = 50)
+    ret['phase1'] = _run_demucs_model(filename, status, 'htdemucs_6s', progress_size = 50)
     stems_found = _check_stems(ret['phase1'], 'htdemucs_6s')
 
     # If no vocals, it's probably instrumental
@@ -98,7 +98,7 @@ def execute(filename, status):
 
     # If no guitar or piano, run the higher quality 4 source model
     if "guitar" not in stems_found.keys() and "piano" not in stems_found.keys():
-        ret['phase2'] = _run_demucs_model(filename, status, 'htdemucs_ft', progress_start = 50, progress_max = 100)
+        ret['phase2'] = _run_demucs_model(filename, status, 'htdemucs_ft', progress_start = 50, progress_size = 50)
         stems_found = _check_stems(ret['phase2'], 'htdemucs_ft')
     else:
         helpers.setprogress(status['id'], Tasks.STEM, 100)
