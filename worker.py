@@ -8,7 +8,7 @@ from urllib.request import urlopen
 import json
 from taskdef import *
 import taskapi as api
-import runtask
+import tasks
 
 # Setup ZeroMQ connection to receive tasks from the director
 context = zmq.Context()
@@ -38,7 +38,7 @@ def _check_ready(file_id, task, status, dep):
 # XXX: REPLACE THIS with one that grabs an actual file
 def _get_as_local_file(file_id, status):
     src = os.environ.get('TESTFILE')
-    dst = runtask.WORK_DIR + f"/{status['uuid']}"
+    dst = tasks.WORK_DIR + f"/{status['uuid']}"
     if not os.path.exists(dst):
         shutil.copyfile(src, dst)
     return dst
@@ -46,7 +46,7 @@ def _get_as_local_file(file_id, status):
 def _run(file_id, task_type, filename, status):
     api.mark_inprogress(file_id, task_type.value)
     start = time.time()
-    ret = runtask.execute[task_type](filename, status)
+    ret = tasks.execute[task_type](filename, status)
     stop = time.time()
     ret['perf'] = {}
     ret['perf']['start'] = datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S')
@@ -86,18 +86,29 @@ while True:
     # Get the file locally for our workload
     filename = _get_as_local_file(file_id, status)
 
+    # Store an original in the file store
+    if task == Tasks.ORIG.value:
+        _run(file_id, Tasks.ORIG, filename, status)
+
+    # Watermarking original file
+    elif task == Tasks.WTRM.value:
+        if _check_ready(file_id, task, status, Tasks.ORIG):
+            _run(file_id, Tasks.WTRM, filename, status)
+
     # Key and BPM detection
-    if task == Tasks.KBPM.value:
-        _run(file_id, Tasks.KBPM, filename, status)
+    elif task == Tasks.KBPM.value:
+        if _check_ready(file_id, task, status, Tasks.ORIG):
+            _run(file_id, Tasks.KBPM, filename, status)
 
     # Stem separation
     elif task == Tasks.STEM.value:
-        if _check_ready(file_id, task, status, Tasks.KBPM):
+        if _check_ready(file_id, task, status, Tasks.ORIG):
             _run(file_id, Tasks.STEM, filename, status)
 
     # Track mastering
     elif task == Tasks.MAST.value:
-        _run(file_id, Tasks.MAST, filename, status)
+        if _check_ready(file_id, task, status, Tasks.ORIG):
+            _run(file_id, Tasks.MAST, filename, status)
 
     # Instrumental track from stems
     elif task == Tasks.INST.value:

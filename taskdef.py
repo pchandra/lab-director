@@ -1,13 +1,15 @@
 from enum import Enum
 
 class Tasks(Enum):
-    KBPM = 'key-bpm'
-    STEM = 'stems'
-    MAST = 'mastering'
-    INST = 'instrumental'
-    LYRC = 'lyrics'
-    MIDI = 'midi'
-    COVR = 'coverart'
+    ORIG = 'original' # Initialize the file store with the original
+    WTRM = 'watermark' # Generate a watermarked version of the original
+    KBPM = 'key-bpm' # Calculate key and BPM of original
+    STEM = 'stems' # Identify and isolate stems from original
+    MAST = 'mastering' # Master the original track
+    INST = 'instrumental' # Produce and intrumental version from stems
+    LYRC = 'lyrics' # Get the lyrics from the vocals stem
+    MIDI = 'midi' # Produce a MIDI file (per stem?)
+    COVR = 'coverart' # Generate cover art automatically
 
 class State(Enum):
     INIT = "initial"
