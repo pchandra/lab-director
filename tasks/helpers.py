@@ -24,7 +24,7 @@ def is_silent(wavfile):
     cmdline = []
     cmdline.append(FFMPEG_BIN)
     cmdline.extend([ "-i", wavfile,
-                     "-af", "silencedetect=n=-20dB:d=1",
+                     "-af", "silencedetect=n=-36dB:d=1",
                      "-f", "null",
                      "-"
                    ])
