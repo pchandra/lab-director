@@ -10,7 +10,16 @@ from . import filestore
 WHISPER_BIN = '/usr/local/bin/whisper'
 WHISPER_MODEL = "tiny"
 
-def execute(file_id, status):
+def execute(file_id, status, force=False):
+    # Short-circuit if the filestore already has assets we would produce
+    output_keys = []
+    output_fmts = [ 'json', 'srt', 'tsv', 'vtt', 'txt']
+    for fmt in output_fmts:
+        output_keys.append(f"{Tasks.LYRC.value}.{fmt}")
+    if not force and filestore.check_keys(file_id, status, output_keys):
+        return
+
+    # Proceed with running this task
     outdir = f"{helpers.WORK_DIR}/{status['uuid']}-{Tasks.LYRC.value}"
     # Return quickly if stemmer says this is an instrumental
     if status[Tasks.STEM.value][State.COMP.value]['instrumental']:
@@ -65,7 +74,7 @@ def execute(file_id, status):
     ret = { "command": { "stdout": stdout, "stderr": stderr } }
     output = {}
     filebase = os.path.splitext(os.path.basename(vocalsfile))[0]
-    for fmt in [ 'json', 'srt', 'tsv', 'vtt', 'txt']:
+    for fmt in output_fmts:
         output[fmt] = filestore.store_file(file_id, status, outdir + f"/{filebase}.{fmt}", f"{Tasks.LYRC.value}.{fmt}")
     ret['output'] = [ {'type':x,'file':output[x]} for x in output.keys()]
     return ret

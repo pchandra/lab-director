@@ -88,7 +88,13 @@ def _check_stems(demucs, model):
             stems_found[stem] = stemfile
     return stems_found
 
-def execute(file_id, status):
+def execute(file_id, status, force=False):
+    # Short-circuit if the filestore already has assets we would produce
+    output_keys = [ f"{Tasks.STEM.value}.json" ]
+    if not force and filestore.check_keys(file_id, status, output_keys):
+        return None
+
+    # Proceed with running this task
     filename = filestore.retrieve_file(file_id, status, Tasks.ORIG.value, helpers.WORK_DIR + f"/{status['uuid']}")
     ret = {}
     # First run the 6 source model

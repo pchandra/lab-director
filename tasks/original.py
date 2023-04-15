@@ -5,7 +5,13 @@ from . import filestore
 
 FFMPEG_BIN = '/usr/local/bin/ffmpeg'
 
-def execute(file_id, status):
+def execute(file_id, status, force=False):
+    # Short-circuit if the filestore already has assets we would produce
+    output_keys = [ f"{Tasks.ORIG.value}", f"{Tasks.ORIG.value}.mp3" ]
+    if not force and filestore.check_keys(file_id, status, output_keys):
+        return
+
+    # Proceed with running this task
     ret = {}
     # Special case call with None to bootstrap
     local_file = filestore.retrieve_file(file_id, status, None, helpers.WORK_DIR + f"/{status['uuid']}")

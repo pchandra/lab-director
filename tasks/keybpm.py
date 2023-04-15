@@ -6,7 +6,13 @@ from . import filestore
 
 KEYBPM_BIN = '/Users/chandra/ll/co/key-bpm-finder/keymaster-json.py'
 
-def execute(file_id, status):
+def execute(file_id, status, force=False):
+    # Short-circuit if the filestore already has assets we would produce
+    output_keys = [ f"{Tasks.KBPM.value}.json" ]
+    if not force and filestore.check_keys(file_id, status, output_keys):
+        return
+
+    # Proceed with running this task
     filename = filestore.retrieve_file(file_id, status, Tasks.ORIG.value, helpers.WORK_DIR + f"/{status['uuid']}")
     # Build the command line to run
     cmdline = []

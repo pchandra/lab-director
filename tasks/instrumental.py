@@ -7,7 +7,13 @@ from . import filestore
 
 WAVMIXER_BIN = '/Users/chandra/ll/co/wav-mixer/wav-mixer.py'
 
-def execute(file_id, status):
+def execute(file_id, status, force=False):
+    # Short-circuit if the filestore already has assets we would produce
+    output_keys = [ f"{Tasks.INST.value}.wav" ]
+    if not force and filestore.check_keys(file_id, status, output_keys):
+        return
+
+    # Proceed with running this task
     outfile = f"{helpers.WORK_DIR}/{status['uuid']}-{Tasks.INST.value}.wav"
     # Return quickly if this is already tagged instrumental from stemming
     if status[Tasks.STEM.value][State.COMP.value]['instrumental']:

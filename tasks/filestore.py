@@ -68,6 +68,16 @@ def _local_key_exists(file_id, status, key):
 def _s3_key_exists(file_id, status, key):
     pass
 
+
+# Check if all keys in a list exist in the filestore
+def check_keys(file_id, status, keylist):
+    ret = True
+    for key in keylist:
+        if not key_exists(file_id, status, key):
+            ret = False
+            break
+    return ret
+
 _backend_local = {}
 _backend_local['store_file'] = _local_store_file
 _backend_local['retrieve_file'] = _local_retrieve_file

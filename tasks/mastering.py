@@ -7,7 +7,13 @@ from . import filestore
 
 PHASELIMITER_BIN = '/Users/chandra/ll/co/phaselimiter/bin/Release/phase_limiter'
 
-def execute(file_id, status):
+def execute(file_id, status, force=False):
+    # Short-circuit if the filestore already has assets we would produce
+    output_keys = [ f"{Tasks.MAST.value}.wav" ]
+    if not force and filestore.check_keys(file_id, status, output_keys):
+        return
+
+    # Proceed with running this task
     filename = filestore.retrieve_file(file_id, status, Tasks.ORIG.value, helpers.WORK_DIR + f"/{status['uuid']}")
     outfile = f"{helpers.WORK_DIR}/{status['uuid']}-{Tasks.MAST.value}.wav"
     # Build the command line to run
