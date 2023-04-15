@@ -18,9 +18,11 @@ def execute(file_id, status):
                                stdout=subprocess.PIPE,
                                universal_newlines=True)
     stdout, _ = process.communicate()
+    # Validate and write JSON output to tempfile
+    json_obj = json.loads(stdout)
     tempfile = helpers.WORK_DIR + f"/{status['uuid']}-{Tasks.KBPM.value}.json"
     with open(tempfile, 'w') as f:
-        f.write(stdout)
+        f.write(json.dumps(json_obj, indent=2))
     stored_location = filestore.store_file(file_id, status, tempfile, f"{Tasks.KBPM.value}.json")
     # The tool outputs JSON so return it as a dict
     ret = {}
