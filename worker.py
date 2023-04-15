@@ -35,18 +35,10 @@ def _check_ready(file_id, task, status, dep):
     else:
         return True
 
-# XXX: REPLACE THIS with one that grabs an actual file
-def _get_as_local_file(file_id, status):
-    src = os.environ.get('TESTFILE')
-    dst = tasks.WORK_DIR + f"/{status['uuid']}"
-    if not os.path.exists(dst):
-        shutil.copyfile(src, dst)
-    return dst
-
-def _run(file_id, task_type, filename, status):
+def _run(file_id, task_type, status):
     api.mark_inprogress(file_id, task_type.value)
     start = time.time()
-    ret = tasks.execute[task_type](filename, status)
+    ret = tasks.execute[task_type](file_id, status)
     stop = time.time()
     ret['perf'] = {}
     ret['perf']['start'] = datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S')
@@ -57,7 +49,6 @@ def _run(file_id, task_type, filename, status):
     data = json.dumps(ret).encode('ascii')
     _log(f"Task \"{task_type.value}\" is complete for {file_id}")
     api.mark_complete(file_id, task_type.value, data)
-
 
 # Process tasks forever
 _log("Starting up worker with PID: %d" % pid)
@@ -83,42 +74,39 @@ while True:
         _log("COMMAND NOT RECOGNIZED")
         continue
 
-    # Get the file locally for our workload
-    filename = _get_as_local_file(file_id, status)
-
     # Store an original in the file store
     if task == Tasks.ORIG.value:
-        _run(file_id, Tasks.ORIG, filename, status)
+        _run(file_id, Tasks.ORIG, status)
 
     # Watermarking original file
     elif task == Tasks.WTRM.value:
         if _check_ready(file_id, task, status, Tasks.ORIG):
-            _run(file_id, Tasks.WTRM, filename, status)
+            _run(file_id, Tasks.WTRM, status)
 
     # Key and BPM detection
     elif task == Tasks.KBPM.value:
         if _check_ready(file_id, task, status, Tasks.ORIG):
-            _run(file_id, Tasks.KBPM, filename, status)
+            _run(file_id, Tasks.KBPM, status)
 
     # Stem separation
     elif task == Tasks.STEM.value:
         if _check_ready(file_id, task, status, Tasks.ORIG):
-            _run(file_id, Tasks.STEM, filename, status)
+            _run(file_id, Tasks.STEM, status)
 
     # Track mastering
     elif task == Tasks.MAST.value:
         if _check_ready(file_id, task, status, Tasks.ORIG):
-            _run(file_id, Tasks.MAST, filename, status)
+            _run(file_id, Tasks.MAST, status)
 
     # Instrumental track from stems
     elif task == Tasks.INST.value:
         if _check_ready(file_id, task, status, Tasks.STEM):
-            _run(file_id, Tasks.INST, filename, status)
+            _run(file_id, Tasks.INST, status)
 
     # Lyrics from vocals
     elif task == Tasks.LYRC.value:
         if _check_ready(file_id, task, status, Tasks.STEM):
-            _run(file_id, Tasks.LYRC, filename, status)
+            _run(file_id, Tasks.LYRC, status)
 
     # MIDI track from stems
     elif task == Tasks.MIDI.value:
