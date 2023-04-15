@@ -10,6 +10,7 @@ class Tasks(Enum):
     LYRC = 'lyrics' # Get the lyrics from the vocals stem
     MIDI = 'midi' # Produce a MIDI file (per stem?)
     COVR = 'coverart' # Generate cover art automatically
+    STAT = 'status' # Save the status as JSON at the end
 
 class State(Enum):
     INIT = "initial"

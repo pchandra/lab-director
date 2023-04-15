@@ -9,6 +9,7 @@ from . import midi
 from . import coverart
 from . import original
 from . import watermark
+from . import status
 
 __all__ = ["execute", 'WORK_DIR']
 
@@ -24,3 +25,4 @@ execute[Tasks.MIDI] = midi.execute
 execute[Tasks.COVR] = coverart.execute
 execute[Tasks.ORIG] = original.execute
 execute[Tasks.WTRM] = watermark.execute
+execute[Tasks.STAT] = status.execute

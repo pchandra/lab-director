@@ -134,3 +134,16 @@ while True:
     # Cover art generation
     elif task == Tasks.COVR.value:
         api.mark_notavailable(file_id, task)
+
+    # Save the status as a last step
+    elif task == Tasks.STAT.value:
+        all_done = True
+        for t in Tasks:
+            if t == Tasks.STAT:
+                continue
+            if not _is_finished(file_id, t, status):
+                all_done = False
+                _requeue(file_id, task, t)
+                break
+        if all_done:
+            _run(file_id, Tasks.STAT, status)
