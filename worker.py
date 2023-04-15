@@ -38,10 +38,10 @@ def _requeue(file_id, task, dep):
     api.mark_waiting(file_id, task)
     api.requeue(file_id, task)
 
-def _run(file_id, task_type, status):
+def _run(file_id, task_type, status, force=False):
     api.mark_inprogress(file_id, task_type.value)
     start = time.time()
-    ret = tasks.execute[task_type](file_id, status)
+    ret = tasks.execute[task_type](file_id, status, force=force)
     stop = time.time()
 
     # Check if this was short-circuited (task detected it had already run on 'file_id')
@@ -79,6 +79,12 @@ def main():
         if task == "stop":
             break
 
+        # Don't force run anything by default unless the task is in ALL CAPS
+        force = False
+        if task in [ x.value.upper() for x in Tasks ]:
+            force = True
+            task = task.lower()
+
         # Get the status for this file first
         file_id = tokens[1]
         status = api.get_status(file_id)
@@ -90,47 +96,47 @@ def main():
 
         # Store an original in the file store
         if task == Tasks.ORIG.value:
-            _run(file_id, Tasks.ORIG, status)
+            _run(file_id, Tasks.ORIG, status, force)
 
         # Watermarking original file
         elif task == Tasks.WTRM.value:
             if _check_ready(file_id, status, Tasks.ORIG):
-                _run(file_id, Tasks.WTRM, status)
+                _run(file_id, Tasks.WTRM, status, force)
             else:
                 _requeue(file_id, task, Tasks.ORIG)
 
         # Key and BPM detection
         elif task == Tasks.KBPM.value:
             if _check_ready(file_id, status, Tasks.ORIG):
-                _run(file_id, Tasks.KBPM, status)
+                _run(file_id, Tasks.KBPM, status, force)
             else:
                 _requeue(file_id, task, Tasks.ORIG)
 
         # Stem separation
         elif task == Tasks.STEM.value:
             if _check_ready(file_id, status, Tasks.ORIG):
-                _run(file_id, Tasks.STEM, status)
+                _run(file_id, Tasks.STEM, status, force)
             else:
                 _requeue(file_id, task, Tasks.ORIG)
 
         # Track mastering
         elif task == Tasks.MAST.value:
             if _check_ready(file_id, status, Tasks.ORIG):
-                _run(file_id, Tasks.MAST, status)
+                _run(file_id, Tasks.MAST, status, force)
             else:
                 _requeue(file_id, task, Tasks.ORIG)
 
         # Instrumental track from stems
         elif task == Tasks.INST.value:
             if _check_ready(file_id, status, Tasks.STEM):
-                _run(file_id, Tasks.INST, status)
+                _run(file_id, Tasks.INST, status, force)
             else:
                 _requeue(file_id, task, Tasks.STEM)
 
         # Lyrics from vocals
         elif task == Tasks.LYRC.value:
             if _check_ready(file_id, status, Tasks.STEM):
-                _run(file_id, Tasks.LYRC, status)
+                _run(file_id, Tasks.LYRC, status, force)
             else:
                 _requeue(file_id, task, Tasks.STEM)
 
@@ -153,7 +159,7 @@ def main():
                     _requeue(file_id, task, t)
                     break
             if all_done:
-                _run(file_id, Tasks.STAT, status)
+                _run(file_id, Tasks.STAT, status, force)
 
 if __name__ == "__main__":
     main()
