@@ -57,93 +57,97 @@ def _is_finished(file_id, task_type, status):
     finished_states = [ x.value for x in [ State.COMP, State.FAIL, State.NA ] ]
     return status[task_type.value]['status'] in finished_states
 
-# Process tasks forever
-_log("Starting up worker with PID: %d" % pid)
-while True:
-    # Send 'ready' and then await a task assignment
-    _log("Ready to accept new tasks")
-    receiver.send(b"ready")
-    message = receiver.recv_string()
-    _log("Got task: %s" % message)
-    tokens = message.split()
-    task = tokens[0]
+def main():
+    # Process tasks forever
+    _log("Starting up worker with PID: %d" % pid)
+    while True:
+        # Send 'ready' and then await a task assignment
+        _log("Ready to accept new tasks")
+        receiver.send(b"ready")
+        message = receiver.recv_string()
+        _log("Got task: %s" % message)
+        tokens = message.split()
+        task = tokens[0]
 
-    # Detect if we're supposed to stop
-    if task == "stop":
-        break
+        # Detect if we're supposed to stop
+        if task == "stop":
+            break
 
-    # Get the status for this file first
-    file_id = tokens[1]
-    status = api.get_status(file_id)
+        # Get the status for this file first
+        file_id = tokens[1]
+        status = api.get_status(file_id)
 
-    # Check that the task is legit before proceeding
-    if not any(x for x in Tasks if x.value == task):
-        _log("COMMAND NOT RECOGNIZED")
-        continue
+        # Check that the task is legit before proceeding
+        if not any(x for x in Tasks if x.value == task):
+            _log("COMMAND NOT RECOGNIZED")
+            continue
 
-    # Store an original in the file store
-    if task == Tasks.ORIG.value:
-        _run(file_id, Tasks.ORIG, status)
+        # Store an original in the file store
+        if task == Tasks.ORIG.value:
+            _run(file_id, Tasks.ORIG, status)
 
-    # Watermarking original file
-    elif task == Tasks.WTRM.value:
-        if _check_ready(file_id, status, Tasks.ORIG):
-            _run(file_id, Tasks.WTRM, status)
-        else:
-            _requeue(file_id, task, Tasks.ORIG)
+        # Watermarking original file
+        elif task == Tasks.WTRM.value:
+            if _check_ready(file_id, status, Tasks.ORIG):
+                _run(file_id, Tasks.WTRM, status)
+            else:
+                _requeue(file_id, task, Tasks.ORIG)
 
-    # Key and BPM detection
-    elif task == Tasks.KBPM.value:
-        if _check_ready(file_id, status, Tasks.ORIG):
-            _run(file_id, Tasks.KBPM, status)
-        else:
-            _requeue(file_id, task, Tasks.ORIG)
+        # Key and BPM detection
+        elif task == Tasks.KBPM.value:
+            if _check_ready(file_id, status, Tasks.ORIG):
+                _run(file_id, Tasks.KBPM, status)
+            else:
+                _requeue(file_id, task, Tasks.ORIG)
 
-    # Stem separation
-    elif task == Tasks.STEM.value:
-        if _check_ready(file_id, status, Tasks.ORIG):
-            _run(file_id, Tasks.STEM, status)
-        else:
-            _requeue(file_id, task, Tasks.ORIG)
+        # Stem separation
+        elif task == Tasks.STEM.value:
+            if _check_ready(file_id, status, Tasks.ORIG):
+                _run(file_id, Tasks.STEM, status)
+            else:
+                _requeue(file_id, task, Tasks.ORIG)
 
-    # Track mastering
-    elif task == Tasks.MAST.value:
-        if _check_ready(file_id, status, Tasks.ORIG):
-            _run(file_id, Tasks.MAST, status)
-        else:
-            _requeue(file_id, task, Tasks.ORIG)
+        # Track mastering
+        elif task == Tasks.MAST.value:
+            if _check_ready(file_id, status, Tasks.ORIG):
+                _run(file_id, Tasks.MAST, status)
+            else:
+                _requeue(file_id, task, Tasks.ORIG)
 
-    # Instrumental track from stems
-    elif task == Tasks.INST.value:
-        if _check_ready(file_id, status, Tasks.STEM):
-            _run(file_id, Tasks.INST, status)
-        else:
-            _requeue(file_id, task, Tasks.STEM)
+        # Instrumental track from stems
+        elif task == Tasks.INST.value:
+            if _check_ready(file_id, status, Tasks.STEM):
+                _run(file_id, Tasks.INST, status)
+            else:
+                _requeue(file_id, task, Tasks.STEM)
 
-    # Lyrics from vocals
-    elif task == Tasks.LYRC.value:
-        if _check_ready(file_id, status, Tasks.STEM):
-            _run(file_id, Tasks.LYRC, status)
-        else:
-            _requeue(file_id, task, Tasks.STEM)
+        # Lyrics from vocals
+        elif task == Tasks.LYRC.value:
+            if _check_ready(file_id, status, Tasks.STEM):
+                _run(file_id, Tasks.LYRC, status)
+            else:
+                _requeue(file_id, task, Tasks.STEM)
 
-    # MIDI track from stems
-    elif task == Tasks.MIDI.value:
-        api.mark_notavailable(file_id, task)
+        # MIDI track from stems
+        elif task == Tasks.MIDI.value:
+            api.mark_notavailable(file_id, task)
 
-    # Cover art generation
-    elif task == Tasks.COVR.value:
-        api.mark_notavailable(file_id, task)
+        # Cover art generation
+        elif task == Tasks.COVR.value:
+            api.mark_notavailable(file_id, task)
 
-    # Save the status as a last step
-    elif task == Tasks.STAT.value:
-        all_done = True
-        for t in Tasks:
-            if t == Tasks.STAT:
-                continue
-            if not _is_finished(file_id, t, status):
-                all_done = False
-                _requeue(file_id, task, t)
-                break
-        if all_done:
-            _run(file_id, Tasks.STAT, status)
+        # Save the status as a last step
+        elif task == Tasks.STAT.value:
+            all_done = True
+            for t in Tasks:
+                if t == Tasks.STAT:
+                    continue
+                if not _is_finished(file_id, t, status):
+                    all_done = False
+                    _requeue(file_id, task, t)
+                    break
+            if all_done:
+                _run(file_id, Tasks.STAT, status)
+
+if __name__ == "__main__":
+    main()
