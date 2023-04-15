@@ -23,7 +23,7 @@ def execute(file_id, status):
     for stem in status[Tasks.STEM.value][State.COMP.value]['output']:
         if stem['type'] == "vocals":
             continue
-        filename = filestore.retrieve_file(file_id, status, f"stem-{stem['type']}.wav", helpers.WORK_DIR + f"/{status['uuid']}")
+        filename = filestore.retrieve_file(file_id, status, f"{Tasks.STEM.value}-{stem['type']}.wav", helpers.WORK_DIR + f"/{status['uuid']}")
         filenames.append(filename)
     if len(filenames) > 0:
         cmdline.extend(filenames)
@@ -39,7 +39,7 @@ def execute(file_id, status):
     stdout, stderr = process.communicate(input="\n\n\n\n\n")
 
     # Store the resulting file
-    stored_location = filestore.store_file(file_id, status, outfile, 'instrumental.wav')
+    stored_location = filestore.store_file(file_id, status, outfile, f"{Tasks.INST.value}.wav")
 
     # Build the dict to return to caller
     ret = { "command": { "stdout": stdout, "stderr": stderr } }

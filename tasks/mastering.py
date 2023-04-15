@@ -8,7 +8,7 @@ from . import filestore
 PHASELIMITER_BIN = '/Users/chandra/ll/co/phaselimiter/bin/Release/phase_limiter'
 
 def execute(file_id, status):
-    filename = filestore.retrieve_file(file_id, status, 'original', helpers.WORK_DIR + f"/{status['uuid']}")
+    filename = filestore.retrieve_file(file_id, status, Tasks.ORIG.value, helpers.WORK_DIR + f"/{status['uuid']}")
     outfile = f"{helpers.WORK_DIR}/{status['uuid']}-{Tasks.MAST.value}.wav"
     # Build the command line to run
     cmdline = []
@@ -52,7 +52,7 @@ def execute(file_id, status):
             break
 
     # Store the resulting file
-    stored_location = filestore.store_file(file_id, status, outfile, 'mastered.wav')
+    stored_location = filestore.store_file(file_id, status, outfile, f"{Tasks.MAST.value}.wav")
 
     # Build the dict to return to caller
     ret = { "command": { "stdout": stdout, "stderr": stderr } }

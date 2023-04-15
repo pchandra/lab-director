@@ -7,7 +7,7 @@ from . import filestore
 KEYBPM_BIN = '/Users/chandra/ll/co/key-bpm-finder/keymaster-json.py'
 
 def execute(file_id, status):
-    filename = filestore.retrieve_file(file_id, status, 'original', helpers.WORK_DIR + f"/{status['uuid']}")
+    filename = filestore.retrieve_file(file_id, status, Tasks.ORIG.value, helpers.WORK_DIR + f"/{status['uuid']}")
     # Build the command line to run
     cmdline = []
     cmdline.append('/usr/local/bin/python3.9')
@@ -18,10 +18,10 @@ def execute(file_id, status):
                                stdout=subprocess.PIPE,
                                universal_newlines=True)
     stdout, _ = process.communicate()
-    tempfile = helpers.WORK_DIR + f"/{status['uuid']}-keybpm.json"
+    tempfile = helpers.WORK_DIR + f"/{status['uuid']}-{Tasks.KBPM.value}.json"
     with open(tempfile, 'w') as f:
         f.write(stdout)
-    stored_location = filestore.store_file(file_id, status, tempfile, 'keybpm.json')
+    stored_location = filestore.store_file(file_id, status, tempfile, f"{Tasks.KBPM.value}.json")
     # The tool outputs JSON so return it as a dict
     ret = {}
     ret['data'] = json.loads(stdout)

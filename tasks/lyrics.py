@@ -8,6 +8,7 @@ from . import helpers
 from . import filestore
 
 WHISPER_BIN = '/usr/local/bin/whisper'
+WHISPER_MODEL = "tiny"
 
 def execute(file_id, status):
     outdir = f"{helpers.WORK_DIR}/{status['uuid']}-{Tasks.LYRC.value}"
@@ -16,12 +17,12 @@ def execute(file_id, status):
         return {}
 
     # Grab the vocal track to analyze
-    vocalsfile = filestore.retrieve_file(file_id, status, f"stem-vocals.wav", helpers.WORK_DIR + f"/{status['uuid']}")
+    vocalsfile = filestore.retrieve_file(file_id, status, f"{Tasks.STEM.value}-vocals.wav", helpers.WORK_DIR + f"/{status['uuid']}")
 
     # Build the command line to run
     cmdline = []
     cmdline.append(WHISPER_BIN)
-    cmdline.extend([ "--model", "medium",
+    cmdline.extend([ "--model", WHISPER_MODEL,
                      "--language", "en",
                      "--output_dir", outdir
                    ])
@@ -63,8 +64,8 @@ def execute(file_id, status):
     # Build the dict to return to caller
     ret = { "command": { "stdout": stdout, "stderr": stderr } }
     output = {}
-    output['json'] = filestore.store_file(file_id, status, outdir + f"/{os.path.basename(vocalsfile)}.json", 'lyrics.json')
-    output['srt'] = filestore.store_file(file_id, status, outdir + f"/{os.path.basename(vocalsfile)}.srt", 'lyrics.srt')
-    output['txt'] = filestore.store_file(file_id, status, outdir + f"/{os.path.basename(vocalsfile)}.txt", 'lyrics.txt')
+    filebase = os.path.splitext(os.path.basename(vocalsfile))[0]
+    for fmt in [ 'json', 'srt', 'tsv', 'vtt', 'txt']:
+        output[fmt] = filestore.store_file(file_id, status, outdir + f"/{filebase}.{fmt}", f"{Tasks.LYRC.value}.{fmt}")
     ret['output'] = [ {'type':x,'file':output[x]} for x in output.keys()]
     return ret
