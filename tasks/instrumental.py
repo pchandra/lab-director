@@ -34,13 +34,12 @@ def execute(file_id, status, force=False):
 
     # Grab all the stems
     filenames = []
-    for stem in status[Tasks.STEM.value][State.COMP.value]['output']:
-        if stem['type'] == "vocals":
+    for stem in metadata['stems']:
+        if stem == f'{Tasks.STEM.value}-vocals.wav':
             continue
-        filename = filestore.retrieve_file(file_id, status, f"{Tasks.STEM.value}-{stem['type']}.wav", helpers.WORK_DIR + f"/{status['uuid']}")
+        filename = filestore.retrieve_file(file_id, status, stem, helpers.WORK_DIR + f"/{status['uuid']}")
         filenames.append(filename)
-    if len(filenames) > 0:
-        cmdline.extend(filenames)
+    cmdline.extend(filenames)
 
     # Connect stdin to prevent hang when in background
     stdout = None
