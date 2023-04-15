@@ -43,14 +43,20 @@ def _run(file_id, task_type, status):
     start = time.time()
     ret = tasks.execute[task_type](file_id, status)
     stop = time.time()
-    ret['perf'] = {}
-    ret['perf']['start'] = datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S')
-    ret['perf']['stop'] = datetime.fromtimestamp(stop).strftime('%Y-%m-%d %H:%M:%S')
-    ret['perf']['time_start'] = start
-    ret['perf']['time_stop'] = stop
-    ret['perf']['time_elapsed'] = stop - start
-    data = json.dumps(ret).encode('ascii')
-    _log(f"Task \"{task_type.value}\" is complete for {file_id}")
+
+    # Check if this was short-circuited (task detected it had already run on 'file_id')
+    data = None
+    if ret is None:
+        _log(f"Task \"{task_type.value}\" reports already done for {file_id}")
+    else:
+        ret['perf'] = {}
+        ret['perf']['start'] = datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S')
+        ret['perf']['stop'] = datetime.fromtimestamp(stop).strftime('%Y-%m-%d %H:%M:%S')
+        ret['perf']['time_start'] = start
+        ret['perf']['time_stop'] = stop
+        ret['perf']['time_elapsed'] = stop - start
+        data = json.dumps(ret).encode('ascii')
+        _log(f"Task \"{task_type.value}\" completed executing for {file_id}")
     api.mark_complete(file_id, task_type.value, data)
 
 def _is_finished(file_id, task_type, status):
