@@ -5,16 +5,18 @@ import wave
 import subprocess
 from taskdef import *
 from . import helpers
+from . import filestore
 
 WHISPER_BIN = '/usr/local/bin/whisper'
 
-def execute(filename, status):
-    outdir = f"{helpers.WORK_DIR}/{os.path.basename(filename)}-{Tasks.LYRC.value}"
+def execute(file_id, status):
+    outdir = f"{helpers.WORK_DIR}/{status['uuid']}-{Tasks.LYRC.value}"
     # Return quickly if stemmer says this is an instrumental
     if status[Tasks.STEM.value][State.COMP.value]['instrumental']:
         return {}
 
-    vocalsfile = status[Tasks.STEM.value][State.COMP.value]['stems']['vocals']
+    # Grab the vocal track to analyze
+    vocalsfile = filestore.retrieve_file(file_id, status, f"stem-vocals.wav", helpers.WORK_DIR + f"/{status['uuid']}")
 
     # Build the command line to run
     cmdline = []
@@ -23,7 +25,6 @@ def execute(filename, status):
                      "--language", "en",
                      "--output_dir", outdir
                    ])
-    # Only use the vocals stem for this input
     cmdline.append(vocalsfile)
     # Execute the command if we don't already have output
     stdout = ""
@@ -61,9 +62,9 @@ def execute(filename, status):
 
     # Build the dict to return to caller
     ret = { "command": { "stdout": stdout, "stderr": stderr } }
-    with open(outdir + f"/{os.path.basename(filename)}-vocals.json", "r") as f:
-        ret["json"] = json.load(f)
-    with open(outdir + f"/{os.path.basename(filename)}-vocals.txt", "r") as f:
-        ret["fulltext"] = f.readlines()
-    ret["srtfile"] = outdir + f"/{os.path.basename(filename)}-vocals.srt"
+    output = {}
+    output['json'] = filestore.store_file(file_id, status, outdir + f"/{os.path.basename(vocalsfile)}.json", 'lyrics.json')
+    output['srt'] = filestore.store_file(file_id, status, outdir + f"/{os.path.basename(vocalsfile)}.srt", 'lyrics.srt')
+    output['txt'] = filestore.store_file(file_id, status, outdir + f"/{os.path.basename(vocalsfile)}.txt", 'lyrics.txt')
+    ret['output'] = [ {'type':x,'file':output[x]} for x in output.keys()]
     return ret

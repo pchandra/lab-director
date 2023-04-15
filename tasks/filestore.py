@@ -1,0 +1,64 @@
+import os
+import shutil
+
+FILESTORE_BACKEND="local"
+FILESTORE_DIR = '/tmp/STORE'
+
+def get_external_file(file_id, status, directory):
+    return _backend['get_external_file'](file_id, status, directory)
+
+def _local_get_external_file(file_id, status, directory):
+    src = os.environ.get('TESTFILE')
+    dst = directory + f"/{status['uuid']}"
+    if not os.path.exists(dst):
+        shutil.copyfile(src, dst)
+    return dst
+
+# XXX: This will be the function to get the file_id URL from site API and grab file from old S3 bucket
+def _s3_get_external_file(file_id, status, directory):
+    return ""
+
+def store_file(file_id, status, path, key):
+    return _backend['store_file'](file_id, status, path, key)
+
+def _local_store_file(file_id, status, path, key):
+    # Create a dir for the file_id if it doesn't exist
+    outdir = FILESTORE_DIR + f"/{file_id}"
+    os.makedirs(outdir, exist_ok=True)
+    dst = outdir + f"/{key}"
+    if not os.path.exists(dst):
+        shutil.copyfile(path, dst)
+    return dst
+
+# XXX: This will be the function to store the local asset to the new S3 bucket hierarchy under 'key'
+def _s3_store_file(file_id, status, path, key):
+    pass
+
+def retrieve_file(file_id, status, key, directory):
+    return _backend['retrieve_file'](file_id, status, key, directory)
+
+def _local_retrieve_file(file_id, status, key, directory):	
+    os.makedirs(directory, exist_ok=True)
+    if key is None:
+        return get_external_file(file_id, status, directory)
+    src = FILESTORE_DIR + f"/{file_id}" + f"/{key}"
+    dst = directory + f"/{key}"
+    if not os.path.exists(dst):
+        shutil.copyfile(src, dst)
+    return dst
+
+# XXX: This will be the function to grab an asset (under 'key') from the new S3 bucket hierarchy
+def _s3_retrieve_file(file_id, status, key, directory):
+    pass
+
+_backend_local = {}
+_backend_local['store_file'] = _local_store_file
+_backend_local['retrieve_file'] = _local_retrieve_file
+_backend_local['get_external_file'] = _local_get_external_file
+
+_backend_s3 = {}
+_backend_s3['store_file'] = _s3_store_file
+_backend_s3['retrieve_file'] = _s3_retrieve_file
+_backend_s3['get_external_file'] = _s3_get_external_file
+
+_backend = _backend_s3 if FILESTORE_BACKEND == "s3" else _backend_local

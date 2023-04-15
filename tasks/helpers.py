@@ -9,7 +9,7 @@ import taskapi as api
 FFMPEG_BIN = '/usr/local/bin/ffmpeg'
 
 # Working directory for tools to operate
-WORK_DIR = '/tmp'
+WORK_DIR = '/tmp/SCRATCH'
 
 def setprogress(file_id, task_type, percent=0):
     update = json.dumps({"percent": percent}).encode('ascii')

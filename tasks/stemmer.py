@@ -3,6 +3,7 @@ import re
 import subprocess
 from taskdef import *
 from . import helpers
+from . import filestore
 
 DEMUCS_BIN = '/usr/local/bin/demucs'
 
@@ -87,7 +88,8 @@ def _check_stems(demucs, model):
             stems_found[stem] = stemfile
     return stems_found
 
-def execute(filename, status):
+def execute(file_id, status):
+    filename = filestore.retrieve_file(file_id, status, 'original', helpers.WORK_DIR + f"/{status['uuid']}")
     ret = {}
     # First run the 6 source model
     ret['phase1'] = _run_demucs_model(filename, status, 'htdemucs_6s', progress_size = 50)
@@ -103,5 +105,10 @@ def execute(filename, status):
     else:
         helpers.setprogress(status['id'], Tasks.STEM, 100)
 
-    ret['stems'] = stems_found
+    # Save each stem back to filestore
+    for stem in stems_found.keys():
+        stored_location = filestore.store_file(file_id, status, stems_found[stem], f'stem-{stem}.wav')
+        stems_found[stem] = stored_location
+
+    ret['output'] = [ {'type':x,'file':stems_found[x]} for x in stems_found.keys()]
     return ret
