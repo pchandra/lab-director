@@ -1,5 +1,6 @@
 import os
 import re
+import json
 import subprocess
 from taskdef import *
 from . import helpers
@@ -15,9 +16,16 @@ def execute(file_id, status, force=False):
 
     # Proceed with running this task
     outfile = f"{helpers.WORK_DIR}/{status['uuid']}-{Tasks.INST.value}.wav"
+
+    # Get the stem metadata from the filestore
+    stem_json = filestore.retrieve_file(file_id, status, f"{Tasks.STEM.value}.json", helpers.WORK_DIR + f"/{status['uuid']}")
+    metadata = None
+    with open(stem_json, 'r') as f:
+        metadata = json.load(f)
+
     # Return quickly if this is already tagged instrumental from stemming
-    if status[Tasks.STEM.value][State.COMP.value]['instrumental']:
-        return {}
+    if metadata['instrumental']:
+        return
 
     # Build the command line to run
     cmdline = []

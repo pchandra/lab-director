@@ -1,5 +1,6 @@
 import os
 import re
+import json
 import subprocess
 from taskdef import *
 from . import helpers
@@ -115,6 +116,15 @@ def execute(file_id, status, force=False):
     for stem in stems_found.keys():
         stored_location = filestore.store_file(file_id, status, stems_found[stem], f'{Tasks.STEM.value}-{stem}.wav')
         stems_found[stem] = stored_location
+
+    # Build a metadata dict to save to filestore
+    stem_obj = {}
+    stem_obj['instrumental'] = ret['instrumental']
+    stem_obj['stems'] = [ f'{Tasks.STEM.value}-{x}.wav' for x in stems_found.keys() ]
+    tempfile = helpers.WORK_DIR + f"/{status['uuid']}-{Tasks.STEM.value}.json"
+    with open(tempfile, 'w') as f:
+        f.write(json.dumps(stem_obj, indent=2))
+    filestore.store_file(file_id, status, tempfile, f"{Tasks.STEM.value}.json")
 
     ret['output'] = [ {'type':x,'file':stems_found[x]} for x in stems_found.keys()]
     return ret

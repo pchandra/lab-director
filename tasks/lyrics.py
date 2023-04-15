@@ -21,9 +21,16 @@ def execute(file_id, status, force=False):
 
     # Proceed with running this task
     outdir = f"{helpers.WORK_DIR}/{status['uuid']}-{Tasks.LYRC.value}"
+
+    # Get the stem metadata from the filestore
+    stem_json = filestore.retrieve_file(file_id, status, f"{Tasks.STEM.value}.json", helpers.WORK_DIR + f"/{status['uuid']}")
+    metadata = None
+    with open(stem_json, 'r') as f:
+        metadata = json.load(f)
+
     # Return quickly if stemmer says this is an instrumental
-    if status[Tasks.STEM.value][State.COMP.value]['instrumental']:
-        return {}
+    if metadata['instrumental']:
+        return
 
     # Grab the vocal track to analyze
     vocalsfile = filestore.retrieve_file(file_id, status, f"{Tasks.STEM.value}-vocals.wav", helpers.WORK_DIR + f"/{status['uuid']}")
