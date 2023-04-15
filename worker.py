@@ -24,16 +24,19 @@ def _log(str):
     sys.stdout.flush()
 
 # Check if a different task is finished
-def _check_ready(file_id, task, status, dep):
+def _check_ready(file_id, status, dep):
     if status[dep.value]['status'] != State.COMP.value:
-        _log(f"Requeuing, task \"{task}\" is waiting on \"{dep.value}\" for {file_id}")
-        api.mark_waiting(file_id, task)
-        api.requeue(file_id, task)
         # Throttle this since we might be waiting a while
         time.sleep(1)
         return False
     else:
         return True
+
+# Put a waiting task back in the queue
+def _requeue(file_id, task, dep):
+    _log(f"Requeuing, task \"{task}\" is waiting on \"{dep.value}\" for {file_id}")
+    api.mark_waiting(file_id, task)
+    api.requeue(file_id, task)
 
 def _run(file_id, task_type, status):
     api.mark_inprogress(file_id, task_type.value)
@@ -49,6 +52,10 @@ def _run(file_id, task_type, status):
     data = json.dumps(ret).encode('ascii')
     _log(f"Task \"{task_type.value}\" is complete for {file_id}")
     api.mark_complete(file_id, task_type.value, data)
+
+def _is_finished(file_id, task_type, status):
+    finished_states = [ x.value for x in [ State.COMP, State.FAIL, State.NA ] ]
+    return status[task_type.value]['status'] in finished_states
 
 # Process tasks forever
 _log("Starting up worker with PID: %d" % pid)
@@ -80,33 +87,45 @@ while True:
 
     # Watermarking original file
     elif task == Tasks.WTRM.value:
-        if _check_ready(file_id, task, status, Tasks.ORIG):
+        if _check_ready(file_id, status, Tasks.ORIG):
             _run(file_id, Tasks.WTRM, status)
+        else:
+            _requeue(file_id, task, Tasks.ORIG)
 
     # Key and BPM detection
     elif task == Tasks.KBPM.value:
-        if _check_ready(file_id, task, status, Tasks.ORIG):
+        if _check_ready(file_id, status, Tasks.ORIG):
             _run(file_id, Tasks.KBPM, status)
+        else:
+            _requeue(file_id, task, Tasks.ORIG)
 
     # Stem separation
     elif task == Tasks.STEM.value:
-        if _check_ready(file_id, task, status, Tasks.ORIG):
+        if _check_ready(file_id, status, Tasks.ORIG):
             _run(file_id, Tasks.STEM, status)
+        else:
+            _requeue(file_id, task, Tasks.ORIG)
 
     # Track mastering
     elif task == Tasks.MAST.value:
-        if _check_ready(file_id, task, status, Tasks.ORIG):
+        if _check_ready(file_id, status, Tasks.ORIG):
             _run(file_id, Tasks.MAST, status)
+        else:
+            _requeue(file_id, task, Tasks.ORIG)
 
     # Instrumental track from stems
     elif task == Tasks.INST.value:
-        if _check_ready(file_id, task, status, Tasks.STEM):
+        if _check_ready(file_id, status, Tasks.STEM):
             _run(file_id, Tasks.INST, status)
+        else:
+            _requeue(file_id, task, Tasks.STEM)
 
     # Lyrics from vocals
     elif task == Tasks.LYRC.value:
-        if _check_ready(file_id, task, status, Tasks.STEM):
+        if _check_ready(file_id, status, Tasks.STEM):
             _run(file_id, Tasks.LYRC, status)
+        else:
+            _requeue(file_id, task, Tasks.STEM)
 
     # MIDI track from stems
     elif task == Tasks.MIDI.value:
