@@ -83,12 +83,16 @@ def _run_demucs_model(filename, status, model, progress_start=0, progress_size=1
     return ret
 
 def _check_stems(demucs, model):
-    stems_found = {}
+    stems_present = {}
+    stems_good = {}
     for stem in demucs[model].keys():
         stemfile = demucs[model][stem]
-        if not helpers.is_silent(stemfile):
-            stems_found[stem] = stemfile
-    return stems_found
+        totally, mostly = helpers.is_silent(stemfile)
+        if not totally:
+            stems_present[stem] = stemfile
+        if not mostly:
+            stems_good[stem] = stemfile
+    return stems_present, stems_good
 
 def execute(file_id, status, force=False):
     # Short-circuit if the filestore already has assets we would produce
@@ -101,31 +105,32 @@ def execute(file_id, status, force=False):
     ret = {}
     # First run the 6 source model
     ret['phase1'] = _run_demucs_model(filename, status, 'htdemucs_6s', progress_size = 50)
-    stems_found = _check_stems(ret['phase1'], 'htdemucs_6s')
+    stems_present, stems_good = _check_stems(ret['phase1'], 'htdemucs_6s')
 
     # If no vocals, it's probably instrumental
-    ret['instrumental'] = "vocals" not in stems_found.keys()
+    ret['instrumental'] = "vocals" not in stems_good.keys()
 
     # If no guitar or piano, run the higher quality 4 source model
-    if "guitar" not in stems_found.keys() and "piano" not in stems_found.keys():
+    if "guitar" not in stems_good.keys() and "piano" not in stems_good.keys():
         ret['phase2'] = _run_demucs_model(filename, status, 'htdemucs_ft', progress_start = 50, progress_size = 50)
-        stems_found = _check_stems(ret['phase2'], 'htdemucs_ft')
+        stems_present, stems_good = _check_stems(ret['phase2'], 'htdemucs_ft')
     else:
         helpers.setprogress(status['id'], Tasks.STEM, 100)
 
     # Save each stem back to filestore
-    for stem in stems_found.keys():
-        stored_location = filestore.store_file(file_id, status, stems_found[stem], f'{Tasks.STEM.value}-{stem}.wav')
-        stems_found[stem] = stored_location
+    for stem in stems_present.keys():
+        stored_location = filestore.store_file(file_id, status, stems_present[stem], f'{Tasks.STEM.value}-{stem}.wav')
+        stems_present[stem] = stored_location
 
     # Build a metadata dict to save to filestore
     stem_obj = {}
     stem_obj['instrumental'] = ret['instrumental']
-    stem_obj['stems'] = [ f'{Tasks.STEM.value}-{x}.wav' for x in stems_found.keys() ]
+    stem_obj['stems-present'] = [ f'{Tasks.STEM.value}-{x}.wav' for x in stems_present.keys() ]
+    stem_obj['stems'] = [ f'{Tasks.STEM.value}-{x}.wav' for x in stems_good.keys() ]
     tempfile = helpers.WORK_DIR + f"/{status['uuid']}-{Tasks.STEM.value}.json"
     with open(tempfile, 'w') as f:
         f.write(json.dumps(stem_obj, indent=2))
     filestore.store_file(file_id, status, tempfile, f"{Tasks.STEM.value}.json")
 
-    ret['output'] = [ {'type':x,'file':stems_found[x]} for x in stems_found.keys()]
+    ret['output'] = [ {'type':x,'file':stems_present[x]} for x in stems_present.keys()]
     return ret

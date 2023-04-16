@@ -43,11 +43,14 @@ CONFIG['FILESTORE_BACKEND']='local'
 # Directory to use for local filestore, if enabled
 CONFIG['FILESTORE_DIR'] = '/tmp/STORE'
 
+# Sound level for considering audio input to be silent
+CONFIG['SILENCE_THRESHOLD'] = '-32dB'
+
+# Max percent of silence allowed in a track, otherwise considered empty
+CONFIG['SILENCE_PERCENT'] = 0.95
+
 # Binary to run 'ffmpeg' tool
 CONFIG['FFMPEG_BIN'] = '/usr/local/bin/ffmpeg'
-
-# Cut-off for considering a wav file to be empty
-CONFIG['FFMPEG_SILENCE_THRESHOLD'] = '-32dB'
 
 # Command to run 'keymaster' tool
 CONFIG['KEYBPM_BIN'] = '/Users/chandra/ll/co/key-bpm-finder/keymaster.py'
