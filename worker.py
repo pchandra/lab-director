@@ -105,10 +105,10 @@ def main():
 
         # Watermarking original file
         elif task == Tasks.WTRM.value:
-            if _check_ready(file_id, status, Tasks.ORIG):
+            if _check_ready(file_id, status, Tasks.MAST):
                 _run(file_id, Tasks.WTRM, status, force)
             else:
-                _requeue(file_id, task, Tasks.ORIG)
+                _requeue(file_id, task, Tasks.MAST)
 
         # Key and BPM detection
         elif task == Tasks.KBPM.value:

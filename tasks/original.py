@@ -20,7 +20,7 @@ def execute(file_id, status, force=False):
 
     # Run FFMPEG to make MP3 version
     outfile = f"{helpers.WORK_DIR}/{status['uuid']}-{Tasks.ORIG.value}.mp3"
-    # Run an FFMPEG cmd to detect silence
+    # Run an FFMPEG cmd to compress to mp3
     cmdline = []
     cmdline.append(FFMPEG_BIN)
     cmdline.extend([ "-i", local_file,
