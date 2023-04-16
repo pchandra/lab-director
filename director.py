@@ -14,10 +14,13 @@ app = Flask(__name__)
 app.config['SHELVE_FILENAME'] = conf['DIRECTOR_SHELVE']
 flask_shelve.init_app(app)
 
+ROUTER_ADDR = conf['ROUTER_ADDR']
+ROUTER_PORT = conf['ROUTER_FRONTEND_PORT']
+
 # Prepare our context and socket to push jobs to workers 
 context = zmq.Context()
 sender = context.socket(zmq.PUSH)
-sender.connect("tcp://localhost:3456")
+sender.connect(f"tcp://{ROUTER_ADDR}:{ROUTER_PORT}")
 
 def _msg(msg):
     return { "message": f"{msg}" }
@@ -140,3 +143,5 @@ def update_notavailable(file_id, task):
     STATUS[file_id] = current
     return _msg("ok")
 
+if __name__ == '__main__':
+    app.run(host=conf['DIRECTOR_BIND'], port = conf['DIRECTOR_PORT'])

@@ -2,9 +2,10 @@ import time
 import json
 from urllib.request import urlopen
 from taskdef import *
+from config import CONFIG as conf
 
 # URL Hosting the director HTTP API (flask)
-BASE_URL = "http://localhost:5000"
+BASE_URL = f"http://{conf['DIRECTOR_ADDR']}:{conf['DIRECTOR_PORT']}"
 
 def get_status(file_id):
     response = urlopen(BASE_URL + f"/status/{file_id}")

@@ -9,11 +9,15 @@ import json
 from taskdef import *
 import taskapi as api
 import tasks
+from config import CONFIG as conf
+
+ROUTER_ADDR = conf['ROUTER_ADDR']
+ROUTER_PORT = conf['ROUTER_BACKEND_PORT']
 
 # Setup ZeroMQ connection to receive tasks from the director
 context = zmq.Context()
 receiver = context.socket(zmq.REQ)
-receiver.connect("tcp://localhost:3457")
+receiver.connect(f"tcp://{ROUTER_ADDR}:{ROUTER_PORT}")
 
 pid = os.getpid()
 
