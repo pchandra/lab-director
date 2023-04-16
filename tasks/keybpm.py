@@ -5,7 +5,7 @@ from . import helpers
 from . import filestore
 from config import CONFIG as conf
 
-KEYBPM_BIN = conf['KEYBPM_BIN']
+KEYMASTER_BIN = conf['KEYMASTER_BIN']
 
 def execute(file_id, status, force=False):
     # Short-circuit if the filestore already has assets we would produce
@@ -18,7 +18,7 @@ def execute(file_id, status, force=False):
     # Build the command line to run
     cmdline = []
     cmdline.append('/usr/local/bin/python3.9')
-    cmdline.append(KEYBPM_BIN)
+    cmdline.append(KEYMASTER_BIN)
     cmdline.append(filename)
     # Execute the command
     process = subprocess.Popen(cmdline, 

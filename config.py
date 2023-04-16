@@ -43,6 +43,9 @@ CONFIG['FILESTORE_BACKEND']='local'
 # Directory to use for local filestore, if enabled
 CONFIG['FILESTORE_DIR'] = '/tmp/STORE'
 
+# Wav file to use for watermarking process
+CONFIG['WATERMARK_WAV'] = '/Users/chandra/ll/co/wav-mixer/stamp.wav'
+
 # Sound level for considering audio input to be silent
 CONFIG['SILENCE_THRESHOLD'] = '-32dB'
 
@@ -53,7 +56,7 @@ CONFIG['SILENCE_PERCENT'] = 0.95
 CONFIG['FFMPEG_BIN'] = '/usr/local/bin/ffmpeg'
 
 # Command to run 'keymaster' tool
-CONFIG['KEYBPM_BIN'] = '/Users/chandra/ll/co/key-bpm-finder/keymaster.py'
+CONFIG['KEYMASTER_BIN'] = '/Users/chandra/ll/co/key-bpm-finder/keymaster.py'
 
 # Command to run the 'demucs' tool
 CONFIG['DEMUCS_BIN'] = '/usr/local/bin/demucs'
@@ -63,6 +66,9 @@ CONFIG['PHASELIMITER_BIN'] = '/Users/chandra/ll/co/phaselimiter/bin/Release/phas
 
 # Command to run for 'wav-mixer' tool
 CONFIG['WAVMIXER_BIN'] = '/Users/chandra/ll/co/wav-mixer/wav-mixer.py'
+
+# Command to run for 'mark-maker' tool
+CONFIG['MARKMAKER_BIN'] = '/Users/chandra/ll/co/wav-mixer/mark-maker.py'
 
 # Command to run for 'whisper' tool
 CONFIG['WHISPER_BIN'] = '/usr/local/bin/whisper'
