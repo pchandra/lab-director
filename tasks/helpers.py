@@ -2,14 +2,12 @@ import os
 import re
 import wave
 import subprocess
-
 import json
+from config import CONFIG as conf
 import taskapi as api
 
-FFMPEG_BIN = '/usr/local/bin/ffmpeg'
-
-# Working directory for tools to operate
-WORK_DIR = '/tmp/SCRATCH'
+FFMPEG_BIN = conf['FFMPEG_BIN']
+WORK_DIR = conf['WORK_DIR']
 
 def setprogress(file_id, task_type, percent=0):
     update = json.dumps({"percent": percent}).encode('ascii')
