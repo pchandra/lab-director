@@ -27,10 +27,10 @@ def _err_no_file(file_id):
 def _err_no_task(task):
     return _msg(f"No such task {task}"), 400
 
-def _sanity_check(file_id, status, task=None):
+def _sanity_check(file_id, status, task=None, allow_upper=False):
   if not file_id in status:
     return False, _err_no_file(file_id)
-  if task is not None and ( not any(x for x in Tasks if x.value == task) ):
+  if task is not None and (not any(x for x in Tasks if x.value == task)) and (allow_upper and not any(x for x in Tasks if x.value.upper() == task)):
     return False, _err_no_task(task)
   return True, ""
 
@@ -62,7 +62,7 @@ def stop_workers():
 @app.route('/requeue/<file_id>/<task>')
 def requeue_task(file_id, task):
   STATUS = flask_shelve.get_shelve()
-  ok, msg = _sanity_check(file_id, STATUS, task)
+  ok, msg = _sanity_check(file_id, STATUS, task, allow_upper=True)
   if not ok:
     return msg
   sender.send_string(f"{task} {file_id}")

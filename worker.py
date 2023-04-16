@@ -81,8 +81,9 @@ def main():
 
         # Don't force run anything by default unless the task is in ALL CAPS
         force = False
-        if task in [ x.value.upper() for x in Tasks ]:
+        if any(x for x in Tasks if x.value.upper() == task):
             force = True
+            _log("Forced command: %s" % task)
             task = task.lower()
 
         # Get the status for this file first
