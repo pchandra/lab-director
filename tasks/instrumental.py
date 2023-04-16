@@ -35,7 +35,7 @@ def execute(file_id, status, force=False):
 
     # Grab all the stems
     filenames = []
-    for stem in metadata['stems']:
+    for stem in metadata['stems-present']:
         if stem == f'{Tasks.STEM.value}-vocals.wav':
             continue
         filename = filestore.retrieve_file(file_id, status, stem, helpers.WORK_DIR + f"/{status['uuid']}")
