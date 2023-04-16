@@ -8,6 +8,7 @@ import taskapi as api
 
 FFMPEG_BIN = conf['FFMPEG_BIN']
 WORK_DIR = conf['WORK_DIR']
+SILENCE_THRESHOLD = conf['FFMPEG_SILENCE_THRESHOLD']
 
 def setprogress(file_id, task_type, percent=0):
     update = json.dumps({"percent": percent}).encode('ascii')
@@ -22,7 +23,7 @@ def is_silent(wavfile):
     cmdline = []
     cmdline.append(FFMPEG_BIN)
     cmdline.extend([ "-i", wavfile,
-                     "-af", "silencedetect=n=-36dB:d=1",
+                     "-af", f"silencedetect=n={SILENCE_THRESHOLD}:d=1",
                      "-f", "null",
                      "-"
                    ])
