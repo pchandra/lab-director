@@ -1,2 +1,2 @@
-def execute(file_id, status):
+def execute(file_id, status, force=False):
     return {}
