@@ -1,9 +1,10 @@
 import os
 import shutil
+from config import CONFIG as conf
 
 
-FILESTORE_BACKEND="local"
-FILESTORE_DIR = '/tmp/STORE'
+FILESTORE_BACKEND = conf['FILESTORE_BACKEND']
+FILESTORE_DIR = conf['FILESTORE_DIR']
 
 
 # Function to bootstrap things by grabbing an asset from off-site and downloading it locally

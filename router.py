@@ -4,8 +4,9 @@ from datetime import datetime
 import time
 import zmq
 import shelve
+from config import CONFIG as conf
 
-SHELVE_FILENAME = "saved-queue"
+SHELVE_FILENAME = conf['ROUTER_SHELVE']
 
 # Frontend socket to collect messages from API
 context = zmq.Context()

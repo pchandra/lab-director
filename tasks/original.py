@@ -2,8 +2,9 @@ import subprocess
 from taskdef import *
 from . import helpers
 from . import filestore
+from config import CONFIG as conf
 
-FFMPEG_BIN = '/usr/local/bin/ffmpeg'
+FFMPEG_BIN = conf['FFMPEG_BIN']
 
 def execute(file_id, status, force=False):
     # Short-circuit if the filestore already has assets we would produce

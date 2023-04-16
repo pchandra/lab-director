@@ -11,9 +11,7 @@ from . import original
 from . import watermark
 from . import status
 
-__all__ = ["execute", 'WORK_DIR']
-
-WORK_DIR = helpers.WORK_DIR
+__all__ = ["execute"]
 
 execute = {}
 execute[Tasks.KBPM] = keybpm.execute

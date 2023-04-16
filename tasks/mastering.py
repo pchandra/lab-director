@@ -4,8 +4,9 @@ import subprocess
 from taskdef import *
 from . import helpers
 from . import filestore
+from config import CONFIG as conf
 
-PHASELIMITER_BIN = '/Users/chandra/ll/co/phaselimiter/bin/Release/phase_limiter'
+PHASELIMITER_BIN = conf['PHASELIMITER_BIN']
 
 def execute(file_id, status, force=False):
     # Short-circuit if the filestore already has assets we would produce

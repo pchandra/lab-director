@@ -5,8 +5,9 @@ import subprocess
 from taskdef import *
 from . import helpers
 from . import filestore
+from config import CONFIG as conf
 
-DEMUCS_BIN = '/usr/local/bin/demucs'
+DEMUCS_BIN = conf['DEMUCS_BIN']
 
 def _stems_for_model(model):
     stems = [ "bass", "drums", "other", "vocals"]

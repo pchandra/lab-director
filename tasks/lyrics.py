@@ -6,9 +6,10 @@ import subprocess
 from taskdef import *
 from . import helpers
 from . import filestore
+from config import CONFIG as conf
 
-WHISPER_BIN = '/usr/local/bin/whisper'
-WHISPER_MODEL = "tiny"
+WHISPER_BIN = conf['WHISPER_BIN']
+WHISPER_MODEL = conf['WHISPER_MODEL']
 
 def execute(file_id, status, force=False):
     # Short-circuit if the filestore already has assets we would produce

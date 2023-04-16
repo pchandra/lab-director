@@ -3,8 +3,9 @@ import subprocess
 from taskdef import *
 from . import helpers
 from . import filestore
+from config import CONFIG as conf
 
-KEYBPM_BIN = '/Users/chandra/ll/co/key-bpm-finder/keymaster-json.py'
+KEYBPM_BIN = conf['KEYBPM_BIN']
 
 def execute(file_id, status, force=False):
     # Short-circuit if the filestore already has assets we would produce

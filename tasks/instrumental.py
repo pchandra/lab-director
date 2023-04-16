@@ -5,8 +5,9 @@ import subprocess
 from taskdef import *
 from . import helpers
 from . import filestore
+from config import CONFIG as conf
 
-WAVMIXER_BIN = '/Users/chandra/ll/co/wav-mixer/wav-mixer.py'
+WAVMIXER_BIN = conf['WAVMIXER_BIN']
 
 def execute(file_id, status, force=False):
     # Short-circuit if the filestore already has assets we would produce

@@ -5,12 +5,13 @@ from flask import request
 from flask import Flask
 import flask_shelve
 from taskdef import *
+from config import CONFIG as conf
 
 # Flask config vars
 app = Flask(__name__)
 
 # Using a Shelve for persistence of the STATUS dict
-app.config['SHELVE_FILENAME'] = 'saved-status'
+app.config['SHELVE_FILENAME'] = conf['DIRECTOR_SHELVE']
 flask_shelve.init_app(app)
 
 # Prepare our context and socket to push jobs to workers 
