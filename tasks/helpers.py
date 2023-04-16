@@ -16,12 +16,13 @@ def setprogress(file_id, task_type, percent=0):
     update = json.dumps({"percent": percent}).encode('ascii')
     api.mark_inprogress(file_id, task_type.value, update)
 
-def is_silent(wavfile):
+def get_duration(wavfile):
     # Get the duration of the audio track
-    duration = 0
     with wave.open(wavfile,'r') as f:
-        duration = f.getnframes() / f.getframerate()
+        return f.getnframes() / f.getframerate()
 
+def is_silent(wavfile):
+    duration = get_duration(wavfile)
     # Run an FFMPEG cmd to detect silence
     cmdline = []
     cmdline.append(FFMPEG_BIN)
