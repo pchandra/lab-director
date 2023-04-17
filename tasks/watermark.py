@@ -51,7 +51,7 @@ def execute(file_id, status, force=False):
     cmdline = []
     cmdline.append(FFMPEG_BIN)
     cmdline.extend([ "-i", outfile,
-                     "-q:a", "2",
+                     "-q:a", "3",
                      "-y"
                    ])
     cmdline.append(mp3file)

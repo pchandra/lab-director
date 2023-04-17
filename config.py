@@ -46,8 +46,8 @@ CONFIG['FILESTORE_DIR'] = '/tmp/STORE'
 # Wav file to use for watermarking process
 CONFIG['WATERMARK_WAV'] = '/Users/chandra/ll/co/wav-mixer/stamp.wav'
 
-# Wav file to use for watermarking process
-CONFIG['WATERMARK_STRENGTH'] = 4
+# Relative strength to apply to the watermark mixing (mark-maker tool)
+CONFIG['WATERMARK_STRENGTH'] = "4"
 
 # Sound level for considering audio input to be silent
 CONFIG['SILENCE_THRESHOLD'] = '-32dB'
