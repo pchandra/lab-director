@@ -11,6 +11,9 @@ FFMPEG_BIN = conf['FFMPEG_BIN']
 MARKMAKER_BIN = conf['MARKMAKER_BIN']
 WATERMARK_WAV = conf['WATERMARK_WAV']
 WATERMARK_STRENGTH = conf['WATERMARK_STRENGTH']
+WATERMARK_DELAY =  conf['WATERMARK_DELAY']
+WATERMARK_GAP = conf['WATERMARK_GAP']
+
 
 def execute(file_id, status, force=False):
     # Short-circuit if the filestore already has assets we would produce
@@ -29,7 +32,9 @@ def execute(file_id, status, force=False):
     cmdline.extend([ "-o", outfile,
                      "-i", filename,
                      "-s", WATERMARK_WAV,
-                     "-m", WATERMARK_STRENGTH
+                     "-m", WATERMARK_STRENGTH,
+                     "-d", WATERMARK_DELAY,
+                     "-g", WATERMARK_GAP
                    ])
     # Connect stdin to prevent hang when in background
     stdout = None
