@@ -54,7 +54,13 @@ def main():
 
             if len(queue) > 0 and socks.get(backend) == zmq.POLLIN:
                 address, empty, ready = backend.recv_multipart()
-                job = queue.pop(0)
+                acceptable = ready.split()[1:]
+                job = b"noop noop"
+                for j in queue:
+                    if j.split()[0] in acceptable:
+                        job = j
+                        queue.remove(job)
+                        break
                 _log("Worker %s reports as ready, sending task: %s" % (address.hex(), job))
                 backend.send_multipart([address, b'', job])
             # Put the queue back into the shelf for persistence

@@ -88,9 +88,9 @@ def main():
     # Process tasks forever
     _log("Starting up worker with PID: %d" % pid)
     while True:
-        # Send 'ready' and then await a task assignment
+        # Send 'ready' and ACCEPTABLE_WORK then await a task assignment
         _log("Ready to accept new tasks")
-        receiver.send(b"ready")
+        receiver.send(b"ready " + ' '.join(ACCEPTABLE_WORK).encode('ascii'))
         message = receiver.recv_string()
         _log("Got task: %s" % message)
         tokens = message.split()
@@ -100,6 +100,11 @@ def main():
         # Detect if we're supposed to stop
         if task == "stop":
             break
+
+        # Detect if we got a no-op
+        if task == "noop":
+            time.sleep(1)
+            continue
 
         # If this node shouldn't do the task, sleep for a second and requeue it
         if not _acceptable_work(task):
