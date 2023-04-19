@@ -14,8 +14,8 @@ def execute(file_id, status, force=False):
 
     # Proceed with running this task
     ret = {}
-    # Special case call with None to bootstrap
-    local_file = filestore.retrieve_file(file_id, status, None, helpers.WORK_DIR + f"/{status['uuid']}")
+    # Get the external file and save it to filestore (this is the first task to run)
+    local_file = filestore.get_external_file(file_id, status, helpers.WORK_DIR + f"/{status['uuid']}")
     ret['output'] = filestore.store_file(file_id, status, local_file, f"{Tasks.ORIG.value}")
 
     # Run FFMPEG to make MP3 version

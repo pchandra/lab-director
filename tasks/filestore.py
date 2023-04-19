@@ -15,6 +15,7 @@ def get_external_file(file_id, status, directory):
     return _backend['get_external_file'](file_id, status, directory)
 
 def _local_get_external_file(file_id, status, directory):
+    os.makedirs(directory, exist_ok=True)
     src = os.environ.get('TESTFILE')
     dst = directory + f"/{status['uuid']}"
     if not os.path.exists(dst):
@@ -22,6 +23,7 @@ def _local_get_external_file(file_id, status, directory):
     return dst
 
 def _s3_get_external_file(file_id, status, directory):
+    os.makedirs(directory, exist_ok=True)
     dst = directory + f"/{status['uuid']}"
     url = api.get_beat_download_url(file_id)
     if url is None:
@@ -58,8 +60,6 @@ def retrieve_file(file_id, status, key, directory):
 
 def _local_retrieve_file(file_id, status, key, directory):
     os.makedirs(directory, exist_ok=True)
-    if key is None:
-        return get_external_file(file_id, status, directory)
     src = FILESTORE_DIR + f"/{file_id}" + f"/{key}"
     dst = directory + f"/{key}"
     shutil.copyfile(src, dst)
@@ -67,9 +67,10 @@ def _local_retrieve_file(file_id, status, key, directory):
 
 # XXX: This will be the function to grab an asset (under 'key') from the new S3 bucket hierarchy
 def _s3_retrieve_file(file_id, status, key, directory):
+    s3path = f"{file_id}/{key}"
     basename = key.split('/')[-1]
     filename = directory + f'/{basename}'
-    s3.Object(FILESTORE_BUCKETNAME, key).download_file(filename)
+    s3.Object(FILESTORE_BUCKETNAME, s3path).download_file(filename)
     return filename
 
 
