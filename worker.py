@@ -83,16 +83,19 @@ def main():
         if task == "stop":
             break
 
+        # Get the status for this file and validate the file_id we received
+        file_id = tokens[1]
+        status = api.get_status(file_id)
+        if api.get_beat_download_url(file_id) is None:
+            _log(f"No such id known: {file_id}")
+            continue
+
         # Don't force run anything by default unless the task is in ALL CAPS
         force = False
         if any(x for x in Tasks if x.value.upper() == task):
             force = True
             _log("Forced command: %s" % task)
             task = task.lower()
-
-        # Get the status for this file first
-        file_id = tokens[1]
-        status = api.get_status(file_id)
 
         # Check that the task is legit before proceeding
         if not any(x for x in Tasks if x.value == task):

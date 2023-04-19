@@ -36,3 +36,38 @@ def requeue(file_id, task):
     time.sleep(1)
     urlopen(BASE_URL + f"/requeue/{file_id}/{task}")
     return
+
+BEAT_FILE = '/Users/chandra/ll/website/beats.json'
+SOUNDKIT_FILE='/Users/chandra/ll/website/soundkits.json'
+_beats = None
+_soundkits = None
+def _init_old_assetstore():
+    global _beats
+    global _soundkits
+    if _beats is None:
+        with open(BEAT_FILE, 'r') as f:
+            _beats = json.load(f)
+        with open(SOUNDKIT_FILE, 'r') as f:
+            _soundkits = json.load(f)
+
+def get_beat_download_url(file_id):
+    beat = _get_beat_info(file_id)
+    if beat is not None:
+        ret = [ x['url'] for x in beat['license_rights'][0]['files'] if x['type'] == 'WAV+' ]
+        if len(ret) == 1:
+            return ret[0]
+    return None
+
+def _get_beat_info(file_id):
+    _init_old_assetstore()
+    ret = [ x for x in _beats if x['id'] == file_id ]
+    if len(ret) == 1:
+        return ret[0]
+    return None
+
+def _get_soundkit_info(file_id):
+    _init_old_assetstore()
+    ret = [ x for x in _soundkits if x['id'] == file_id ]
+    if len(ret) == 1:
+        return ret[0]
+    return None

@@ -1,5 +1,7 @@
 import os
 import shutil
+import requests
+import taskapi as api
 from config import CONFIG as conf
 
 
@@ -18,10 +20,15 @@ def _local_get_external_file(file_id, status, directory):
         shutil.copyfile(src, dst)
     return dst
 
-# XXX: This will be the function to get the file_id URL from site API and grab file from old S3 bucket
 def _s3_get_external_file(file_id, status, directory):
-    return ""
-
+    dst = directory + f"/{status['uuid']}"
+    url = api.get_beat_download_url(file_id)
+    if url is None:
+        raise Exception(f"Attempting to fetch an invalid id: {file_id}")
+    r = requests.get(url, allow_redirects=True)
+    with open(dst, 'wb') as f:
+        f.write(r.content)
+    return dst
 
 # Store a local file in the filestore under 'key'
 def store_file(file_id, status, path, key):
