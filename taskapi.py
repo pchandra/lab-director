@@ -37,8 +37,8 @@ def requeue(file_id, task):
     urlopen(BASE_URL + f"/requeue/{file_id}/{task}")
     return
 
-BEAT_FILE = conf['BATCH_BEAT_FILE]']
-SOUNDKIT_FILE = conf['BATCH_SOUNDKIT_FILE]']
+BEAT_FILE = conf['BATCH_BEAT_FILE']
+SOUNDKIT_FILE = conf['BATCH_SOUNDKIT_FILE']
 
 _beats = None
 _soundkits = None
