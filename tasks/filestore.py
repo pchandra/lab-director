@@ -17,14 +17,14 @@ def get_external_file(file_id, status, directory):
 def _local_get_external_file(file_id, status, directory):
     os.makedirs(directory, exist_ok=True)
     src = os.environ.get('TESTFILE')
-    dst = directory + f"/{status['uuid']}"
+    dst = directory + f"/{status['uuid']}.wav"
     if not os.path.exists(dst):
         shutil.copyfile(src, dst)
     return dst
 
 def _s3_get_external_file(file_id, status, directory):
     os.makedirs(directory, exist_ok=True)
-    dst = directory + f"/{status['uuid']}"
+    dst = directory + f"/{status['uuid']}.wav"
     url = api.get_beat_download_url(file_id)
     if url is None:
         raise Exception(f"Attempting to fetch an invalid id: {file_id}")

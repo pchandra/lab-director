@@ -1,4 +1,5 @@
 import subprocess
+import taglib
 from taskdef import *
 from . import helpers
 from . import filestore
@@ -14,8 +15,18 @@ def execute(file_id, status, force=False):
 
     # Proceed with running this task
     ret = {}
-    # Get the external file and save it to filestore (this is the first task to run)
+    # Get the external file
     local_file = filestore.get_external_file(file_id, status, helpers.WORK_DIR + f"/{status['uuid']}")
+    # Strip any tags it might have in it
+    with taglib.File(local_file, save_on_exit=True) as beat:
+        beat.removeUnsupportedProperties(beat.unsupported)
+    with taglib.File(local_file, save_on_exit=True) as beat:
+        tags = []
+        for tag in beat.tags.keys():
+            tags.append(str(tag))
+        for tag in tags:
+            del beat.tags[tag]
+    # Save it as the original to the filestore
     ret['output'] = filestore.store_file(file_id, status, local_file, f"{Tasks.ORIG.value}")
 
     # Run FFMPEG to make MP3 version
