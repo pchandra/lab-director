@@ -5,7 +5,7 @@ CONFIG = {}
 ###### Config section for Router
 
 # Address for clients to use to talk to the Router
-CONFIG['ROUTER_ADDR'] = '3.130.252.90'
+CONFIG['ROUTER_ADDR'] = '127.0.0.1'
 
 # Address and port for the Router's frontend ZMQ sockets (Director is the client)
 CONFIG['ROUTER_FRONTEND_BIND'] = '0.0.0.0'
@@ -22,7 +22,7 @@ CONFIG['ROUTER_SHELVE'] = 'saved-queue'
 ###### Config section for DIRECTOR
 
 # Address for clients to use to talk to the Director
-CONFIG['DIRECTOR_ADDR'] = '3.130.252.90'
+CONFIG['DIRECTOR_ADDR'] = '127.0.0.1'
 
 # Address and port for the Director HTTP API to bind to (Workers and external tools are the clients)
 CONFIG['DIRECTOR_BIND'] = '0.0.0.0'
@@ -38,10 +38,13 @@ CONFIG['DIRECTOR_SHELVE'] = 'saved-status'
 CONFIG['WORK_DIR'] = '/tmp/SCRATCH'
 
 # Should be either 'local' or 's3'
-CONFIG['FILESTORE_BACKEND']='local'
+CONFIG['FILESTORE_BACKEND']='s3'
 
 # Directory to use for local filestore, if enabled
 CONFIG['FILESTORE_DIR'] = '/tmp/STORE'
+
+# Bucket name to use for s3 filestore, if enabled
+CONFIG['FILESTORE_BUCKETNAME'] = 'licenselounge-audiolab'
 
 # Wav file to use for watermarking process
 CONFIG['WATERMARK_WAV'] = '/home/ubuntu/wav-mixer/stamps/ll-stamp.wav'
