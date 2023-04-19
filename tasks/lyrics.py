@@ -10,6 +10,7 @@ from config import CONFIG as conf
 
 WHISPER_BIN = conf['WHISPER_BIN']
 WHISPER_MODEL = conf['WHISPER_MODEL']
+ML_DEVICE = conf['ML_DEVICE']
 
 def execute(file_id, status, force=False):
     # Short-circuit if the filestore already has assets we would produce
@@ -41,6 +42,7 @@ def execute(file_id, status, force=False):
     cmdline.append(WHISPER_BIN)
     cmdline.extend([ "--model", WHISPER_MODEL,
                      "--language", "en",
+                     "--device", ML_DEVICE,
                      "--output_dir", outdir
                    ])
     cmdline.append(vocalsfile)

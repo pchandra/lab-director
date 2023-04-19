@@ -88,3 +88,6 @@ CONFIG['WHISPER_MODEL'] = "tiny"
 # Location for JSON files for initial batch import
 CONFIG['BATCH_BEAT_FILE'] = '/Users/chandra/ll/website/beats.json'
 CONFIG['BATCH_SOUNDKIT_FILE'] ='/Users/chandra/ll/website/soundkits.json'
+
+# Device to use for ML tools, either "cpu" or "cuda"
+CONFIG['ML_DEVICE'] = "cpu"

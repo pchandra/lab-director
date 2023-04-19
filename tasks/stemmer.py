@@ -8,6 +8,7 @@ from . import filestore
 from config import CONFIG as conf
 
 DEMUCS_BIN = conf['DEMUCS_BIN']
+ML_DEVICE = conf['ML_DEVICE']
 
 def _stems_for_model(model):
     stems = [ "bass", "drums", "other", "vocals"]
@@ -23,7 +24,7 @@ def _run_demucs_model(filename, status, model, progress_start=0, progress_size=1
     # Build the command line to run the demucs model
     cmdline = []
     cmdline.append(DEMUCS_BIN)
-    cmdline.extend([ "-d", "cpu",
+    cmdline.extend([ "-d", ML_DEVICE,
                      "-n", model,
                      "-o", helpers.WORK_DIR,
                      "--filename", "{track}-{stem}.{ext}"
