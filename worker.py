@@ -15,8 +15,14 @@ ROUTER_ADDR = conf['ROUTER_ADDR']
 ROUTER_PORT = conf['ROUTER_BACKEND_PORT']
 
 # Only run tasks from the following list on this worker node
-ACCEPTABLE_WORK = [ x.value for x in Tasks ]
-#ACCEPTABLE_WORK = [ Tasks.MAST.value, Tasks.KBPM.value]
+#ACCEPTABLE_WORK = [ x.value for x in Tasks ]
+#ACCEPTABLE_WORK = [ Tasks.MAST.value, Tasks.KBPM.value ]
+ACCEPTABLE_WORK = [ Tasks.ORIG.value, Tasks.WTRM.value, 
+                    Tasks.MAST.value, Tasks.KBPM.value,
+                    Tasks.STEM.value, Tasks.INST.value,
+                    Tasks.LYRC.value, Tasks.MIDI.value,
+                    Tasks.COVR.value, Tasks.STAT.value
+                  ]
 
 # Setup ZeroMQ connection to receive tasks from the director
 context = zmq.Context()
