@@ -14,6 +14,10 @@ from config import CONFIG as conf
 ROUTER_ADDR = conf['ROUTER_ADDR']
 ROUTER_PORT = conf['ROUTER_BACKEND_PORT']
 
+# Only run tasks from the following list on this worker node
+ACCEPTABLE_WORK = [ x.value for x in Tasks ]
+#ACCEPTABLE_WORK = [ Tasks.MAST.value, Tasks.KBPM.value]
+
 # Setup ZeroMQ connection to receive tasks from the director
 context = zmq.Context()
 receiver = context.socket(zmq.REQ)
@@ -37,10 +41,13 @@ def _check_ready(file_id, status, dep):
         return True
 
 # Put a waiting task back in the queue
-def _requeue(file_id, task, dep):
-    _log(f"Requeuing, task \"{task}\" is waiting on \"{dep.value}\" for {file_id}")
+def _requeue(file_id, task):
+    _log(f"Requeuing, task \"{task}\" for {file_id}")
     api.mark_waiting(file_id, task)
     api.requeue(file_id, task)
+
+def _log_waiting(file_id, task, dep):
+    _log(f"Task \"{task}\" for {file_id} is waiting on \"{dep.value}\"")
 
 def _run(file_id, task_type, status, force=False):
     api.mark_inprogress(file_id, task_type.value)
@@ -67,6 +74,9 @@ def _is_finished(file_id, task_type, status):
     finished_states = [ x.value for x in [ State.COMP, State.FAIL, State.NA ] ]
     return status[task_type.value]['status'] in finished_states
 
+def _acceptable_work(task):
+    return task.lower() in ACCEPTABLE_WORK
+
 def main():
     # Process tasks forever
     _log("Starting up worker with PID: %d" % pid)
@@ -82,6 +92,13 @@ def main():
         # Detect if we're supposed to stop
         if task == "stop":
             break
+
+        # If this node shouldn't do the task, sleep for a second and requeue it
+        if not _acceptable_work(task):
+            _log(f"Not processing tasks of type \"{task}\" on this worker")
+            time.sleep(1)
+            _requeue(file_id, task)
+            continue
 
         # Get the status for this file and validate the file_id we received
         file_id = tokens[1]
@@ -111,42 +128,48 @@ def main():
             if _check_ready(file_id, status, Tasks.MAST):
                 _run(file_id, Tasks.WTRM, status, force)
             else:
-                _requeue(file_id, task, Tasks.MAST)
+                _log_waiting(file_id, task, Tasks.MAST)
+                _requeue(file_id, task)
 
         # Key and BPM detection
         elif task == Tasks.KBPM.value:
             if _check_ready(file_id, status, Tasks.ORIG):
                 _run(file_id, Tasks.KBPM, status, force)
             else:
-                _requeue(file_id, task, Tasks.ORIG)
+                _log_waiting(file_id, task, Tasks.ORIG)
+                _requeue(file_id, task)
 
         # Stem separation
         elif task == Tasks.STEM.value:
             if _check_ready(file_id, status, Tasks.ORIG):
                 _run(file_id, Tasks.STEM, status, force)
             else:
-                _requeue(file_id, task, Tasks.ORIG)
+                _log_waiting(file_id, task, Tasks.ORIG)
+                _requeue(file_id, task)
 
         # Track mastering
         elif task == Tasks.MAST.value:
             if _check_ready(file_id, status, Tasks.ORIG):
                 _run(file_id, Tasks.MAST, status, force)
             else:
-                _requeue(file_id, task, Tasks.ORIG)
+                _log_waiting(file_id, task, Tasks.ORIG)
+                _requeue(file_id, task)
 
         # Instrumental track from stems
         elif task == Tasks.INST.value:
             if _check_ready(file_id, status, Tasks.STEM):
                 _run(file_id, Tasks.INST, status, force)
             else:
-                _requeue(file_id, task, Tasks.STEM)
+                _log_waiting(file_id, task, Tasks.STEM)
+                _requeue(file_id, task)
 
         # Lyrics from vocals
         elif task == Tasks.LYRC.value:
             if _check_ready(file_id, status, Tasks.STEM):
                 _run(file_id, Tasks.LYRC, status, force)
             else:
-                _requeue(file_id, task, Tasks.STEM)
+                _log_waiting(file_id, task, Tasks.STEM)
+                _requeue(file_id, task)
 
         # MIDI track from stems
         elif task == Tasks.MIDI.value:
@@ -164,7 +187,8 @@ def main():
                     continue
                 if not _is_finished(file_id, t, status):
                     all_done = False
-                    _requeue(file_id, task, t)
+                    _log_waiting(file_id, task, t)
+                    _requeue(file_id, task)
                     break
             if all_done:
                 _run(file_id, Tasks.STAT, status, force)
