@@ -15,14 +15,14 @@ ROUTER_ADDR = conf['ROUTER_ADDR']
 ROUTER_PORT = conf['ROUTER_BACKEND_PORT']
 
 # Only run tasks from the following list on this worker node
-#ACCEPTABLE_WORK = [ x.value for x in Tasks ]
-#ACCEPTABLE_WORK = [ Tasks.MAST.value, Tasks.KBPM.value ]
-ACCEPTABLE_WORK = [ Tasks.ORIG.value, Tasks.WTRM.value, 
-                    Tasks.MAST.value, Tasks.KBPM.value,
-                    Tasks.STEM.value, Tasks.INST.value,
-                    Tasks.LYRC.value, Tasks.MIDI.value,
-                    Tasks.COVR.value, Tasks.STAT.value
-                  ]
+ACCEPTABLE_WORK = [ x.value for x in Tasks ]
+#ACCEPTABLE_WORK = [ Tasks.MAST.value ]
+#ACCEPTABLE_WORK = [ Tasks.ORIG.value, Tasks.WTRM.value, 
+#                    Tasks.MAST.value, Tasks.KBPM.value,
+#                    Tasks.STEM.value, Tasks.INST.value,
+#                    Tasks.LYRC.value, Tasks.MIDI.value,
+#                    Tasks.COVR.value, Tasks.STAT.value
+#                  ]
 
 # Setup ZeroMQ connection to receive tasks from the director
 context = zmq.Context()
@@ -47,9 +47,10 @@ def _check_ready(file_id, status, dep):
         return True
 
 # Put a waiting task back in the queue
-def _requeue(file_id, task):
+def _requeue(file_id, task, mark_waiting=True):
     _log(f"Requeuing, task \"{task}\" for {file_id}")
-    api.mark_waiting(file_id, task)
+    if mark_waiting:
+        api.mark_waiting(file_id, task)
     api.requeue(file_id, task)
 
 def _log_waiting(file_id, task, dep):
@@ -94,6 +95,7 @@ def main():
         _log("Got task: %s" % message)
         tokens = message.split()
         task = tokens[0]
+        file_id = tokens[1]
 
         # Detect if we're supposed to stop
         if task == "stop":
@@ -103,11 +105,10 @@ def main():
         if not _acceptable_work(task):
             _log(f"Not processing tasks of type \"{task}\" on this worker")
             time.sleep(1)
-            _requeue(file_id, task)
+            _requeue(file_id, task, mark_waiting=False)
             continue
 
         # Get the status for this file and validate the file_id we received
-        file_id = tokens[1]
         status = api.get_status(file_id)
         if api.get_beat_info(file_id) is None:
             _log(f"No such id known: {file_id}")

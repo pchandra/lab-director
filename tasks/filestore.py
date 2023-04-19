@@ -67,6 +67,7 @@ def _local_retrieve_file(file_id, status, key, directory):
 
 # XXX: This will be the function to grab an asset (under 'key') from the new S3 bucket hierarchy
 def _s3_retrieve_file(file_id, status, key, directory):
+    os.makedirs(directory, exist_ok=True)
     s3path = f"{file_id}/{key}"
     basename = key.split('/')[-1]
     filename = directory + f'/{basename}'
