@@ -17,7 +17,6 @@ def execute(file_id, status, force=False):
     filename = filestore.retrieve_file(file_id, status, Tasks.ORIG.value, helpers.WORK_DIR + f"/{status['uuid']}")
     # Build the command line to run
     cmdline = []
-    cmdline.append('/usr/local/bin/python3.9')
     cmdline.append(KEYMASTER_BIN)
     cmdline.append(filename)
     # Execute the command

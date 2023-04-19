@@ -27,7 +27,6 @@ def execute(file_id, status, force=False):
 
     # Run the tool to make the watermarked version
     cmdline = []
-    cmdline.append('/usr/local/bin/python3.9')
     cmdline.append(MARKMAKER_BIN)
     cmdline.extend([ "-o", outfile,
                      "-i", filename,

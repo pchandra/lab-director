@@ -30,7 +30,6 @@ def execute(file_id, status, force=False):
 
     # Build the command line to run
     cmdline = []
-    cmdline.append('/usr/local/bin/python3.9')
     cmdline.append(WAVMIXER_BIN)
     cmdline.extend([ "-o", outfile ])
 
