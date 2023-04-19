@@ -86,7 +86,7 @@ def main():
         # Get the status for this file and validate the file_id we received
         file_id = tokens[1]
         status = api.get_status(file_id)
-        if api.get_beat_download_url(file_id) is None:
+        if api.get_beat_info(file_id) is None:
             _log(f"No such id known: {file_id}")
             continue
 
