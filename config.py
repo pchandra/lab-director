@@ -43,6 +43,9 @@ CONFIG['FILESTORE_BACKEND']='local'
 # Directory to use for local filestore, if enabled
 CONFIG['FILESTORE_DIR'] = '/tmp/STORE'
 
+# Bucket name to use for s3 filestore, if enabled
+CONFIG['FILESTORE_BUCKETNAME'] = 'licenselounge-audiolab'
+
 # Wav file to use for watermarking process
 CONFIG['WATERMARK_WAV'] = '/Users/chandra/ll/co/wav-mixer/stamps/ll-stamp.wav'
 

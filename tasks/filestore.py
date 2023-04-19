@@ -1,13 +1,14 @@
 import os
 import shutil
 import requests
+import boto3
 import taskapi as api
 from config import CONFIG as conf
 
 
 FILESTORE_BACKEND = conf['FILESTORE_BACKEND']
 FILESTORE_DIR = conf['FILESTORE_DIR']
-
+FILESTORE_BUCKETNAME = conf['FILESTORE_BUCKETNAME']
 
 # Function to bootstrap things by grabbing an asset from off-site and downloading it locally
 def get_external_file(file_id, status, directory):
@@ -42,9 +43,13 @@ def _local_store_file(file_id, status, path, key):
     shutil.copyfile(path, dst)
     return dst
 
+s3 = boto3.resource('s3')
+
 # XXX: This will be the function to store the local asset to the new S3 bucket hierarchy under 'key'
 def _s3_store_file(file_id, status, path, key):
-    pass
+    s3path = f"{file_id}/{key}"
+    s3.Bucket(FILESTORE_BUCKETNAME).upload_file(Filename=path, Key=s3path)
+    return s3path
 
 
 # Download the file under 'key' in the filestore to the local filesystem
@@ -62,7 +67,10 @@ def _local_retrieve_file(file_id, status, key, directory):
 
 # XXX: This will be the function to grab an asset (under 'key') from the new S3 bucket hierarchy
 def _s3_retrieve_file(file_id, status, key, directory):
-    pass
+    basename = key.split('/')[-1]
+    filename = directory + f'/{basename}'
+    s3.Object(FILESTORE_BUCKETNAME, key).download_file(filename)
+    return filename
 
 
 # Check if a key exists in the filestore
@@ -74,8 +82,9 @@ def _local_key_exists(file_id, status, key):
     return os.path.exists(path)
 
 def _s3_key_exists(file_id, status, key):
-    pass
-
+    path = f"{file_id}/{key}"
+    results = s3.meta.client.list_objects_v2(Bucket=FILESTORE_BUCKETNAME, Prefix=path)
+    return 'Contents' in results
 
 # Check if all keys in a list exist in the filestore
 def check_keys(file_id, status, keylist):
