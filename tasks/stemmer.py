@@ -17,8 +17,8 @@ def _stems_for_model(model):
         stems.append("piano")
     return stems
 
-def _run_demucs_model(filename, status, model, progress_start=0, progress_size=100):
-    outbase = f"{helpers.WORK_DIR}/{model}/{os.path.basename(filename)}"
+def _run_demucs_model(file_id, filename, scratch, model, progress_start=0, progress_size=100):
+    outbase = f"{scratch}/{model}/{os.path.basename(filename)}"
     stems = _stems_for_model(model)
 
     # Build the command line to run the demucs model
@@ -26,7 +26,7 @@ def _run_demucs_model(filename, status, model, progress_start=0, progress_size=1
     cmdline.append(DEMUCS_BIN)
     cmdline.extend([ "-d", ML_DEVICE,
                      "-n", model,
-                     "-o", helpers.WORK_DIR,
+                     "-o", scratch,
                      "--filename", "{track}-{stem}.{ext}"
                    ])
     cmdline.append(filename)
@@ -52,7 +52,7 @@ def _run_demucs_model(filename, status, model, progress_start=0, progress_size=1
     models_done = 0
     model_done = False
     total_percent = 0
-    helpers.setprogress(status['id'], Tasks.STEM, progress_start)
+    helpers.setprogress(file_id, Tasks.STEM, progress_start)
     # Interesting output is in stderr, update percent as we go
     while True:
         line = process.stderr.readline()
@@ -67,13 +67,13 @@ def _run_demucs_model(filename, status, model, progress_start=0, progress_size=1
                 model_done = False
                 models_done += 1
             total_percent = (model_percent / models_total) + (models_done * (100 / models_total))
-            helpers.setprogress(status['id'], Tasks.STEM, progress_start + total_percent/(100/progress_size))
+            helpers.setprogress(file_id, Tasks.STEM, progress_start + total_percent/(100/progress_size))
         if process.poll() is not None:
             for line in process.stdout.readlines():
                 stdout += line
             for line in process.stderr.readlines():
                 stderr += line
-            helpers.setprogress(status['id'], Tasks.STEM, progress_start + 100/(100/progress_size))
+            helpers.setprogress(file_id, Tasks.STEM, progress_start + 100/(100/progress_size))
             break
 
     # Build the dict to return to caller
@@ -95,32 +95,33 @@ def _check_stems(demucs, model):
             stems_good[stem] = stemfile
     return stems_present, stems_good
 
-def execute(file_id, status, force=False):
+def execute(file_id, force=False):
     # Short-circuit if the filestore already has assets we would produce
     output_keys = [ f"{Tasks.STEM.value}.json" ]
-    if not force and filestore.check_keys(file_id, status, output_keys):
+    if not force and filestore.check_keys(file_id, output_keys):
         return None
 
     # Proceed with running this task
-    filename = filestore.retrieve_file(file_id, status, Tasks.ORIG.value, helpers.WORK_DIR + f"/{status['uuid']}")
+    scratch = helpers.create_scratch_dir()
+    filename = filestore.retrieve_file(file_id, Tasks.ORIG.value, scratch)
     ret = {}
     # First run the 6 source model
-    ret['phase1'] = _run_demucs_model(filename, status, 'htdemucs_6s', progress_size = 50)
+    ret['phase1'] = _run_demucs_model(file_id, filename, scratch, 'htdemucs_6s', progress_size = 50)
     stems_present, stems_good = _check_stems(ret['phase1'], 'htdemucs_6s')
 
     # If no guitar or piano, run the higher quality 4 source model
     if "guitar" not in stems_good.keys() and "piano" not in stems_good.keys():
-        ret['phase2'] = _run_demucs_model(filename, status, 'htdemucs_ft', progress_start = 50, progress_size = 50)
+        ret['phase2'] = _run_demucs_model(file_id, filename, scratch, 'htdemucs_ft', progress_start = 50, progress_size = 50)
         stems_present, stems_good = _check_stems(ret['phase2'], 'htdemucs_ft')
     else:
-        helpers.setprogress(status['id'], Tasks.STEM, 100)
+        helpers.setprogress(file_id, Tasks.STEM, 100)
 
     # If no vocals, it's probably instrumental
     ret['instrumental'] = "vocals" not in stems_good.keys()
 
     # Save each stem back to filestore
     for stem in stems_present.keys():
-        stored_location = filestore.store_file(file_id, status, stems_present[stem], f'{Tasks.STEM.value}-{stem}.wav')
+        stored_location = filestore.store_file(file_id, stems_present[stem], f'{Tasks.STEM.value}-{stem}.wav')
         stems_present[stem] = stored_location
 
     # Build a metadata dict to save to filestore
@@ -128,10 +129,11 @@ def execute(file_id, status, force=False):
     stem_obj['instrumental'] = ret['instrumental']
     stem_obj['stems-present'] = [ f'{Tasks.STEM.value}-{x}.wav' for x in stems_present.keys() ]
     stem_obj['stems'] = [ f'{Tasks.STEM.value}-{x}.wav' for x in stems_good.keys() ]
-    tempfile = helpers.WORK_DIR + f"/{status['uuid']}-{Tasks.STEM.value}.json"
+    tempfile = f"{scratch}/{Tasks.STEM.value}.json"
     with open(tempfile, 'w') as f:
         f.write(json.dumps(stem_obj, indent=2))
-    filestore.store_file(file_id, status, tempfile, f"{Tasks.STEM.value}.json")
+    filestore.store_file(file_id, tempfile, f"{Tasks.STEM.value}.json")
 
     ret['output'] = [ {'type':x,'file':stems_present[x]} for x in stems_present.keys()]
+    helpers.destroy_scratch_dir(scratch)
     return ret

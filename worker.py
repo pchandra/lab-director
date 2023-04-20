@@ -56,10 +56,10 @@ def _requeue(file_id, task, mark_waiting=True):
 def _log_waiting(file_id, task, dep):
     _log(f"Task \"{task}\" for {file_id} is waiting on \"{dep.value}\"")
 
-def _run(file_id, task_type, status, force=False):
+def _run(file_id, task_type, force=False):
     api.mark_inprogress(file_id, task_type.value)
     start = time.time()
-    ret = tasks.execute[task_type](file_id, status, force=force)
+    ret = tasks.execute[task_type](file_id, force=force)
     stop = time.time()
 
     # Check if this was short-circuited (task detected it had already run on 'file_id')
@@ -77,7 +77,7 @@ def _run(file_id, task_type, status, force=False):
         _log(f"Task \"{task_type.value}\" completed executing for {file_id}")
     api.mark_complete(file_id, task_type.value, data)
 
-def _is_finished(file_id, task_type, status):
+def _is_finished(file_id, status, task_type):
     finished_states = [ x.value for x in [ State.COMP, State.FAIL, State.NA ] ]
     return status[task_type.value]['status'] in finished_states
 
@@ -133,12 +133,12 @@ def main():
 
         # Store an original in the file store
         if task == Tasks.ORIG.value:
-            _run(file_id, Tasks.ORIG, status, force)
+            _run(file_id, Tasks.ORIG, force)
 
         # Watermarking original file
         elif task == Tasks.WTRM.value:
             if _check_ready(file_id, status, Tasks.MAST):
-                _run(file_id, Tasks.WTRM, status, force)
+                _run(file_id, Tasks.WTRM, force)
             else:
                 _log_waiting(file_id, task, Tasks.MAST)
                 _requeue(file_id, task)
@@ -146,7 +146,7 @@ def main():
         # Key and BPM detection
         elif task == Tasks.KBPM.value:
             if _check_ready(file_id, status, Tasks.ORIG):
-                _run(file_id, Tasks.KBPM, status, force)
+                _run(file_id, Tasks.KBPM, force)
             else:
                 _log_waiting(file_id, task, Tasks.ORIG)
                 _requeue(file_id, task)
@@ -154,7 +154,7 @@ def main():
         # Stem separation
         elif task == Tasks.STEM.value:
             if _check_ready(file_id, status, Tasks.ORIG):
-                _run(file_id, Tasks.STEM, status, force)
+                _run(file_id, Tasks.STEM, force)
             else:
                 _log_waiting(file_id, task, Tasks.ORIG)
                 _requeue(file_id, task)
@@ -162,7 +162,7 @@ def main():
         # Track mastering
         elif task == Tasks.MAST.value:
             if _check_ready(file_id, status, Tasks.ORIG):
-                _run(file_id, Tasks.MAST, status, force)
+                _run(file_id, Tasks.MAST, force)
             else:
                 _log_waiting(file_id, task, Tasks.ORIG)
                 _requeue(file_id, task)
@@ -170,7 +170,7 @@ def main():
         # Instrumental track from stems
         elif task == Tasks.INST.value:
             if _check_ready(file_id, status, Tasks.STEM):
-                _run(file_id, Tasks.INST, status, force)
+                _run(file_id, Tasks.INST, force)
             else:
                 _log_waiting(file_id, task, Tasks.STEM)
                 _requeue(file_id, task)
@@ -178,7 +178,7 @@ def main():
         # Lyrics from vocals
         elif task == Tasks.LYRC.value:
             if _check_ready(file_id, status, Tasks.STEM):
-                _run(file_id, Tasks.LYRC, status, force)
+                _run(file_id, Tasks.LYRC, force)
             else:
                 _log_waiting(file_id, task, Tasks.STEM)
                 _requeue(file_id, task)
@@ -197,13 +197,13 @@ def main():
             for t in Tasks:
                 if t == Tasks.STAT:
                     continue
-                if not _is_finished(file_id, t, status):
+                if not _is_finished(file_id, status, t):
                     all_done = False
                     _log_waiting(file_id, task, t)
                     _requeue(file_id, task)
                     break
             if all_done:
-                _run(file_id, Tasks.STAT, status, force)
+                _run(file_id, Tasks.STAT, force)
 
 if __name__ == "__main__":
     main()

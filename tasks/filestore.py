@@ -1,4 +1,5 @@
 import os
+import uuid
 import shutil
 import requests
 import boto3
@@ -11,20 +12,18 @@ FILESTORE_DIR = conf['FILESTORE_DIR']
 FILESTORE_BUCKETNAME = conf['FILESTORE_BUCKETNAME']
 
 # Function to bootstrap things by grabbing an asset from off-site and downloading it locally
-def get_external_file(file_id, status, directory):
-    return _backend['get_external_file'](file_id, status, directory)
+def get_external_file(file_id, directory):
+    return _backend['get_external_file'](file_id, directory)
 
-def _local_get_external_file(file_id, status, directory):
-    os.makedirs(directory, exist_ok=True)
+def _local_get_external_file(file_id, directory):
     src = os.environ.get('TESTFILE')
-    dst = directory + f"/{status['uuid']}.wav"
+    dst = directory + f"/{str(uuid.uuid4())}.wav"
     if not os.path.exists(dst):
         shutil.copyfile(src, dst)
     return dst
 
-def _s3_get_external_file(file_id, status, directory):
-    os.makedirs(directory, exist_ok=True)
-    dst = directory + f"/{status['uuid']}.wav"
+def _s3_get_external_file(file_id, directory):
+    dst = directory + f"/{str(uuid.uuid4())}.wav"
     url = api.get_beat_download_url(file_id)
     if url is None:
         raise Exception(f"Attempting to fetch an invalid id: {file_id}")
@@ -34,10 +33,10 @@ def _s3_get_external_file(file_id, status, directory):
     return dst
 
 # Store a local file in the filestore under 'key'
-def store_file(file_id, status, path, key):
-    return _backend['store_file'](file_id, status, path, key)
+def store_file(file_id, path, key):
+    return _backend['store_file'](file_id, path, key)
 
-def _local_store_file(file_id, status, path, key):
+def _local_store_file(file_id, path, key):
     # Create a dir for the file_id if it doesn't exist
     outdir = FILESTORE_DIR + f"/{file_id}"
     os.makedirs(outdir, exist_ok=True)
@@ -48,26 +47,24 @@ def _local_store_file(file_id, status, path, key):
 s3 = boto3.resource('s3')
 
 # XXX: This will be the function to store the local asset to the new S3 bucket hierarchy under 'key'
-def _s3_store_file(file_id, status, path, key):
+def _s3_store_file(file_id, path, key):
     s3path = f"{file_id}/{key}"
     s3.Bucket(FILESTORE_BUCKETNAME).upload_file(Filename=path, Key=s3path)
     return s3path
 
 
 # Download the file under 'key' in the filestore to the local filesystem
-def retrieve_file(file_id, status, key, directory):
-    return _backend['retrieve_file'](file_id, status, key, directory)
+def retrieve_file(file_id, key, directory):
+    return _backend['retrieve_file'](file_id, key, directory)
 
-def _local_retrieve_file(file_id, status, key, directory):
-    os.makedirs(directory, exist_ok=True)
+def _local_retrieve_file(file_id, key, directory):
     src = FILESTORE_DIR + f"/{file_id}" + f"/{key}"
     dst = directory + f"/{key}"
     shutil.copyfile(src, dst)
     return dst
 
 # XXX: This will be the function to grab an asset (under 'key') from the new S3 bucket hierarchy
-def _s3_retrieve_file(file_id, status, key, directory):
-    os.makedirs(directory, exist_ok=True)
+def _s3_retrieve_file(file_id, key, directory):
     s3path = f"{file_id}/{key}"
     basename = key.split('/')[-1]
     filename = directory + f'/{basename}'
@@ -76,23 +73,23 @@ def _s3_retrieve_file(file_id, status, key, directory):
 
 
 # Check if a key exists in the filestore
-def key_exists(file_id, status, key):
-    return _backend['key_exists'](file_id, status, key)
+def key_exists(file_id, key):
+    return _backend['key_exists'](file_id, key)
 
-def _local_key_exists(file_id, status, key):
+def _local_key_exists(file_id, key):
     path = FILESTORE_DIR + f"/{file_id}" + f"/{key}"
     return os.path.exists(path)
 
-def _s3_key_exists(file_id, status, key):
+def _s3_key_exists(file_id, key):
     path = f"{file_id}/{key}"
     results = s3.meta.client.list_objects_v2(Bucket=FILESTORE_BUCKETNAME, Prefix=path)
     return 'Contents' in results
 
 # Check if all keys in a list exist in the filestore
-def check_keys(file_id, status, keylist):
+def check_keys(file_id, keylist):
     ret = True
     for key in keylist:
-        if not key_exists(file_id, status, key):
+        if not key_exists(file_id, key):
             ret = False
             break
     return ret

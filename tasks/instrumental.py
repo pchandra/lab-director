@@ -9,17 +9,18 @@ from config import CONFIG as conf
 
 WAVMIXER_BIN = conf['WAVMIXER_BIN']
 
-def execute(file_id, status, force=False):
+def execute(file_id, force=False):
     # Short-circuit if the filestore already has assets we would produce
     output_keys = [ f"{Tasks.INST.value}.wav" ]
-    if not force and filestore.check_keys(file_id, status, output_keys):
+    if not force and filestore.check_keys(file_id, output_keys):
         return
 
     # Proceed with running this task
-    outfile = f"{helpers.WORK_DIR}/{status['uuid']}-{Tasks.INST.value}.wav"
+    scratch = helpers.create_scratch_dir()
+    outfile = f"{scratch}/{Tasks.INST.value}.wav"
 
     # Get the stem metadata from the filestore
-    stem_json = filestore.retrieve_file(file_id, status, f"{Tasks.STEM.value}.json", helpers.WORK_DIR + f"/{status['uuid']}")
+    stem_json = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}.json", scratch)
     metadata = None
     with open(stem_json, 'r') as f:
         metadata = json.load(f)
@@ -38,7 +39,7 @@ def execute(file_id, status, force=False):
     for stem in metadata['stems-present']:
         if stem == f'{Tasks.STEM.value}-vocals.wav':
             continue
-        filename = filestore.retrieve_file(file_id, status, stem, helpers.WORK_DIR + f"/{status['uuid']}")
+        filename = filestore.retrieve_file(file_id, stem, scratch)
         filenames.append(filename)
     cmdline.extend(filenames)
 
@@ -53,9 +54,10 @@ def execute(file_id, status, force=False):
     stdout, stderr = process.communicate(input="\n\n\n\n\n")
 
     # Store the resulting file
-    stored_location = filestore.store_file(file_id, status, outfile, f"{Tasks.INST.value}.wav")
+    stored_location = filestore.store_file(file_id, outfile, f"{Tasks.INST.value}.wav")
 
     # Build the dict to return to caller
     ret = { "command": { "stdout": stdout, "stderr": stderr } }
     ret["output"] = stored_location
+    helpers.destroy_scratch_dir(scratch)
     return ret

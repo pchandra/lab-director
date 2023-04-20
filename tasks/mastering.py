@@ -8,15 +8,16 @@ from config import CONFIG as conf
 
 PHASELIMITER_BIN = conf['PHASELIMITER_BIN']
 
-def execute(file_id, status, force=False):
+def execute(file_id, force=False):
     # Short-circuit if the filestore already has assets we would produce
     output_keys = [ f"{Tasks.MAST.value}.wav" ]
-    if not force and filestore.check_keys(file_id, status, output_keys):
+    if not force and filestore.check_keys(file_id, output_keys):
         return
 
     # Proceed with running this task
-    filename = filestore.retrieve_file(file_id, status, Tasks.ORIG.value, helpers.WORK_DIR + f"/{status['uuid']}")
-    outfile = f"{helpers.WORK_DIR}/{status['uuid']}-{Tasks.MAST.value}.wav"
+    scratch = helpers.create_scratch_dir()
+    filename = filestore.retrieve_file(file_id, Tasks.ORIG.value, scratch)
+    outfile = f"{scratch}/{Tasks.MAST.value}.wav"
     # Build the command line to run
     cmdline = []
     cmdline.append(PHASELIMITER_BIN)
@@ -41,7 +42,7 @@ def execute(file_id, status, force=False):
     process.stdin.write("\n\n\n\n\n")
 
     percent = 0
-    helpers.setprogress(status['id'], Tasks.MAST, 0)
+    helpers.setprogress(file_id, Tasks.MAST, 0)
     while True:
         line = process.stdout.readline()
         stdout += line
@@ -49,19 +50,20 @@ def execute(file_id, status, force=False):
         m = p.match(line)
         if m is not None:
             percent = float(m.group(1)) * 100
-            helpers.setprogress(status['id'], Tasks.MAST, percent)
+            helpers.setprogress(file_id, Tasks.MAST, percent)
         if process.poll() is not None:
             for line in process.stdout.readlines():
                 stdout += line
             for line in process.stderr.readlines():
                 stderr += line
-            helpers.setprogress(status['id'], Tasks.MAST, 100)
+            helpers.setprogress(file_id, Tasks.MAST, 100)
             break
 
     # Store the resulting file
-    stored_location = filestore.store_file(file_id, status, outfile, f"{Tasks.MAST.value}.wav")
+    stored_location = filestore.store_file(file_id, outfile, f"{Tasks.MAST.value}.wav")
 
     # Build the dict to return to caller
     ret = { "command": { "stdout": stdout, "stderr": stderr } }
     ret['output'] = stored_location
+    helpers.destroy_scratch_dir(scratch)
     return ret

@@ -1,6 +1,8 @@
 import os
 import re
+import uuid
 import wave
+import shutil
 import subprocess
 import json
 from config import CONFIG as conf
@@ -62,3 +64,14 @@ def is_silent(wavfile):
     # Check if total silent time is above our max percent of silence allowed
     mostly = silence_total > (duration * SILENCE_PERCENT)
     return totally, mostly
+
+scratch_dirs = []
+def create_scratch_dir():
+    path = WORK_DIR + f"/{str(uuid.uuid4())}"
+    os.makedirs(path, exist_ok=True)
+    scratch_dirs.append(path)
+    return path
+
+def destroy_scratch_dir(path):
+    if path in scratch_dirs:
+        shutil.rmtree(path)
