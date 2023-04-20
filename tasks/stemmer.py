@@ -108,15 +108,15 @@ def execute(file_id, status, force=False):
     ret['phase1'] = _run_demucs_model(filename, status, 'htdemucs_6s', progress_size = 50)
     stems_present, stems_good = _check_stems(ret['phase1'], 'htdemucs_6s')
 
-    # If no vocals, it's probably instrumental
-    ret['instrumental'] = "vocals" not in stems_good.keys()
-
     # If no guitar or piano, run the higher quality 4 source model
     if "guitar" not in stems_good.keys() and "piano" not in stems_good.keys():
         ret['phase2'] = _run_demucs_model(filename, status, 'htdemucs_ft', progress_start = 50, progress_size = 50)
         stems_present, stems_good = _check_stems(ret['phase2'], 'htdemucs_ft')
     else:
         helpers.setprogress(status['id'], Tasks.STEM, 100)
+
+    # If no vocals, it's probably instrumental
+    ret['instrumental'] = "vocals" not in stems_good.keys()
 
     # Save each stem back to filestore
     for stem in stems_present.keys():
