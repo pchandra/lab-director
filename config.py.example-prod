@@ -1,3 +1,5 @@
+from taskdef import *
+
 # Some commononly tweaked, system-dependent variables
 CONFIG = {}
 
@@ -33,6 +35,15 @@ CONFIG['DIRECTOR_SHELVE'] = 'saved-status'
 
 
 ###### Config section for Workers
+
+# Only run tasks from the following list on this worker node
+#CONFIG['ACCEPTABLE_WORK'] = [ x.value for x in Tasks ]
+CONFIG['ACCEPTABLE_WORK']  = [ Tasks.ORIG.value, Tasks.WTRM.value,
+                               Tasks.KBPM.value,
+                               Tasks.STEM.value, Tasks.INST.value,
+                               Tasks.LYRC.value, Tasks.MIDI.value,
+                               Tasks.COVR.value, Tasks.STAT.value
+                             ]
 
 # Directory Workers should use for scratch space when running tasks
 CONFIG['WORK_DIR'] = '/tmp/SCRATCH'
