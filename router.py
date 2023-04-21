@@ -42,7 +42,7 @@ def main():
         while True:
             # Extract the queue from the shelf
             queue = store['queue']
-            time.sleep(1)
+            time.sleep(0.1)
             _log("Router is polling for new messages, queue depth: %d" % len(queue))
             socks = dict(poller.poll())
 
