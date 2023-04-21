@@ -6,6 +6,7 @@ from . import helpers
 from . import filestore
 from config import CONFIG as conf
 
+FFMPEG_BIN = conf['FFMPEG_BIN']
 PHASELIMITER_BIN = conf['PHASELIMITER_BIN']
 
 def execute(file_id, force=False):
@@ -17,6 +18,22 @@ def execute(file_id, force=False):
     # Proceed with running this task
     scratch = helpers.create_scratch_dir()
     filename = filestore.retrieve_file(file_id, Tasks.ORIG.value, scratch)
+    # Run this file through ffmpeg since phaselimiter can be picky
+    outfile = f"{scratch}/{Tasks.ORIG.value}.wav"
+    cmdline = []
+    cmdline.append(FFMPEG_BIN)
+    cmdline.extend([ "-i", filename,
+                     "-y"
+                   ])
+    cmdline.append(outfile)
+    process = subprocess.Popen(cmdline,
+                               stdin=subprocess.PIPE,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE,
+                               universal_newlines=True)
+    stdout, stderr = process.communicate(input="\n\n\n\n\n")
+    filename = outfile
+    # Now run phase_limiter on the output of ffmpeg
     outfile = f"{scratch}/{Tasks.MAST.value}.wav"
     # Build the command line to run
     cmdline = []
