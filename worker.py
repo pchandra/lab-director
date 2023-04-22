@@ -115,13 +115,15 @@ def main():
 
         # Get the status for this file and validate the file_id we received
         status = api.get_status(file_id)
-        if task in [x.value for x in TASKS_BEAT] and api.get_beat_info(file_id) is None:
-            _log(f"No such beat id known: {file_id}")
-            continue
+        # STAT is special case that runs for all types
+        if task != Tasks.STAT.value:
+            if task in [x.value for x in TASKS_BEAT] and api.get_beat_info(file_id) is None:
+                _log(f"No such beat id known: {file_id}")
+                continue
 
-        if task in [x.value for x in TASKS_SOUNDKIT] and api.get_soundkit_info(file_id) is None:
-            _log(f"No such soundkit id known: {file_id}")
-            continue
+            if task in [x.value for x in TASKS_SOUNDKIT] and api.get_soundkit_info(file_id) is None:
+                _log(f"No such soundkit id known: {file_id}")
+                continue
 
         # Check that the task is legit before proceeding
         if not any(x for x in Tasks if x.value == task):
