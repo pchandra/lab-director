@@ -30,6 +30,9 @@ def _log(str):
     sys.stdout.write(f"[{timestamp}] [Worker-{pid}] {str}\n")
     sys.stdout.flush()
 
+def _warn(str):
+    _log("WARN: " + str)
+
 # Check if a different task is finished
 def _check_ready(file_id, status, dep):
     if status[dep.value]['status'] != State.COMP.value:
@@ -92,16 +95,18 @@ def main():
 
         # Detect if we're supposed to stop
         if task == "stop":
+            _warn("Stopping worker...")
             break
 
         # Detect if we got a no-op
         if task == "noop":
+            _warn("No-op received, sleeping a second")
             time.sleep(1)
             continue
 
         # If this node shouldn't do the task, sleep for a second and requeue it
         if not _acceptable_work(task):
-            _log(f"Not processing tasks of type \"{task}\" on this worker")
+            _warn(f"Not processing tasks of type \"{task}\" on this worker")
             time.sleep(1)
             _requeue(file_id, task, mark_waiting=False)
             continue
@@ -110,7 +115,7 @@ def main():
         force = False
         if any(x for x in Tasks if x.value.upper() == task):
             force = True
-            _log("Forced command: %s" % task)
+            _warn("Forced command: %s" % task)
             task = task.lower()
 
         # Get the status for this file and validate the file_id we received
@@ -118,16 +123,16 @@ def main():
         # STAT is special case that runs for all types
         if task != Tasks.STAT.value:
             if task in [x.value for x in TASKS_BEAT] and api.get_beat_info(file_id) is None:
-                _log(f"No such beat id known: {file_id}")
+                _warn(f"No such beat id known: {file_id}")
                 continue
 
             if task in [x.value for x in TASKS_SOUNDKIT] and api.get_soundkit_info(file_id) is None:
-                _log(f"No such soundkit id known: {file_id}")
+                _warn(f"No such soundkit id known: {file_id}")
                 continue
 
         # Check that the task is legit before proceeding
         if not any(x for x in Tasks if x.value == task):
-            _log("COMMAND NOT RECOGNIZED")
+            _warn("COMMAND NOT RECOGNIZED")
             continue
 
         # Store an original beat/song in the file store
