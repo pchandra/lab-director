@@ -43,8 +43,8 @@ def _sanity_check(file_id, status, task=None, allow_upper=False):
 def index():
     return _msg('AudioLab HTTP API Service')
 
-@app.route('/load_beat/<file_id>')
-def load_beat(file_id):
+@app.route('/stub_beat/<file_id>')
+def stub_beat(file_id):
     STATUS = flask_shelve.get_shelve()
     if file_id in STATUS:
         return _msg(f"Beat already exists: {file_id}"), 400
@@ -54,9 +54,36 @@ def load_beat(file_id):
     for task in [x.value for x in TASKS_BEAT]:
         current[task] = {}
         current[task]['status'] = State.INIT.value
-        sender.send_string(f"{task} {file_id}")
     STATUS[file_id] = current
-    return _msg(f"Queued all beat tasks for: {file_id}")
+    return _msg(f"Status entry created for beat: {file_id}")
+
+@app.route('/stub_song/<file_id>')
+def stub_song(file_id):
+    return stub_beat(file_id)
+
+@app.route('/stub_soundkit/<file_id>')
+def stub_soundkit(file_id):
+    STATUS = flask_shelve.get_shelve()
+    if file_id in STATUS:
+        return _msg(f"Soundkit already exists: {file_id}"), 400
+    current = {}
+    current['id'] = file_id
+    current['type'] = 'soundkit'
+    for task in [x.value for x in TASKS_SOUNDKIT]:
+        current[task] = {}
+        current[task]['status'] = State.INIT.value
+    STATUS[file_id] = current
+    return _msg(f"Status entry created for soundkit: {file_id}")
+
+@app.route('/load_beat/<file_id>')
+def load_beat(file_id):
+    STATUS = flask_shelve.get_shelve()
+    if file_id in STATUS:
+        return _msg(f"Beat already exists: {file_id}"), 400
+    stub_beat(file_id)
+    for task in [x.value for x in TASKS_BEAT]:
+        sender.send_string(f"{task} {file_id}")
+    return _msg(f"Queued all tasks for beat: {file_id}")
 
 @app.route('/load_song/<file_id>')
 def load_song(file_id):
@@ -67,15 +94,10 @@ def load_soundkit(file_id):
     STATUS = flask_shelve.get_shelve()
     if file_id in STATUS:
         return _msg(f"Soundkit already exists: {file_id}"), 400
-    current = {}
-    current['id'] = file_id
-    current['type'] = 'soundkit'
+    stub_soundkit()
     for task in [x.value for x in TASKS_SOUNDKIT]:
-        current[task] = {}
-        current[task]['status'] = State.INIT.value
         sender.send_string(f"{task} {file_id}")
-    STATUS[file_id] = current
-    return _msg(f"Queued all soundkit tasks for: {file_id}")
+    return _msg(f"Queued all tasks for soundkit: {file_id}")
 
 @app.route('/stop')
 def stop_worker():
