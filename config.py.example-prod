@@ -4,6 +4,27 @@ from taskdef import *
 CONFIG = {}
 
 
+###### General config for the whole suite
+
+# The tasks that must be run for each Beat/Song
+CONFIG['TASKS_BEAT'] = [ Tasks.ORIG,
+                         Tasks.WTRM,
+                         Tasks.KBPM,
+                         Tasks.STEM,
+                         Tasks.MAST,
+                         Tasks.INST,
+                         Tasks.LYRC,
+                         Tasks.MIDI,
+                         Tasks.COVR,
+                         Tasks.STAT
+                       ]
+
+# The tasks that must be run for each Soundkit
+CONFIG['TASKS_SOUNDKIT'] = [ Tasks.OGSK,
+                             Tasks.ZINV,
+                             Tasks.STAT
+                           ]
+
 ###### Config section for Router
 
 # Address for clients to use to talk to the Router
