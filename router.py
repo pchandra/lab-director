@@ -61,7 +61,7 @@ def main():
                 acceptable = ready.split()[1:]
                 job = b"noop noop"
                 for j in queue:
-                    if j.split()[0] in acceptable:
+                    if j.split()[0].lower() in acceptable:
                         job = j
                         queue.remove(job)
                         break
