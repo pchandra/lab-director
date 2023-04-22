@@ -14,6 +14,8 @@ from config import CONFIG as conf
 ROUTER_ADDR = conf['ROUTER_ADDR']
 ROUTER_PORT = conf['ROUTER_BACKEND_PORT']
 ACCEPTABLE_WORK = conf['ACCEPTABLE_WORK']
+TASKS_BEAT = conf['TASKS_BEAT']
+TASKS_SOUNDKIT = conf['TASKS_SOUNDKIT']
 
 # Setup ZeroMQ connection to receive tasks from the director
 context = zmq.Context()
@@ -104,27 +106,43 @@ def main():
             _requeue(file_id, task, mark_waiting=False)
             continue
 
-        # Get the status for this file and validate the file_id we received
-        status = api.get_status(file_id)
-        if api.get_beat_info(file_id) is None:
-            _log(f"No such id known: {file_id}")
-            continue
-
-        # Don't force run anything by default unless the task is in ALL CAPS
+        # If the task is in ALL CAPS, force the task to run
         force = False
         if any(x for x in Tasks if x.value.upper() == task):
             force = True
             _log("Forced command: %s" % task)
             task = task.lower()
 
+        # Get the status for this file and validate the file_id we received
+        status = api.get_status(file_id)
+        if task in [x.value for x in TASKS_BEAT] and api.get_beat_info(file_id) is None:
+            _log(f"No such beat id known: {file_id}")
+            continue
+
+        if task in [x.value for x in TASKS_SOUNDKIT] and api.get_soundkit_info(file_id) is None:
+            _log(f"No such soundkit id known: {file_id}")
+            continue
+
         # Check that the task is legit before proceeding
         if not any(x for x in Tasks if x.value == task):
             _log("COMMAND NOT RECOGNIZED")
             continue
 
-        # Store an original in the file store
+        # Store an original beat/song in the file store
         if task == Tasks.ORIG.value:
             _run(file_id, Tasks.ORIG, force)
+
+        # Store an original soundkit in the file store
+        elif task == Tasks.OGSK.value:
+            _run(file_id, Tasks.OGSK, force)
+
+        # Gather Zip inventory and metadata
+        elif task == Tasks.ZINV.value:
+            if _check_ready(file_id, status, Tasks.OGSK):
+                _run(file_id, Tasks.ZINV, force)
+            else:
+                _log_waiting(file_id, task, Tasks.OGSK)
+                _requeue(file_id, task)
 
         # Watermarking original file
         elif task == Tasks.WTRM.value:
@@ -185,7 +203,8 @@ def main():
         # Save the status as a last step
         elif task == Tasks.STAT.value:
             all_done = True
-            for t in Tasks:
+            to_do = TASKS_BEAT if status['type'] == 'beat' else TASKS_SOUNDKIT
+            for t in to_do:
                 if t == Tasks.STAT:
                     continue
                 if not _is_finished(file_id, status, t):

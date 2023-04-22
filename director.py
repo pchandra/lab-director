@@ -1,4 +1,3 @@
-import uuid
 import zmq
 from random import randrange
 from flask import request
@@ -16,6 +15,8 @@ flask_shelve.init_app(app)
 
 ROUTER_ADDR = conf['ROUTER_ADDR']
 ROUTER_PORT = conf['ROUTER_FRONTEND_PORT']
+TASKS_BEAT = conf['TASKS_BEAT']
+TASKS_SOUNDKIT = conf['TASKS_SOUNDKIT']
 
 # Prepare our context and socket to push jobs to workers 
 context = zmq.Context()
@@ -41,27 +42,46 @@ def _sanity_check(file_id, status, task=None, allow_upper=False):
 @app.route('/')
 def index():
     return _msg('AudioLab HTTP API Service')
-  
-@app.route('/new/<file_id>')
-def new_file(file_id):
+
+@app.route('/load_beat/<file_id>')
+def load_beat(file_id):
     STATUS = flask_shelve.get_shelve()
     if file_id in STATUS:
-        return _msg(f"Item already exists: {file_id}"), 400
+        return _msg(f"Beat already exists: {file_id}"), 400
     current = {}
     current['id'] = file_id
-    current['uuid'] = str(uuid.uuid4())
-    for task in [x.value for x in Tasks]:
+    current['type'] = 'beat'
+    for task in [x.value for x in TASKS_BEAT]:
         current[task] = {}
         current[task]['status'] = State.INIT.value
         sender.send_string(f"{task} {file_id}")
     STATUS[file_id] = current
-    return _msg(f"Queued all initial tasks for: {file_id}")
+    return _msg(f"Queued all beat tasks for: {file_id}")
+
+@app.route('/load_song/<file_id>')
+def load_song(file_id):
+    return load_beat(file_id)
+
+@app.route('/load_soundkit/<file_id>')
+def load_soundkit(file_id):
+    STATUS = flask_shelve.get_shelve()
+    if file_id in STATUS:
+        return _msg(f"Soundkit already exists: {file_id}"), 400
+    current = {}
+    current['id'] = file_id
+    current['type'] = 'soundkit'
+    for task in [x.value for x in TASKS_SOUNDKIT]:
+        current[task] = {}
+        current[task]['status'] = State.INIT.value
+        sender.send_string(f"{task} {file_id}")
+    STATUS[file_id] = current
+    return _msg(f"Queued all soundkit tasks for: {file_id}")
 
 @app.route('/stop')
-def stop_workers():
+def stop_worker():
     STATUS = flask_shelve.get_shelve()
-    sender.send_string(f"stop all")
-    return _msg("Sending command to stop all workers")
+    sender.send_string(f"stop stop")
+    return _msg("Sending command to stop a worker")
 
 @app.route('/requeue/<file_id>/<task>')
 def requeue_task(file_id, task):

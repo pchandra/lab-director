@@ -11,6 +11,8 @@ class Tasks(Enum):
     MIDI = 'midi' # Produce a MIDI file (per stem?)
     COVR = 'coverart' # Generate cover art automatically
     STAT = 'status' # Save the status as JSON at the end
+    OGSK = 'soundkit' # Initialize filestore with soundkit
+    ZINV = 'inventory' # Gather metadata about the contents of a zip
 
 class State(Enum):
     INIT = "initial"

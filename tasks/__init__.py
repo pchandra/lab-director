@@ -10,6 +10,8 @@ from . import coverart
 from . import original
 from . import watermark
 from . import status
+from . import soundkit
+from . import inventory
 
 __all__ = ["execute"]
 
@@ -24,3 +26,5 @@ execute[Tasks.COVR] = coverart.execute
 execute[Tasks.ORIG] = original.execute
 execute[Tasks.WTRM] = watermark.execute
 execute[Tasks.STAT] = status.execute
+execute[Tasks.OGSK] = soundkit.execute
+execute[Tasks.ZINV] = inventory.execute
