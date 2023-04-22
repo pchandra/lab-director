@@ -23,19 +23,8 @@ def execute(file_id, force=False):
     local_file = filestore.get_external_file(file_id, scratch)
     ret['original'] = filestore.store_file(file_id, local_file, f"{Tasks.ORIG.value}")
 
-    # Interrogate file and grab some stats about it
-    metadata = {}
-    info = sf.info(local_file, verbose=True)
-    metadata['channels'] = info.channels
-    metadata['duration'] = info.duration
-    metadata['format'] = info.format
-    metadata['format_info'] = info.format_info
-    metadata['frames'] = info.frames
-    metadata['samplerate'] = info.samplerate
-    metadata['subtype'] = info.subtype
-    metadata['subtype_info'] = info.subtype_info
-    metadata['verbose'] = info.extra_info
-    # Save this to JSON
+    # Save the file info along side it
+    metadata = helpers.get_audio_info(local_file)
     tempfile = f"{scratch}/{Tasks.ORIG.value}.json"
     with open(tempfile, 'w') as f:
         f.write(json.dumps(metadata, indent=2))
