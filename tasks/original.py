@@ -1,6 +1,8 @@
+import json
 import shutil
 import subprocess
 import taglib
+import soundfile as sf
 from taskdef import *
 from . import helpers
 from . import filestore
@@ -10,7 +12,7 @@ FFMPEG_BIN = conf['FFMPEG_BIN']
 
 def execute(file_id, force=False):
     # Short-circuit if the filestore already has assets we would produce
-    output_keys = [ f"{Tasks.ORIG.value}", f"{Tasks.ORIG.value}.wav", f"{Tasks.ORIG.value}.mp3" ]
+    output_keys = [ f"{Tasks.ORIG.value}", f"{Tasks.ORIG.value}.json", f"{Tasks.ORIG.value}.wav", f"{Tasks.ORIG.value}.mp3" ]
     if not force and filestore.check_keys(file_id, output_keys):
         return
 
@@ -21,7 +23,25 @@ def execute(file_id, force=False):
     local_file = filestore.get_external_file(file_id, scratch)
     ret['original'] = filestore.store_file(file_id, local_file, f"{Tasks.ORIG.value}")
 
-    # Assume it's a wave for tag removal
+    # Interrogate file and grab some stats about it
+    metadata = {}
+    info = sf.info(local_file, verbose=True)
+    metadata['channels'] = info.channels
+    metadata['duration'] = info.duration
+    metadata['format'] = info.format
+    metadata['format_info'] = info.format_info
+    metadata['frames'] = info.frames
+    metadata['samplerate'] = info.samplerate
+    metadata['subtype'] = info.subtype
+    metadata['subtype_info'] = info.subtype_info
+    metadata['verbose'] = info.extra_info
+    # Save this to JSON
+    tempfile = f"{scratch}/{Tasks.ORIG.value}.json"
+    with open(tempfile, 'w') as f:
+        f.write(json.dumps(metadata, indent=2))
+    ret['info'] = filestore.store_file(file_id, tempfile, f"{Tasks.ORIG.value}.json")
+
+    # XXX: This is a hack... assume it's a wave for tag removal
     wavname = local_file + '.wav'
     shutil.move(local_file, wavname)
 
