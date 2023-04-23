@@ -129,6 +129,10 @@ def main():
             if task in [x.value for x in TASKS_SOUNDKIT] and api.get_soundkit_info(file_id) is None:
                 _warn(f"No such soundkit id known: {file_id}")
                 continue
+        elif api.get_beat_info(file_id) is None and api.get_soundkit_info(file_id) is None:
+            _warn(f"No such id known: {file_id}")
+            continue
+
 
         # Check that the task is legit before proceeding
         if not any(x for x in Tasks if x.value == task):
