@@ -39,6 +39,20 @@ def _sanity_check(file_id, status, task=None, allow_upper=False):
         return False, _err_no_task(task)
     return True, ""
 
+def _create_status(file_id, audio_type):
+    ret = {}
+    ret['id'] = file_id
+    ret['type'] = audio_type
+    target = None
+    if audio_type == 'beat':
+        target = TASKS_BEAT
+    elif audio_type == 'soundkit':
+        target = TASKS_SOUNDKIT
+    for task in [x.value for x in target]:
+        ret[task] = {}
+        ret[task]['status'] = State.INIT.value
+    return ret
+
 @app.route('/')
 def index():
     return _msg('AudioLab HTTP API Service')
@@ -48,13 +62,7 @@ def stub_beat(file_id):
     STATUS = flask_shelve.get_shelve()
     if file_id in STATUS:
         return _msg(f"Beat already exists: {file_id}"), 400
-    current = {}
-    current['id'] = file_id
-    current['type'] = 'beat'
-    for task in [x.value for x in TASKS_BEAT]:
-        current[task] = {}
-        current[task]['status'] = State.INIT.value
-    STATUS[file_id] = current
+    STATUS[file_id] = _create_status(file_id, 'beat')
     return _msg(f"Status entry created for beat: {file_id}")
 
 @app.route('/stub_song/<file_id>')
@@ -66,13 +74,7 @@ def stub_soundkit(file_id):
     STATUS = flask_shelve.get_shelve()
     if file_id in STATUS:
         return _msg(f"Soundkit already exists: {file_id}"), 400
-    current = {}
-    current['id'] = file_id
-    current['type'] = 'soundkit'
-    for task in [x.value for x in TASKS_SOUNDKIT]:
-        current[task] = {}
-        current[task]['status'] = State.INIT.value
-    STATUS[file_id] = current
+    STATUS[file_id] = _create_status(file_id, 'soundkit')
     return _msg(f"Status entry created for soundkit: {file_id}")
 
 @app.route('/load_beat/<file_id>')
@@ -80,7 +82,7 @@ def load_beat(file_id):
     STATUS = flask_shelve.get_shelve()
     if file_id in STATUS:
         return _msg(f"Beat already exists: {file_id}"), 400
-    stub_beat(file_id)
+    STATUS[file_id] = _create_status(file_id, 'beat')
     for task in [x.value for x in TASKS_BEAT]:
         sender.send_string(f"{task} {file_id}")
     return _msg(f"Queued all tasks for beat: {file_id}")
@@ -94,7 +96,7 @@ def load_soundkit(file_id):
     STATUS = flask_shelve.get_shelve()
     if file_id in STATUS:
         return _msg(f"Soundkit already exists: {file_id}"), 400
-    stub_soundkit()
+    STATUS[file_id] = _create_status(file_id, 'soundkit')
     for task in [x.value for x in TASKS_SOUNDKIT]:
         sender.send_string(f"{task} {file_id}")
     return _msg(f"Queued all tasks for soundkit: {file_id}")
