@@ -32,11 +32,11 @@ CONFIG['ROUTER_ADDR'] = '127.0.0.1'
 
 # Address and port for the Router's frontend ZMQ sockets (Director is the client)
 CONFIG['ROUTER_FRONTEND_BIND'] = '0.0.0.0'
-CONFIG['ROUTER_FRONTEND_PORT'] = 3456
+CONFIG['ROUTER_FRONTEND_PORT'] = 1234
 
 # Address and port for the Router's backend ZMQ sockets (Workers are the clients)
 CONFIG['ROUTER_BACKEND_BIND'] = '0.0.0.0'
-CONFIG['ROUTER_BACKEND_PORT'] = 3457
+CONFIG['ROUTER_BACKEND_PORT'] = 3456
 
 # Python 'Shelve' file used for the router to save state
 CONFIG['ROUTER_SHELVE'] = 'saved-queue'
@@ -49,7 +49,7 @@ CONFIG['DIRECTOR_ADDR'] = '127.0.0.1'
 
 # Address and port for the Director HTTP API to bind to (Workers and external tools are the clients)
 CONFIG['DIRECTOR_BIND'] = '0.0.0.0'
-CONFIG['DIRECTOR_PORT'] = 5000
+CONFIG['DIRECTOR_PORT'] = 5678
 
 # Python 'Shelve' file used for the director to save state
 CONFIG['DIRECTOR_SHELVE'] = 'saved-status'
