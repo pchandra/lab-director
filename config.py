@@ -99,6 +99,9 @@ CONFIG['SILENCE_PERCENT'] = 0.95
 # Binary to run 'ffmpeg' tool
 CONFIG['FFMPEG_BIN'] = '/usr/local/bin/ffmpeg'
 
+# Binary to run 'ffprobe' tool
+CONFIG['FFPROBE_BIN'] = '/usr/local/bin/ffprobe'
+
 # Command to run 'keymaster' tool
 CONFIG['KEYMASTER_BIN'] = '/Users/chandra/ll/co/key-bpm-finder/keymaster.py'
 

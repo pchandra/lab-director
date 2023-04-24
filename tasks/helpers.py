@@ -10,6 +10,7 @@ from config import CONFIG as conf
 import taskapi as api
 
 FFMPEG_BIN = conf['FFMPEG_BIN']
+FFPROBE_BIN = conf['FFPROBE_BIN']
 WORK_DIR = conf['WORK_DIR']
 SILENCE_THRESHOLD = conf['SILENCE_THRESHOLD']
 SILENCE_PERCENT = conf['SILENCE_PERCENT']
@@ -67,31 +68,25 @@ def is_silent(wavfile):
     return totally, mostly
 
 def get_audio_info(wavfile):
-    # Interrogate file and grab some stats about it
-    metadata = {}
-    info = sf.info(wavfile, verbose=True)
-    metadata['size'] = os.path.getsize(wavfile)
-    metadata['bit_depth'] = 0
-    if info.subtype in ['PCM_S8', 'PCM_U8']:
-        metadata['bit_depth'] = 8
-    elif info.subtype in ['PCM_16']:
-        metadata['bit_depth'] = 16
-    elif info.subtype in ['PCM_24']:
-        metadata['bit_depth'] = 24
-    elif info.subtype in ['PCM_32', 'FLOAT']:
-        metadata['bit_depth'] = 32
-    elif info.subtype in ['DOUBLE']:
-        metadata['bit_depth'] = 64
-    metadata['channels'] = info.channels
-    metadata['duration'] = info.duration
-    metadata['format'] = info.format
-    metadata['format_info'] = info.format_info
-    metadata['frames'] = info.frames
-    metadata['samplerate'] = info.samplerate
-    metadata['subtype'] = info.subtype
-    metadata['subtype_info'] = info.subtype_info
-    metadata['verbose'] = info.extra_info
-    return metadata
+    # Build the command line to run
+    cmdline = []
+    cmdline.append(FFPROBE_BIN)
+    cmdline.extend([ "-v", "quiet",
+                     "-of", "json",
+                     "-show_format",
+                     "-show_streams",
+                     "-show_chapters",
+                     "-show_programs",
+                     "-find_stream_info"
+                   ])
+    cmdline.append(wavfile)
+    # Execute the command
+    process = subprocess.Popen(cmdline,
+                               stdout=subprocess.PIPE,
+                               universal_newlines=True)
+    stdout, _ = process.communicate()
+    # Validate and write JSON output to tempfile
+    return json.loads(stdout)
 
 scratch_dirs = []
 def create_scratch_dir():
