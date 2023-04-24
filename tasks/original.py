@@ -30,25 +30,38 @@ def execute(file_id, force=False):
         f.write(json.dumps(metadata, indent=2))
     ret['info'] = filestore.store_file(file_id, tempfile, f"{Tasks.ORIG.value}.json")
 
-    # XXX: This is a hack... assume it's a wave for tag removal
-    wavname = local_file + '.wav'
-    shutil.move(local_file, wavname)
+    # Screen to ensure we have an AIFF or WAV file
+    fmt = metadata['format'].get('format_name')
+    extension = '.aiff' if fmt == 'aiff' else '.wav' if fmt == 'wav' else None
+    if extension is None:
+        return { 'message': f'File format not recognized: {fmt}', 'failed': True }
+    channels = metadata['streams'][0]['channels']
+    srate = metadata['streams'][0]['sample_rate']
+    ssize = metadata['streams'][0]['bits_per_sample']
+    audioname = local_file + extension
+    shutil.move(local_file, audioname)
 
-    # Now strip any tags it might have in it
-    with taglib.File(wavname, save_on_exit=True) as beat:
-        beat.removeUnsupportedProperties(beat.unsupported)
-    with taglib.File(wavname, save_on_exit=True) as beat:
-        tags = []
-        for tag in beat.tags.keys():
-            tags.append(str(tag))
-        for tag in tags:
-            del beat.tags[tag]
+    # Pick a lossless wav codec based on the input file
+    codec = 'pcm_s16le'
+    if ssize == 8:
+        codec = 'pcm_u8'
+    elif ssize == 16:
+        codec = 'pcm_s16le'
+    elif ssize == 24:
+        codec = 'pcm_s24le'
+    elif ssize == 32:
+        codec = 'pcm_s32le'
 
-    # Now run this through ffmpeg to translate as WAV
+    # Now run this through ffmpeg to translate as clean WAV file
     outfile = f"{scratch}/{Tasks.ORIG.value}.wav"
     cmdline = []
     cmdline.append(FFMPEG_BIN)
-    cmdline.extend([ "-i", wavname,
+    cmdline.extend([ "-i", audioname,
+                     "-v", "quiet",
+                     "-ac", str(channels),
+                     "-ar", str(srate),
+                     "-acodec", codec,
+                     "-map_metadata", "-1",
                      "-y"
                    ])
     cmdline.append(outfile)
@@ -68,6 +81,7 @@ def execute(file_id, force=False):
     cmdline = []
     cmdline.append(FFMPEG_BIN)
     cmdline.extend([ "-i", outfile,
+                     "-v", "quiet",
                      "-b:a", "320k",
                      "-y"
                    ])

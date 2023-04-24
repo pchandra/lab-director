@@ -62,6 +62,7 @@ def _run(file_id, task_type, force=False):
     data = None
     if ret is None:
         _log(f"Task \"{task_type.value}\" reports already done for {file_id}")
+        api.mark_complete(file_id, task_type.value, data)
     else:
         ret['perf'] = {}
         ret['perf']['start'] = datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S')
@@ -70,8 +71,12 @@ def _run(file_id, task_type, force=False):
         ret['perf']['time_stop'] = stop
         ret['perf']['time_elapsed'] = stop - start
         data = json.dumps(ret).encode('ascii')
-        _log(f"Task \"{task_type.value}\" completed executing for {file_id}")
-    api.mark_complete(file_id, task_type.value, data)
+        if ret.get('failed', False):
+            _log(f"Task \"{task_type.value}\" FAILED executing for {file_id}")
+            api.mark_failed(file_id, task_type.value, data)
+        else:
+            _log(f"Task \"{task_type.value}\" completed executing for {file_id}")
+            api.mark_complete(file_id, task_type.value, data)
 
 def _is_finished(file_id, status, task_type):
     finished_states = [ x.value for x in [ State.COMP, State.FAIL, State.NA ] ]
