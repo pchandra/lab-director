@@ -21,7 +21,7 @@ def execute(file_id, force=False):
     cmdline.append(KEYMASTER_BIN)
     cmdline.append(filename)
     # Execute the command
-    process = subprocess.Popen(cmdline, 
+    process = subprocess.Popen(cmdline,
                                stdout=subprocess.PIPE,
                                universal_newlines=True)
     stdout, _ = process.communicate()
