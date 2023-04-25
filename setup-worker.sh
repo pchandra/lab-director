@@ -36,23 +36,27 @@ chmod +x ~/bin/phase_limiter
 #
 #############################
 
-export AL_TYPE="al-worker"
-export AL_PROCESS1="work1"
-export AL_PROCESS2="work2"
+export AL_TYPE="agent"
+export AL_PROCESS1="worker1"
+export AL_PROCESS2="worker2"
 
 ./setup-common.sh
 
 # Third-party tools that we run
 python3 -m pip install -U demucs openai-whisper basic-pitch
 
-# Get the home-made tools too using a READ-ONLY github fine-grained token
-pushd .
-cd ~/
-git config --global credential.helper store
-git clone https://github.com/License-Lounge/lab-director
-git clone https://github.com/License-Lounge/wav-mixer
-git clone https://github.com/License-Lounge/key-bpm-finder
-popd
+############
+############ Get the home-made tools too using a
+############ READ-ONLY github fine-grained token
+############
+############ pushd .
+############ cd ~/
+############ git config --global credential.helper store
+############ git clone https://github.com/License-Lounge/lab-director
+############ git clone https://github.com/License-Lounge/wav-mixer
+############ git clone https://github.com/License-Lounge/key-bpm-finder
+############ popd
+############
 
 # Dependencies for the home-made tools we just cloned
 python3 -m pip install -U librosa matplotlib numpy numba pycairo boto3 pytaglib
