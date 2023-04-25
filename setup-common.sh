@@ -13,15 +13,17 @@ sudo apt-get install -y python3 python3-pip
 
 python3 -m pip install -U zmq
 
-mkdir -p ~/bin
-cp static/tmux-wrapper.sh ~/bin/lab_tmux.sh
-chmod +x ~/bin/lab_tmux.sh
+BINDIR=~/.local/bin
 
-OUTFILE=~/bin/audiolab
+mkdir -p $BINDIR
+cp static/tmux-wrapper.sh $BINDIR/audiolab_tmux.sh
+chmod +x $BINDIR/audiolab_tmux.sh
+
+OUTFILE=$BINDIR/audiolab
 touch $OUTFILE
 chmod +x $OUTFILE
 echo "#!/bin/bash" > $OUTFILE
 echo "AL_TYPE=\"$AL_TYPE\"" >> $OUTFILE
 echo "AL_PROCESS1=\"$AL_PROCESS1\"" >> $OUTFILE
 echo "AL_PROCESS2=\"$AL_PROCESS2\"" >> $OUTFILE
-echo "exec ~/bin/lab_tmux.sh"
+echo "exec $BINDIR/audiolab_tmux.sh" >> $OUTFILE
