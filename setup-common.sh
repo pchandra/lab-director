@@ -23,7 +23,7 @@ OUTFILE=$BINDIR/audiolab
 touch $OUTFILE
 chmod +x $OUTFILE
 echo "#!/bin/bash" > $OUTFILE
-echo "AL_TYPE=\"$AL_TYPE\"" >> $OUTFILE
-echo "AL_PROCESS1=\"$AL_PROCESS1\"" >> $OUTFILE
-echo "AL_PROCESS2=\"$AL_PROCESS2\"" >> $OUTFILE
+echo "export AL_TYPE=$AL_TYPE" >> $OUTFILE
+echo "export AL_PROCESS1=$AL_PROCESS1" >> $OUTFILE
+echo "export AL_PROCESS2=$AL_PROCESS2" >> $OUTFILE
 echo "exec $BINDIR/audiolab_tmux.sh" >> $OUTFILE
