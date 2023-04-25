@@ -1,5 +1,6 @@
 import os
 import re
+import json
 import subprocess
 from taskdef import *
 from . import helpers
@@ -19,6 +20,13 @@ def execute(file_id, force=False):
     scratch = helpers.create_scratch_dir()
     filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.wav", scratch)
     outfile = f"{scratch}/{Tasks.MAST.value}.wav"
+
+    # Get the info for the original file to get the bit depth
+    infofile = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.json", scratch)
+    with open(infofile, 'r') as f:
+        info = json.load(f)
+    bitdepth = info['streams'][0]['bits_per_sample']
+
     # Build the command line to run
     cmdline = []
     cmdline.append(PHASELIMITER_BIN)
@@ -27,7 +35,8 @@ def execute(file_id, force=False):
                      "-ceiling_mode", "lowpass_true_peak",
                      "-ceiling", "-0.5",
                      "-mastering_mode", "mastering5",
-                     "mastering5_mastering_level", "0.7",
+                     "-mastering5_mastering_level", "0.7",
+                     "-bit_depth", str(bitdepth),
                      "-input", filename,
                      "-output", outfile
                    ])

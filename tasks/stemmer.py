@@ -21,6 +21,12 @@ def _run_demucs_model(file_id, filename, scratch, model, progress_start=0, progr
     outbase = f"{scratch}/{model}/{os.path.basename(filename)}"
     stems = _stems_for_model(model)
 
+    # Get the info for the original file to get the bit depth
+    infofile = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.json", scratch)
+    with open(infofile, 'r') as f:
+        info = json.load(f)
+    bitdepth = info['streams'][0]['bits_per_sample']
+
     # Build the command line to run the demucs model
     cmdline = []
     cmdline.append(DEMUCS_BIN)
@@ -29,6 +35,10 @@ def _run_demucs_model(file_id, filename, scratch, model, progress_start=0, progr
                      "-o", scratch,
                      "--filename", "{track}-{stem}.{ext}"
                    ])
+    if bitdepth == 24:
+        cmdline.append("--int24")
+    elif bitdepth == 32:
+        cmdline.append("--float32")
     cmdline.append(filename)
 
     # Run it
@@ -103,7 +113,7 @@ def execute(file_id, force=False):
 
     # Proceed with running this task
     scratch = helpers.create_scratch_dir()
-    filename = filestore.retrieve_file(file_id, Tasks.ORIG.value, scratch)
+    filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.wav", scratch)
     ret = {}
     # First run the 6 source model
     ret['phase1'] = _run_demucs_model(file_id, filename, scratch, 'htdemucs_6s', progress_size = 50)

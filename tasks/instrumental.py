@@ -29,10 +29,18 @@ def execute(file_id, force=False):
     if metadata['instrumental']:
         return
 
+    # Get the info for the original file to get the bit depth
+    infofile = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.json", scratch)
+    with open(infofile, 'r') as f:
+        info = json.load(f)
+    bitdepth = info['streams'][0]['bits_per_sample']
+
     # Build the command line to run
     cmdline = []
     cmdline.append(WAVMIXER_BIN)
-    cmdline.extend([ "-o", outfile ])
+    cmdline.extend([ "-o", outfile,
+                     "-b", str(bitdepth)
+                   ])
 
     # Grab all the stems
     filenames = []
