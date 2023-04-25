@@ -20,7 +20,14 @@ echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt
 sudo apt-get update
 sudo apt-get install -y intel-basekit
 
-. /opt/intel/oneapi/setvars.sh
+############
+############ Must also copy the built 'phase_limiter' binary
+############ to ~/bin/phase_limiter.real
+############
+
+mkdir -p ~/bin
+cp static/phaselimiter-wrapper.sh ~/bin/phase_limiter
+chmod +x ~/bin/phase_limiter
 
 #############################
 #
@@ -29,7 +36,11 @@ sudo apt-get install -y intel-basekit
 #
 #############################
 
-sudo apt-get install -y python3 python3-pip
+export AL_TYPE="al-worker"
+export AL_PROCESS1="work1"
+export AL_PROCESS2="work2"
+
+./setup-common.sh
 
 # Third-party tools that we run
 python3 -m pip install -U demucs openai-whisper basic-pitch
@@ -45,6 +56,3 @@ popd
 
 # Dependencies for the home-made tools we just cloned
 python3 -m pip install -U librosa matplotlib numpy numba pycairo boto3 pytaglib
-
-# Dependencies for running the director and router components
-python3 -m pip install -U Flask Flask-shelve zmq

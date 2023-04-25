@@ -8,6 +8,10 @@
 #
 #############################
 
-sudo apt-get install -y python3 python3-pip
+export AL_TYPE="al-leader"
+export AL_PROCESS1="director"
+export AL_PROCESS2="router"
 
-python3 -m pip install -U Flask Flask-shelve zmq
+./setup-common.sh
+
+python3 -m pip install -U Flask Flask-shelve
