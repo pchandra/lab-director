@@ -1,7 +1,6 @@
 import os
 import re
 import uuid
-import wave
 import shutil
 import subprocess
 import json
@@ -22,8 +21,8 @@ def setprogress(file_id, task_type, percent=0):
 
 def get_duration(wavfile):
     # Get the duration of the audio track
-    with wave.open(wavfile,'r') as f:
-        return f.getnframes() / f.getframerate()
+    info = get_audio_info(wavfile)
+    return float(info['streams'][0]['duration'])
 
 def is_silent(wavfile):
     duration = get_duration(wavfile)
