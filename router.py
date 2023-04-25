@@ -59,6 +59,7 @@ def main():
             if len(queue) > 0 and socks.get(backend) == zmq.POLLIN:
                 address, empty, ready = backend.recv_multipart()
                 acceptable = ready.split()[1:]
+                acceptable.append('stop')
                 job = b"noop noop"
                 for j in queue:
                     if j.split()[0].lower() in acceptable:
