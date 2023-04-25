@@ -78,6 +78,9 @@ CONFIG['FILESTORE_DIR'] = '/tmp/STORE'
 # Bucket name to use for s3 filestore, if enabled
 CONFIG['FILESTORE_BUCKETNAME'] = 'licenselounge-audiolab'
 
+# Multipart threshold setting for S3 uploads and downloads
+CONFIG['MULTIPART_THRESHOLD'] = 64 * 1024 * 1024
+
 # Wav file to use for watermarking process
 CONFIG['WATERMARK_WAV'] = '/home/ubuntu/wav-mixer/stamps/ll-stamp.wav'
 

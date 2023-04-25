@@ -10,6 +10,7 @@ from config import CONFIG as conf
 FILESTORE_BACKEND = conf['FILESTORE_BACKEND']
 FILESTORE_DIR = conf['FILESTORE_DIR']
 FILESTORE_BUCKETNAME = conf['FILESTORE_BUCKETNAME']
+MULTIPART_THRESHOLD = conf['MULTIPART_THRESHOLD']
 
 # Function to bootstrap things by grabbing an asset from off-site and downloading it locally
 def get_external_file(file_id, directory):
@@ -44,12 +45,14 @@ def _local_store_file(file_id, path, key):
     shutil.copyfile(path, dst)
     return dst
 
+from boto3.s3.transfer import TransferConfig
 s3 = boto3.resource('s3')
+config = TransferConfig(multipart_threshold=MULTIPART_THRESHOLD)
 
-# XXX: This will be the function to store the local asset to the new S3 bucket hierarchy under 'key'
+# Store the local asset to the new S3 bucket hierarchy under 'key'
 def _s3_store_file(file_id, path, key):
     s3path = f"{file_id}/{key}"
-    s3.Bucket(FILESTORE_BUCKETNAME).upload_file(Filename=path, Key=s3path)
+    s3.Bucket(FILESTORE_BUCKETNAME).upload_file(Filename=path, Key=s3path, Config=config)
     return s3path
 
 
@@ -63,12 +66,12 @@ def _local_retrieve_file(file_id, key, directory):
     shutil.copyfile(src, dst)
     return dst
 
-# XXX: This will be the function to grab an asset (under 'key') from the new S3 bucket hierarchy
+# Download the file under 'key' from the new S3 bucket hierarchy
 def _s3_retrieve_file(file_id, key, directory):
     s3path = f"{file_id}/{key}"
     basename = key.split('/')[-1]
     filename = directory + f'/{basename}'
-    s3.Object(FILESTORE_BUCKETNAME, s3path).download_file(filename)
+    s3.Object(FILESTORE_BUCKETNAME, s3path).download_file(filename, Config=config)
     return filename
 
 
