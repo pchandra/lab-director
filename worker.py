@@ -46,7 +46,7 @@ def _check_ready(file_id, status, dep):
 def _requeue(file_id, task, mark_waiting=True):
     _log(f"Requeuing, task \"{task}\" for {file_id}")
     if mark_waiting:
-        api.mark_waiting(file_id, task)
+        api.mark_waiting(file_id, task.lower())
     api.requeue(file_id, task)
 
 def _log_waiting(file_id, task, dep):
@@ -158,7 +158,7 @@ def main():
                 _run(file_id, Tasks.ZINV, force)
             else:
                 _log_waiting(file_id, task, Tasks.OGSK)
-                _requeue(file_id, task)
+                _requeue(file_id, task.upper() if force else task)
 
         # Watermarking original file
         elif task == Tasks.WTRM.value:
@@ -166,7 +166,7 @@ def main():
                 _run(file_id, Tasks.WTRM, force)
             else:
                 _log_waiting(file_id, task, Tasks.MAST)
-                _requeue(file_id, task)
+                _requeue(file_id, task.upper() if force else task)
 
         # Key and BPM detection
         elif task == Tasks.KBPM.value:
@@ -174,7 +174,7 @@ def main():
                 _run(file_id, Tasks.KBPM, force)
             else:
                 _log_waiting(file_id, task, Tasks.ORIG)
-                _requeue(file_id, task)
+                _requeue(file_id, task.upper() if force else task)
 
         # Stem separation
         elif task == Tasks.STEM.value:
@@ -182,7 +182,7 @@ def main():
                 _run(file_id, Tasks.STEM, force)
             else:
                 _log_waiting(file_id, task, Tasks.ORIG)
-                _requeue(file_id, task)
+                _requeue(file_id, task.upper() if force else task)
 
         # Track mastering
         elif task == Tasks.MAST.value:
@@ -190,7 +190,7 @@ def main():
                 _run(file_id, Tasks.MAST, force)
             else:
                 _log_waiting(file_id, task, Tasks.ORIG)
-                _requeue(file_id, task)
+                _requeue(file_id, task.upper() if force else task)
 
         # Instrumental track from stems
         elif task == Tasks.INST.value:
@@ -198,7 +198,7 @@ def main():
                 _run(file_id, Tasks.INST, force)
             else:
                 _log_waiting(file_id, task, Tasks.STEM)
-                _requeue(file_id, task)
+                _requeue(file_id, task.upper() if force else task)
 
         # Lyrics from vocals
         elif task == Tasks.LYRC.value:
@@ -206,7 +206,7 @@ def main():
                 _run(file_id, Tasks.LYRC, force)
             else:
                 _log_waiting(file_id, task, Tasks.STEM)
-                _requeue(file_id, task)
+                _requeue(file_id, task.upper() if force else task)
 
         # MIDI track from stems
         elif task == Tasks.MIDI.value:
@@ -226,7 +226,7 @@ def main():
                 if not _is_finished(file_id, status, t):
                     all_done = False
                     _log_waiting(file_id, task, t)
-                    _requeue(file_id, task)
+                    _requeue(file_id, task.upper() if force else task)
                     break
             if all_done:
                 _run(file_id, Tasks.STAT, force)
