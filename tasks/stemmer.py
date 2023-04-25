@@ -18,7 +18,7 @@ def _stems_for_model(model):
     return stems
 
 def _run_demucs_model(file_id, filename, scratch, model, progress_start=0, progress_size=100):
-    outbase = f"{scratch}/{model}/{os.path.basename(filename)}"
+    outbase = f"{scratch}/{model}/{os.path.splitext(os.path.basename(filename))[0]}"
     stems = _stems_for_model(model)
 
     # Get the info for the original file to get the bit depth
