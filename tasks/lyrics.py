@@ -58,10 +58,8 @@ def execute(file_id, force=False):
                                universal_newlines=True)
     process.stdin.write("\n\n\n\n\n")
 
-    # Get duration of audio file
-    duration = 0
-    with wave.open(vocalsfile,'r') as f:
-        duration = f.getnframes() / f.getframerate()
+    # Get duration of audio file to mark progress
+    duration = helpers.get_duration(vocalsfile)
     percent = 0
     helpers.setprogress(file_id, Tasks.LYRC, 0)
     while True:
