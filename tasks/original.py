@@ -19,27 +19,28 @@ def execute(file_id, force=False):
     # Proceed with running this task
     ret = {}
     scratch = helpers.create_scratch_dir()
-    # Get the external file and store it as-is
+    # Get the external file and grab it's metadata
     local_file = filestore.get_external_file(file_id, scratch)
+    metadata = helpers.get_audio_info(local_file)
+    if not metadata:
+        return { 'message': f'File format not recognized', 'failed': True }
+    fmt = metadata['format'].get('format_name')
+    if fmt != 'wav' and fmt != 'aiff':
+        return { 'message': f'Not accepting this file format: {fmt}', 'failed': True }
+
+    # Store the original
     ret['original'] = filestore.store_file(file_id, local_file, f"{Tasks.ORIG.value}")
 
     # Save the file info along side it
-    metadata = helpers.get_audio_info(local_file)
     tempfile = f"{scratch}/{Tasks.ORIG.value}.json"
     with open(tempfile, 'w') as f:
         f.write(json.dumps(metadata, indent=2))
     ret['info'] = filestore.store_file(file_id, tempfile, f"{Tasks.ORIG.value}.json")
 
     # Screen to ensure we have an AIFF or WAV file
-    fmt = metadata['format'].get('format_name')
-    extension = '.aiff' if fmt == 'aiff' else '.wav' if fmt == 'wav' else None
-    if extension is None:
-        return { 'message': f'File format not recognized: {fmt}', 'failed': True }
     channels = metadata['streams'][0]['channels']
     srate = metadata['streams'][0]['sample_rate']
     ssize = metadata['streams'][0]['bits_per_sample']
-    audioname = local_file + extension
-    shutil.move(local_file, audioname)
 
     # Pick a lossless wav codec based on the input file
     codec = 'pcm_s16le'
@@ -56,7 +57,7 @@ def execute(file_id, force=False):
     outfile = f"{scratch}/{Tasks.ORIG.value}.wav"
     cmdline = []
     cmdline.append(FFMPEG_BIN)
-    cmdline.extend([ "-i", audioname,
+    cmdline.extend([ "-i", local_file,
                      "-v", "quiet",
                      "-ac", str(channels),
                      "-ar", str(srate),
