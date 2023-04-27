@@ -8,10 +8,6 @@
 #
 #############################
 
-export AL_TYPE="al-leader"
-export AL_PROCESS1="director"
-export AL_PROCESS2="router"
-
 ./setup-common.sh
 
 python3 -m pip install -U Flask Flask-shelve

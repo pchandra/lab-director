@@ -36,10 +36,6 @@ chmod +x ~/bin/phase_limiter
 #
 #############################
 
-export AL_TYPE="agent"
-export AL_PROCESS1="worker1"
-export AL_PROCESS2="worker2"
-
 ./setup-common.sh
 
 # Third-party tools that we run

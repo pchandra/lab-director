@@ -16,14 +16,5 @@ python3 -m pip install -U zmq
 BINDIR=~/.local/bin
 
 mkdir -p $BINDIR
-cp static/tmux-wrapper.sh $BINDIR/audiolab_tmux.sh
-chmod +x $BINDIR/audiolab_tmux.sh
-
-OUTFILE=$BINDIR/audiolab
-touch $OUTFILE
-chmod +x $OUTFILE
-echo "#!/bin/bash" > $OUTFILE
-echo "export AL_TYPE=$AL_TYPE" >> $OUTFILE
-echo "export AL_PROCESS1=$AL_PROCESS1" >> $OUTFILE
-echo "export AL_PROCESS2=$AL_PROCESS2" >> $OUTFILE
-echo "exec $BINDIR/audiolab_tmux.sh" >> $OUTFILE
+cp static/tmux-wrapper.sh $BINDIR/audiolab
+chmod +x $BINDIR/audiolab
