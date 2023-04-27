@@ -2,6 +2,7 @@ import os
 import uuid
 import shutil
 import requests
+import mimetypes
 import boto3
 import taskapi as api
 from config import CONFIG as conf
@@ -52,7 +53,8 @@ config = TransferConfig(multipart_threshold=MULTIPART_THRESHOLD)
 # Store the local asset to the new S3 bucket hierarchy under 'key'
 def _s3_store_file(file_id, path, key):
     s3path = f"{file_id}/{key}"
-    s3.Bucket(FILESTORE_BUCKETNAME).upload_file(Filename=path, Key=s3path, Config=config)
+    file_mime_type, _ = mimetypes.guess_type(path)
+    s3.Bucket(FILESTORE_BUCKETNAME).upload_file(Filename=path, Key=s3path, Config=config, ExtraArgs={'ContentType': file_mime_type})
     return s3path
 
 
