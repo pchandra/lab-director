@@ -142,7 +142,7 @@ def execute(file_id, force=False):
         stems_core[stem] = stored_location
     for stem in stems_extra.keys():
         stored_location = filestore.store_file(file_id, stems_extra[stem], f'{Tasks.STEM.value}-{stem}.wav')
-        stems_core[stem] = stored_location
+        stems_extra[stem] = stored_location
 
     # Build a metadata dict to save to filestore
     stem_obj = {}
