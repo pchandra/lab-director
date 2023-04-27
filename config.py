@@ -97,7 +97,7 @@ CONFIG['WATERMARK_GAP'] = "0"
 CONFIG['SILENCE_THRESHOLD'] = '-32dB'
 
 # Max percent of silence allowed in a track, otherwise considered empty
-CONFIG['SILENCE_PERCENT'] = 0.95
+CONFIG['SILENCE_PERCENT'] = 0.90
 
 # Binary to run 'ffmpeg' tool
 CONFIG['FFMPEG_BIN'] = '/usr/local/bin/ffmpeg'
