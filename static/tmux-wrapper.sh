@@ -18,4 +18,9 @@ if [ X"$1" == X ]; then \
      exit
 fi
 
-$TMUX attach -t "$1" || sleep 1; $TMUX new-session -s "$1"
+$TMUX ls 2>&1 | grep -e "^$1:" >/dev/null 2>&1
+if [ X$? == X0 ]; then \
+    $TMUX attach -t "$1"
+else
+    $TMUX new-session -s "$1"
+fi
