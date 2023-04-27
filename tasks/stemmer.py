@@ -115,35 +115,46 @@ def execute(file_id, force=False):
     scratch = helpers.create_scratch_dir()
     filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.wav", scratch)
     ret = {}
-    # First run the 6 source model
-    ret['phase1'] = _run_demucs_model(file_id, filename, scratch, 'htdemucs_6s', progress_size = 50)
-    stems_present, stems_good = _check_stems(ret['phase1'], 'htdemucs_6s')
+    # Run the high quality 4 source model and filter for non-silent
+    ret['htdemucs_ft'] = _run_demucs_model(file_id, filename, scratch, 'htdemucs_ft', progress_size = 50)
+    stems_core, stems_good = _check_stems(ret['htdemucs_ft'], 'htdemucs_ft')
 
-    # If no guitar or piano, run the higher quality 4 source model
-    if "guitar" not in stems_good.keys() and "piano" not in stems_good.keys():
-        ret['phase2'] = _run_demucs_model(file_id, filename, scratch, 'htdemucs_ft', progress_start = 50, progress_size = 50)
-        stems_present, stems_good = _check_stems(ret['phase2'], 'htdemucs_ft')
-    else:
-        helpers.setprogress(file_id, Tasks.STEM, 100)
+    # Run the 6 source and see if there's a good guitar or piano stem
+    ret['htdemucs_6s'] = _run_demucs_model(file_id, filename, scratch, 'htdemucs_6s', progress_start = 50, progress_size = 50)
+    _, stems6g = _check_stems(ret['htdemucs_6s'], 'htdemucs_6s')
+
+    # Done with the tool execution
+    helpers.setprogress(file_id, Tasks.STEM, 100)
+
+    # See if there's any good ones in the new sources
+    stems_extra = {}
+    for stem in [ 'guitar', 'piano' ]:
+        if stem in stems6g:
+            stems_good[stem] = stems6g[stem]
+            stems_extra[stem] = stems6g[stem]
 
     # If no vocals, it's probably instrumental
     ret['instrumental'] = "vocals" not in stems_good.keys()
 
     # Save each stem back to filestore
-    for stem in stems_present.keys():
-        stored_location = filestore.store_file(file_id, stems_present[stem], f'{Tasks.STEM.value}-{stem}.wav')
-        stems_present[stem] = stored_location
+    for stem in stems_core.keys():
+        stored_location = filestore.store_file(file_id, stems_core[stem], f'{Tasks.STEM.value}-{stem}.wav')
+        stems_core[stem] = stored_location
+    for stem in stems_extra.keys():
+        stored_location = filestore.store_file(file_id, stems_extra[stem], f'{Tasks.STEM.value}-{stem}.wav')
+        stems_core[stem] = stored_location
 
     # Build a metadata dict to save to filestore
     stem_obj = {}
     stem_obj['instrumental'] = ret['instrumental']
-    stem_obj['stems-present'] = [ f'{Tasks.STEM.value}-{x}.wav' for x in stems_present.keys() ]
     stem_obj['stems'] = [ f'{Tasks.STEM.value}-{x}.wav' for x in stems_good.keys() ]
+    stem_obj['stems-core'] = [ f'{Tasks.STEM.value}-{x}.wav' for x in stems_core.keys() ]
+    stem_obj['stems-extra'] = [ f'{Tasks.STEM.value}-{x}.wav' for x in stems_extra.keys() ]
     tempfile = f"{scratch}/{Tasks.STEM.value}.json"
     with open(tempfile, 'w') as f:
         f.write(json.dumps(stem_obj, indent=2))
     filestore.store_file(file_id, tempfile, f"{Tasks.STEM.value}.json")
 
-    ret['output'] = [ {'type':x,'file':stems_present[x]} for x in stems_present.keys()]
+    ret['output'] = stem_obj
     helpers.destroy_scratch_dir(scratch)
     return ret
