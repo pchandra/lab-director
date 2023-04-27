@@ -51,12 +51,18 @@ def _init_old_assetstore():
         with open(SOUNDKIT_FILE, 'r') as f:
             _soundkits = json.load(f)
 
-def get_beat_download_url(file_id):
+def get_beat_file_url(file_id):
     beat = get_beat_info(file_id)
     if beat is not None:
         ret = [ x['url'] for x in beat['license_rights'][0]['files'] if x['type'] == 'WAV+' ]
         if len(ret) == 1:
             return ret[0]
+    return None
+
+def get_beat_picture_url(file_id):
+    beat = get_beat_info(file_id)
+    if beat is not None:
+        return beat['pictureUrl']
     return None
 
 def get_beat_info(file_id):

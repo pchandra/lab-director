@@ -13,21 +13,21 @@ FILESTORE_BUCKETNAME = conf['FILESTORE_BUCKETNAME']
 MULTIPART_THRESHOLD = conf['MULTIPART_THRESHOLD']
 
 # Function to bootstrap things by grabbing an asset from off-site and downloading it locally
-def get_external_file(file_id, directory):
-    return _backend['get_external_file'](file_id, directory)
-
-def _local_get_external_file(file_id, directory):
-    src = os.environ.get('TESTFILE')
+def get_beat_file(file_id, directory):
     dst = directory + f"/{str(uuid.uuid4())}"
-    if not os.path.exists(dst):
-        shutil.copyfile(src, dst)
-    return dst
-
-def _s3_get_external_file(file_id, directory):
-    dst = directory + f"/{str(uuid.uuid4())}"
-    url = api.get_beat_download_url(file_id)
+    url = api.get_beat_file_url(file_id)
     if url is None:
         raise Exception(f"Attempting to fetch an invalid id: {file_id}")
+    r = requests.get(url, allow_redirects=True)
+    with open(dst, 'wb') as f:
+        f.write(r.content)
+    return dst
+
+def get_beat_picture(file_id, directory):
+    dst = directory + f"/{str(uuid.uuid4())}"
+    url = api.get_beat_picture_url(file_id)
+    if url is None:
+        return None
     r = requests.get(url, allow_redirects=True)
     with open(dst, 'wb') as f:
         f.write(r.content)
@@ -101,12 +101,10 @@ _backend_local = {}
 _backend_local['store_file'] = _local_store_file
 _backend_local['retrieve_file'] = _local_retrieve_file
 _backend_local['key_exists'] = _local_key_exists
-_backend_local['get_external_file'] = _local_get_external_file
 
 _backend_s3 = {}
 _backend_s3['store_file'] = _s3_store_file
 _backend_s3['retrieve_file'] = _s3_retrieve_file
 _backend_s3['key_exists'] = _s3_key_exists
-_backend_s3['get_external_file'] = _s3_get_external_file
 
 _backend = _backend_s3 if FILESTORE_BACKEND == "s3" else _backend_local

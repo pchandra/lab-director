@@ -1,8 +1,5 @@
 import json
-import shutil
 import subprocess
-import taglib
-import soundfile as sf
 from taskdef import *
 from . import helpers
 from . import filestore
@@ -20,7 +17,7 @@ def execute(file_id, force=False):
     ret = {}
     scratch = helpers.create_scratch_dir()
     # Get the external file and grab it's metadata
-    local_file = filestore.get_external_file(file_id, scratch)
+    local_file = filestore.get_beat_file(file_id, scratch)
     metadata = helpers.get_audio_info(local_file)
     if not metadata:
         return { 'message': f'File format not recognized', 'failed': True }

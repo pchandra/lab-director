@@ -214,7 +214,7 @@ def main():
 
         # Cover art generation
         elif task == Tasks.COVR.value:
-            api.mark_notavailable(file_id, task)
+            _run(file_id, Tasks.COVR, force)
 
         # Save the status as a last step
         elif task == Tasks.STAT.value:
