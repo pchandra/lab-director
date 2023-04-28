@@ -160,6 +160,14 @@ def main():
                 _log_waiting(file_id, task, Tasks.OGSK)
                 _requeue(file_id, task.upper() if force else task)
 
+        # Bar graphics generation
+        elif task == Tasks.BARS.value:
+            if _check_ready(file_id, status, Tasks.ORIG):
+                _run(file_id, Tasks.BARS, force)
+            else:
+                _log_waiting(file_id, task, Tasks.ORIG)
+                _requeue(file_id, task.upper() if force else task)
+
         # Watermarking original file
         elif task == Tasks.WTRM.value:
             if _check_ready(file_id, status, Tasks.MAST):

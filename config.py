@@ -8,6 +8,7 @@ CONFIG = {}
 
 # The tasks that must be run for each Beat/Song
 CONFIG['TASKS_BEAT'] = [ Tasks.ORIG,
+                         Tasks.BARS,
                          Tasks.WTRM,
                          Tasks.KBPM,
                          Tasks.STEM,
@@ -125,6 +126,9 @@ CONFIG['WAVMIXER_BIN'] = '/Users/chandra/ll/co/wav-mixer/wav-mixer.py'
 
 # Command to run for 'mark-maker' tool
 CONFIG['MARKMAKER_BIN'] = '/Users/chandra/ll/co/wav-mixer/mark-maker.py'
+
+# Command to run for 'bar-tender' tool
+CONFIG['BARTENDER_BIN'] = '/Users/chandra/ll/co/wav-mixer/bar-tender.py'
 
 # Command to run for 'whisper' tool
 CONFIG['WHISPER_BIN'] = '/usr/local/bin/whisper'
