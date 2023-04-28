@@ -7,11 +7,13 @@ import boto3
 import taskapi as api
 from config import CONFIG as conf
 
-
 FILESTORE_BACKEND = conf['FILESTORE_BACKEND']
 FILESTORE_DIR = conf['FILESTORE_DIR']
-FILESTORE_BUCKETNAME = conf['FILESTORE_BUCKETNAME']
 MULTIPART_THRESHOLD = conf['MULTIPART_THRESHOLD']
+
+from boto3.s3.transfer import TransferConfig
+s3 = boto3.resource('s3')
+config = TransferConfig(multipart_threshold=MULTIPART_THRESHOLD)
 
 # Function to bootstrap things by grabbing an asset from off-site and downloading it locally
 def get_beat_file(file_id, directory):
@@ -35,66 +37,63 @@ def get_beat_picture(file_id, directory):
     return dst
 
 # Store a local file in the filestore under 'key'
-def store_file(file_id, path, key):
-    return _backend['store_file'](file_id, path, key)
+def store_file(file_id, path, key, section):
+    return _backend['store_file'](file_id, path, key, section)
 
-def _local_store_file(file_id, path, key):
+def _local_store_file(file_id, path, key, section):
     # Create a dir for the file_id if it doesn't exist
-    outdir = FILESTORE_DIR + f"/{file_id}"
+    outdir = FILESTORE_DIR + f"/{section}/{file_id}"
     os.makedirs(outdir, exist_ok=True)
     dst = outdir + f"/{key}"
     shutil.copyfile(path, dst)
     return dst
 
-from boto3.s3.transfer import TransferConfig
-s3 = boto3.resource('s3')
-config = TransferConfig(multipart_threshold=MULTIPART_THRESHOLD)
-
 # Store the local asset to the new S3 bucket hierarchy under 'key'
-def _s3_store_file(file_id, path, key):
+def _s3_store_file(file_id, path, key, section):
     s3path = f"{file_id}/{key}"
-    file_mime_type, _ = mimetypes.guess_type(path)
-    s3.Bucket(FILESTORE_BUCKETNAME).upload_file(Filename=path, Key=s3path, Config=config, ExtraArgs={'ContentType': file_mime_type})
+    file_mime_type, _ = mimetypes.guess_type(key)
+    extra = {'ContentType': file_mime_type} if file_mime_type is not None else None
+    s3.Bucket(section).upload_file(Filename=path, Key=s3path, Config=config, ExtraArgs=extra)
     return s3path
 
 
 # Download the file under 'key' in the filestore to the local filesystem
-def retrieve_file(file_id, key, directory):
-    return _backend['retrieve_file'](file_id, key, directory)
+def retrieve_file(file_id, key, directory, section):
+    return _backend['retrieve_file'](file_id, key, directory, section)
 
-def _local_retrieve_file(file_id, key, directory):
-    src = FILESTORE_DIR + f"/{file_id}" + f"/{key}"
+def _local_retrieve_file(file_id, key, directory, section):
+    src = FILESTORE_DIR + f"/{section}/{file_id}" + f"/{key}"
     dst = directory + f"/{key}"
     shutil.copyfile(src, dst)
     return dst
 
 # Download the file under 'key' from the new S3 bucket hierarchy
-def _s3_retrieve_file(file_id, key, directory):
+def _s3_retrieve_file(file_id, key, directory, section):
     s3path = f"{file_id}/{key}"
     basename = key.split('/')[-1]
     filename = directory + f'/{basename}'
-    s3.Object(FILESTORE_BUCKETNAME, s3path).download_file(filename, Config=config)
+    s3.Object(section, s3path).download_file(filename, Config=config)
     return filename
 
 
 # Check if a key exists in the filestore
-def key_exists(file_id, key):
-    return _backend['key_exists'](file_id, key)
+def key_exists(file_id, key, section):
+    return _backend['key_exists'](file_id, key, section)
 
-def _local_key_exists(file_id, key):
-    path = FILESTORE_DIR + f"/{file_id}" + f"/{key}"
+def _local_key_exists(file_id, key, section):
+    path = FILESTORE_DIR + f"/{section}/{file_id}" + f"/{key}"
     return os.path.exists(path)
 
-def _s3_key_exists(file_id, key):
+def _s3_key_exists(file_id, key, section):
     path = f"{file_id}/{key}"
-    results = s3.meta.client.list_objects_v2(Bucket=FILESTORE_BUCKETNAME, Prefix=path)
+    results = s3.meta.client.list_objects_v2(Bucket=section, Prefix=path)
     return 'Contents' in results
 
 # Check if all keys in a list exist in the filestore
-def check_keys(file_id, keylist):
+def check_keys(file_id, keylist, section):
     ret = True
     for key in keylist:
-        if not key_exists(file_id, key):
+        if not key_exists(file_id, key, section):
             ret = False
             break
     return ret

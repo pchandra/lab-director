@@ -9,20 +9,22 @@ from config import CONFIG as conf
 
 FFMPEG_BIN = conf['FFMPEG_BIN']
 PHASELIMITER_BIN = conf['PHASELIMITER_BIN']
+FILESTORE_PUBLIC = conf['FILESTORE_PUBLIC']
+FILESTORE_BEATS = conf['FILESTORE_BEATS']
 
 def execute(file_id, force=False):
     # Short-circuit if the filestore already has assets we would produce
     output_keys = [ f"{Tasks.MAST.value}.wav" ]
-    if not force and filestore.check_keys(file_id, output_keys):
+    if not force and filestore.check_keys(file_id, output_keys, FILESTORE_BEATS):
         return
 
     # Proceed with running this task
     scratch = helpers.create_scratch_dir()
-    filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.wav", scratch)
+    filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.wav", scratch, FILESTORE_BEATS)
     outfile = f"{scratch}/{Tasks.MAST.value}.wav"
 
     # Get the info for the original file to get the bit depth
-    infofile = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.json", scratch)
+    infofile = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.json", scratch, FILESTORE_PUBLIC)
     with open(infofile, 'r') as f:
         info = json.load(f)
     bitdepth = info['streams'][0]['bits_per_sample']
@@ -70,7 +72,7 @@ def execute(file_id, force=False):
             break
 
     # Store the resulting file
-    stored_location = filestore.store_file(file_id, outfile, f"{Tasks.MAST.value}.wav")
+    stored_location = filestore.store_file(file_id, outfile, f"{Tasks.MAST.value}.wav", FILESTORE_BEATS)
 
     # Build the dict to return to caller
     ret = { "command": { "stdout": stdout, "stderr": stderr } }

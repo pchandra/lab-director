@@ -3,11 +3,14 @@ from taskdef import *
 import taskapi as api
 from . import helpers
 from . import filestore
+from config import CONFIG as conf
+
+FILESTORE_BEATS = conf['FILESTORE_BEATS']
 
 def execute(file_id, force=False):
     # Short-circuit if the filestore already has assets we would produce
     output_keys = [ f"{Tasks.STAT.value}.json" ]
-    if not force and filestore.check_keys(file_id, output_keys):
+    if not force and filestore.check_keys(file_id, output_keys, FILESTORE_BEATS):
         return
 
     # Proceed with running this task
@@ -18,7 +21,7 @@ def execute(file_id, force=False):
     with open(tempfile, 'w') as f:
         f.write(json.dumps(status, indent=2))
     # Store json file
-    stored_location = filestore.store_file(file_id, tempfile, f"{Tasks.STAT.value}.json")
+    stored_location = filestore.store_file(file_id, tempfile, f"{Tasks.STAT.value}.json", FILESTORE_BEATS)
     ret = {}
     ret['output'] = stored_location
     helpers.destroy_scratch_dir(scratch)

@@ -6,25 +6,25 @@ from . import helpers
 from . import filestore
 from config import CONFIG as conf
 
-
 FFMPEG_BIN = conf['FFMPEG_BIN']
 MARKMAKER_BIN = conf['MARKMAKER_BIN']
 WATERMARK_WAV = conf['WATERMARK_WAV']
 WATERMARK_STRENGTH = conf['WATERMARK_STRENGTH']
 WATERMARK_DELAY =  conf['WATERMARK_DELAY']
 WATERMARK_GAP = conf['WATERMARK_GAP']
-
+FILESTORE_PUBLIC = conf['FILESTORE_PUBLIC']
+FILESTORE_BEATS = conf['FILESTORE_BEATS']
 
 def execute(file_id, force=False):
     # Short-circuit if the filestore already has assets we would produce
     output_keys = [ f"{Tasks.WTRM.value}.mp3" ]
-    if not force and filestore.check_keys(file_id, output_keys):
+    if not force and filestore.check_keys(file_id, output_keys, FILESTORE_PUBLIC):
         return
 
     # Proceed with running this task
     scratch = helpers.create_scratch_dir()
     outfile = f"{scratch}/{Tasks.WTRM.value}.wav"
-    filename = filestore.retrieve_file(file_id, f"{Tasks.MAST.value}.wav", scratch)
+    filename = filestore.retrieve_file(file_id, f"{Tasks.MAST.value}.wav", scratch, FILESTORE_BEATS)
 
     # Run the tool to make the watermarked version
     cmdline = []
@@ -68,7 +68,7 @@ def execute(file_id, force=False):
     stdout, stderr = process.communicate(input="\n\n\n\n\n")
 
     # Store the resulting file
-    ret['output'] = filestore.store_file(file_id, mp3file, f"{Tasks.WTRM.value}.mp3")
+    ret['output'] = filestore.store_file(file_id, mp3file, f"{Tasks.WTRM.value}.mp3", FILESTORE_PUBLIC)
     ret["phase2"] = { "stdout": stdout, "stderr": stderr }
     helpers.destroy_scratch_dir(scratch)
     return ret

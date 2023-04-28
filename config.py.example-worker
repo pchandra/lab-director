@@ -75,8 +75,14 @@ CONFIG['FILESTORE_BACKEND']='s3'
 # Directory to use for local filestore, if enabled
 CONFIG['FILESTORE_DIR'] = '/tmp/STORE'
 
-# Bucket name to use for s3 filestore, if enabled
-CONFIG['FILESTORE_BUCKETNAME'] = 'licenselounge-audiolab'
+# Section name for public files, local: subdirectory, s3: bucket name
+CONFIG['FILESTORE_PUBLIC'] = 'licenselounge-public'
+
+# Section name for beat files, local: subdirectory, s3: bucket name
+CONFIG['FILESTORE_BEATS'] = 'licenselounge-beats'
+
+# Section name for soundkit files, local: subdirectory, s3: bucket name
+CONFIG['FILESTORE_SOUNDKITS'] = 'licenselounge-soundkits'
 
 # Multipart threshold setting for S3 uploads and downloads
 CONFIG['MULTIPART_THRESHOLD'] = 64 * 1024 * 1024

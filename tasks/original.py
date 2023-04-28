@@ -6,11 +6,13 @@ from . import filestore
 from config import CONFIG as conf
 
 FFMPEG_BIN = conf['FFMPEG_BIN']
+FILESTORE_PUBLIC = conf['FILESTORE_PUBLIC']
+FILESTORE_BEATS = conf['FILESTORE_BEATS']
 
 def execute(file_id, force=False):
     # Short-circuit if the filestore already has assets we would produce
-    output_keys = [ f"{Tasks.ORIG.value}", f"{Tasks.ORIG.value}.json", f"{Tasks.ORIG.value}.wav", f"{Tasks.ORIG.value}.mp3" ]
-    if not force and filestore.check_keys(file_id, output_keys):
+    output_keys = [ f"{Tasks.ORIG.value}.json" ]
+    if not force and filestore.check_keys(file_id, output_keys, FILESTORE_PUBLIC):
         return
 
     # Proceed with running this task
@@ -26,13 +28,13 @@ def execute(file_id, force=False):
         return { 'message': f'Not accepting this file format: {fmt}', 'failed': True }
 
     # Store the original
-    ret['original'] = filestore.store_file(file_id, local_file, f"{Tasks.ORIG.value}")
+    ret['original'] = filestore.store_file(file_id, local_file, f"{Tasks.ORIG.value}", FILESTORE_BEATS)
 
     # Save the file info along side it
     tempfile = f"{scratch}/{Tasks.ORIG.value}.json"
     with open(tempfile, 'w') as f:
         f.write(json.dumps(metadata, indent=2))
-    ret['info'] = filestore.store_file(file_id, tempfile, f"{Tasks.ORIG.value}.json")
+    ret['info'] = filestore.store_file(file_id, tempfile, f"{Tasks.ORIG.value}.json", FILESTORE_PUBLIC)
 
     # Screen to ensure we have an AIFF or WAV file
     channels = metadata['streams'][0]['channels']
@@ -71,7 +73,7 @@ def execute(file_id, force=False):
     stdout, stderr = process.communicate(input="\n\n\n\n\n")
 
     # Save it as the wav version of original to the filestore
-    ret['output'] = filestore.store_file(file_id, outfile, f"{Tasks.ORIG.value}.wav")
+    ret['output'] = filestore.store_file(file_id, outfile, f"{Tasks.ORIG.value}.wav", FILESTORE_BEATS)
 
     # Run FFMPEG to make MP3 version
     mp3file = f"{scratch}/{Tasks.ORIG.value}.mp3"
@@ -92,7 +94,7 @@ def execute(file_id, force=False):
     stdout, stderr = process.communicate(input="\n\n\n\n\n")
 
     # Store the resulting file
-    ret['mp3'] = filestore.store_file(file_id, mp3file, f"{Tasks.ORIG.value}.mp3")
+    ret['mp3'] = filestore.store_file(file_id, mp3file, f"{Tasks.ORIG.value}.mp3", FILESTORE_BEATS)
 
     # Build the dict to return to caller
     ret["command"] = { "stdout": stdout, "stderr": stderr }
