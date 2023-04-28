@@ -54,7 +54,10 @@ def main():
                 message = frontend.recv_multipart()
                 task, file_id = message[0].split()
                 _log("Frontend got task: %s" % message[0])
-                queue.append(message[0])
+                if task.lower() == 'stop':
+                    queue.insert(0, message[0])
+                else:
+                    queue.append(message[0])
 
             if len(queue) > 0 and socks.get(backend) == zmq.POLLIN:
                 address, empty, ready = backend.recv_multipart()
