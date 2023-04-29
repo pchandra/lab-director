@@ -131,6 +131,9 @@ CONFIG['MARKMAKER_BIN'] = '/Users/chandra/ll/co/wav-mixer/mark-maker.py'
 # Command to run for 'bar-tender' tool
 CONFIG['BARTENDER_BIN'] = '/Users/chandra/ll/co/wav-mixer/bar-tender.py'
 
+# Command to run for 'zip-liner' tool
+CONFIG['ZIPLINER_BIN'] = '/Users/chandra/ll/co/wav-mixer/zip-liner.py'
+
 # Command to run for 'whisper' tool
 CONFIG['WHISPER_BIN'] = '/usr/local/bin/whisper'
 
