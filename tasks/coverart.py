@@ -18,12 +18,20 @@ def execute(file_id, force=False):
     ret = {}
     scratch = helpers.create_scratch_dir()
 
+    status = api.get_status(file_id)
+    if status['type'] == 'beat':
+        url = api.get_beat_picture_url(file_id)
+    elif status['type'] == 'soundkit':
+        url = api.get_soundkit_picture_url(file_id)
+    else:
+        raise Exception("Unknown type in COVR!")
+
     # Get the cover art file
-    local_file = filestore.get_beat_picture(file_id, scratch)
+    local_file = filestore.download_file(url, scratch)
 
     ret[Tasks.COVR.value] = None
     if local_file is not None:
-        ext = os.path.splitext(api.get_beat_picture_url(file_id))[1]
+        ext = os.path.splitext(url)[1]
         ret[Tasks.COVR.value] = f"{Tasks.COVR.value}{ext}"
         tempfile = f"{scratch}/{Tasks.COVR.value}.json"
         with open(tempfile, 'w') as f:

@@ -15,20 +15,9 @@ from boto3.s3.transfer import TransferConfig
 s3 = boto3.resource('s3')
 config = TransferConfig(multipart_threshold=MULTIPART_THRESHOLD)
 
-# Function to bootstrap things by grabbing an asset from off-site and downloading it locally
-def get_beat_file(file_id, directory):
+# Function to download a file locally from a URL
+def download_file(url, directory):
     dst = directory + f"/{str(uuid.uuid4())}"
-    url = api.get_beat_file_url(file_id)
-    if url is None:
-        raise Exception(f"Attempting to fetch an invalid id: {file_id}")
-    r = requests.get(url, allow_redirects=True)
-    with open(dst, 'wb') as f:
-        f.write(r.content)
-    return dst
-
-def get_beat_picture(file_id, directory):
-    dst = directory + f"/{str(uuid.uuid4())}"
-    url = api.get_beat_picture_url(file_id)
     if url is None:
         return None
     r = requests.get(url, allow_redirects=True)

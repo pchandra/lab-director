@@ -1,6 +1,7 @@
 import json
 import subprocess
 from taskdef import *
+import taskapi as api
 from . import helpers
 from . import filestore
 from config import CONFIG as conf
@@ -19,7 +20,7 @@ def execute(file_id, force=False):
     ret = {}
     scratch = helpers.create_scratch_dir()
     # Get the external file and grab it's metadata
-    local_file = filestore.get_beat_file(file_id, scratch)
+    local_file = filestore.download_file(api.get_beat_file_url(file_id), scratch)
     metadata = helpers.get_audio_info(local_file)
     if not metadata:
         return { 'message': f'File format not recognized', 'failed': True }
