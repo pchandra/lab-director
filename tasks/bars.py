@@ -28,7 +28,7 @@ def execute(file_id, force=False):
     cmdline.append(BARTENDER_BIN)
     cmdline.extend([ "-i", filename,
                      "-o", svgname,
-                     "-p", pngname,        
+                     "-p", pngname,
                      "-b", "200",
                      "-s", "2",
                      "-H", "200",
@@ -49,7 +49,7 @@ def execute(file_id, force=False):
     cmdline.append(BARTENDER_BIN)
     cmdline.extend([ "-i", filename,
                      "-o", svgname,
-                     "-p", pngname,        
+                     "-p", pngname,
                      "-b", "100",
                      "-s", "2",
                      "-H", "100",
