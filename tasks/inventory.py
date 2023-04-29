@@ -30,10 +30,10 @@ def _check_dir(subdir, base, info={}, other=[]):
             other.extend(dirother)
         else:
             result = _file_handler(fullpath)
+            key = fullpath.replace(base + '/', '')
             if result == {}:
                 other.append(key)
             elif result is not None:
-                key = fullpath.replace(base + '/', '')
                 info[key] = result
     return info, other
 
