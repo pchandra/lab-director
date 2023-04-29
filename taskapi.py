@@ -72,6 +72,18 @@ def get_beat_info(file_id):
         return ret[0]
     return None
 
+def get_soundkit_file_url(file_id):
+    skit = get_soundkit_info(file_id)
+    if skit is not None:
+        return skit['file']['url']
+    return None
+
+def get_soundkit_picture_url(file_id):
+    skit = get_soundkit_info(file_id)
+    if skit is not None:
+        return skit['picture_url']
+    return None
+
 def get_soundkit_info(file_id):
     _init_old_assetstore()
     ret = [ x for x in _soundkits if x['id'] == file_id ]
