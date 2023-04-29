@@ -19,6 +19,7 @@ def execute(file_id, force=False):
     scratch = helpers.create_scratch_dir()
 
     status = api.get_status(file_id)
+    url = None
     if status['type'] == 'beat':
         url = api.get_beat_picture_url(file_id)
     elif status['type'] == 'soundkit':
