@@ -70,17 +70,17 @@ def execute(file_id, force=False):
             summary['size-uncompresssed'] += int(fmt.get('size', 0))
         summary['file-types'][ext] = summary['file-types'].get(ext, 0) + 1
 
-    # Build the object we will save/return
-    ret = {}
-    ret['summary'] = summary
-    ret['files'] = zipinfo
-    ret['others'] = others
+    # Build the object we will save
+    inventory = {}
+    inventory['summary'] = summary
+    inventory['files'] = zipinfo
+    inventory['others'] = others
 
     tempfile = f"{scratch}/{Tasks.ZINV.value}.json"
     with open(tempfile, 'w') as f:
-        f.write(json.dumps(ret, indent=2))
+        f.write(json.dumps(inventory, indent=2))
     stored_location = filestore.store_file(file_id, tempfile, f"{Tasks.ZINV.value}.json", FILESTORE_PUBLIC)
-
+    ret = {}
     ret['output'] = stored_location
     helpers.destroy_scratch_dir(scratch)
     return ret
