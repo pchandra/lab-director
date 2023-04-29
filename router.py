@@ -33,6 +33,10 @@ def main():
     poller.register(frontend, zmq.POLLIN)
     poller.register(backend, zmq.POLLIN)
 
+    # Read protocol version string
+    with open('version-token') as f:
+        proto_ver = f.read().strip()
+
     with shelve.open(SHELVE_FILENAME) as store:
         if not 'queue' in store:
             store['queue'] = []
@@ -44,7 +48,7 @@ def main():
             counter += 1
             # Extract the queue from the shelf
             queue = store['queue']
-            time.sleep(0.1)
+            time.sleep(0.01)
             if counter > 20:
                 _log("Router is polling for new messages, queue depth: %d" % len(queue))
                 counter = 0
@@ -61,15 +65,21 @@ def main():
 
             if len(queue) > 0 and socks.get(backend) == zmq.POLLIN:
                 address, empty, ready = backend.recv_multipart()
-                acceptable = ready.split()[1:]
-                acceptable.append('stop')
                 job = b"noop noop"
-                for j in queue:
-                    if j.split()[0].lower() in acceptable:
-                        job = j
-                        queue.remove(job)
-                        break
-                _log("Worker %s reports as ready, sending task: %s" % (address.hex(), job))
+                tokens = ready.split()
+                # Check protocol version
+                if tokens[1] != proto_ver:
+                    job = b"stop stop"
+                    _log(f"Worker version mismatch! Expected: {proto_ver}, got: {tokens[1]}")
+                else:
+                    acceptable = tokens[2:]
+                    acceptable.append('stop')
+                    for j in queue:
+                        if j.split()[0].lower() in acceptable:
+                            job = j
+                            queue.remove(job)
+                            break
+                    _log("Worker %s reports as ready, sending task: %s" % (address.hex(), job))
                 backend.send_multipart([address, b'', job])
             # Put the queue back into the shelf for persistence
             store['queue'] = queue

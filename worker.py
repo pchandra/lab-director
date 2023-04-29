@@ -88,10 +88,15 @@ def _acceptable_work(task):
 def main():
     # Process tasks forever
     _log("Starting up worker with PID: %d" % pid)
+
+    # Read protocol version string
+    with open('version-token') as f:
+        proto_ver = f.read().strip()
+
     while True:
         # Send 'ready' and ACCEPTABLE_WORK then await a task assignment
         _log("Ready to accept new tasks")
-        receiver.send(b"ready " + ' '.join(ACCEPTABLE_WORK).encode('ascii'))
+        receiver.send(f"ready {proto_ver} ".encode('ascii') + ' '.join(ACCEPTABLE_WORK).encode('ascii'))
         message = receiver.recv_string()
         _log("Got task: %s" % message)
         tokens = message.split()
