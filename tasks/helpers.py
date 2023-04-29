@@ -21,7 +21,7 @@ def setprogress(file_id, task_type, percent=0):
 
 def get_duration(wavfile):
     # Get the duration of the audio track
-    info = get_audio_info(wavfile)
+    info = get_media_info(wavfile)
     return float(info['streams'][0]['duration'])
 
 def is_silent(wavfile):
@@ -66,7 +66,7 @@ def is_silent(wavfile):
     mostly = silence_total > (duration * SILENCE_PERCENT)
     return totally, mostly
 
-def get_audio_info(wavfile):
+def get_media_info(wavfile):
     # Build the command line to run
     cmdline = []
     cmdline.append(FFPROBE_BIN)

@@ -21,7 +21,7 @@ def execute(file_id, force=False):
     scratch = helpers.create_scratch_dir()
     # Get the external file and grab it's metadata
     local_file = filestore.download_file(api.get_beat_file_url(file_id), scratch)
-    metadata = helpers.get_audio_info(local_file)
+    metadata = helpers.get_media_info(local_file)
     if not metadata:
         return { 'message': f'File format not recognized', 'failed': True }
     fmt = metadata['format'].get('format_name')
