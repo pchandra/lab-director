@@ -6,6 +6,7 @@ from . import helpers
 from . import filestore
 from config import CONFIG as conf
 
+FFPROBE_BIN = conf['FFPROBE_BIN']
 ZIPLINER_BIN = conf['ZIPLINER_BIN']
 FILESTORE_PUBLIC = conf['FILESTORE_PUBLIC']
 FILESTORE_SOUNDKITS = conf['FILESTORE_SOUNDKITS']
@@ -25,7 +26,8 @@ def execute(file_id, force=False):
     cmdline = []
     cmdline.append(ZIPLINER_BIN)
     cmdline.extend([ "-i", filename,
-                     "-o", outfile
+                     "-o", outfile,
+                     "-f", FFPROBE_BIN
                    ])
     # Execute the command
     process = subprocess.Popen(cmdline,
