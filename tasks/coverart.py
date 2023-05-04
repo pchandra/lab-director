@@ -30,12 +30,15 @@ def execute(file_id, force=False):
 
     # Get the cover art file
     local_file = filestore.download_file(url, scratch)
-    imgfile = local_file + ".jpg"
-    image = PIL.Image.open(local_file)
-    image.save(imgfile)
 
     ret[Tasks.COVR.value] = None
     if local_file is not None:
+        # Create a standard JPG
+        imgfile = local_file + ".jpg"
+        image = PIL.Image.open(local_file)
+        image.save(imgfile)
+
+        # Save the original with a reference JSON and the JPG
         ext = os.path.splitext(url)[1]
         ret[Tasks.COVR.value] = f"{Tasks.COVR.value}-orig{ext}"
         tempfile = f"{scratch}/{Tasks.COVR.value}.json"
