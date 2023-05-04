@@ -28,6 +28,13 @@ def execute(file_id, force=False):
     else:
         raise Exception("Unknown type in COVR!")
 
+    # For soundkits, save the preview file
+    if status['type'] == 'soundkit':
+        preview = api.get_soundkit_preview_url(file_id)
+        if preview is not None:
+            preview_file = filestore.download_file(preview, scratch)
+            filestore.store_file(file_id, preview_file, f"watermark.mp3", FILESTORE_PUBLIC)
+
     # Get the cover art file
     local_file = filestore.download_file(url, scratch)
 
