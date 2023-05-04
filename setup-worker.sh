@@ -55,4 +55,4 @@ python3 -m pip install -U demucs openai-whisper basic-pitch
 ############
 
 # Dependencies for the home-made tools we just cloned
-python3 -m pip install -U librosa matplotlib numpy numba pycairo boto3 pytaglib
+python3 -m pip install -U librosa matplotlib numpy numba pycairo boto3 pytaglib Pillow

@@ -1,5 +1,6 @@
 import os
 import json
+import PIL
 from taskdef import *
 import taskapi as api
 from . import helpers
@@ -29,14 +30,18 @@ def execute(file_id, force=False):
 
     # Get the cover art file
     local_file = filestore.download_file(url, scratch)
+    pngfile = local_file + ".png"
+    image = PIL.Image.open(local_file)
+    image.save(pngfile)
 
     ret[Tasks.COVR.value] = None
     if local_file is not None:
         ext = os.path.splitext(url)[1]
-        ret[Tasks.COVR.value] = f"{Tasks.COVR.value}{ext}"
+        ret[Tasks.COVR.value] = f"{Tasks.COVR.value}-orig{ext}"
         tempfile = f"{scratch}/{Tasks.COVR.value}.json"
         with open(tempfile, 'w') as f:
             f.write(json.dumps(ret, indent=2))
         filestore.store_file(file_id, tempfile, f"{Tasks.COVR.value}.json", FILESTORE_PUBLIC)
-        ret[Tasks.COVR.value] = filestore.store_file(file_id, local_file, f"{Tasks.COVR.value}{ext}", FILESTORE_PUBLIC)
+        ret[Tasks.COVR.value] = filestore.store_file(file_id, pngfile, f"{Tasks.COVR.value}.png", FILESTORE_PUBLIC)
+        ret[f"{Tasks.COVR.value}-orig"] = filestore.store_file(file_id, local_file, f"{Tasks.COVR.value}-orig{ext}", FILESTORE_PUBLIC)
     return ret
