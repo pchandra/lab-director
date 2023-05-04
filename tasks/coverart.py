@@ -1,6 +1,6 @@
 import os
 import json
-import PIL
+import PIL.Image
 from taskdef import *
 import taskapi as api
 from . import helpers
