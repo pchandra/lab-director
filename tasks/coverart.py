@@ -36,6 +36,8 @@ def execute(file_id, force=False):
         # Create a standard JPG
         imgfile = local_file + ".jpg"
         image = PIL.Image.open(local_file)
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
         image.save(imgfile)
 
         # Save the original with a reference JSON and the JPG
