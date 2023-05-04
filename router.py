@@ -35,7 +35,7 @@ def main():
 
     # Read protocol version string
     with open('version-token') as f:
-        proto_ver = f.read().strip()
+        proto_ver = f.read().strip().encode('ascii')
 
     with shelve.open(SHELVE_FILENAME) as store:
         if not 'queue' in store:
