@@ -1,3 +1,4 @@
+import os
 import json
 import subprocess
 from taskdef import *
@@ -7,6 +8,7 @@ from . import filestore
 from config import CONFIG as conf
 
 FFMPEG_BIN = conf['FFMPEG_BIN']
+FILESTORE_BACKEND = conf['FILESTORE_BACKEND']
 FILESTORE_PUBLIC = conf['FILESTORE_PUBLIC']
 FILESTORE_BEATS = conf['FILESTORE_BEATS']
 
@@ -20,7 +22,10 @@ def execute(file_id, force=False):
     ret = {}
     scratch = helpers.create_scratch_dir()
     # Get the external file and grab it's metadata
-    local_file = filestore.download_file(api.get_beat_file_url(file_id), scratch)
+    if FILESTORE_BACKEND == "local":
+        local_file = os.getenv('TESTFILE')
+    else:
+        local_file = filestore.download_file(api.get_beat_file_url(file_id), scratch)
     metadata = helpers.get_media_info(local_file)
     if not metadata:
         return { 'message': f'File format not recognized', 'failed': True }
