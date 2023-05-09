@@ -13,6 +13,7 @@ from . import status
 from . import soundkit
 from . import inventory
 from . import bars
+from . import graphics
 
 __all__ = ["execute"]
 
@@ -30,3 +31,4 @@ execute[Tasks.STAT] = status.execute
 execute[Tasks.OGSK] = soundkit.execute
 execute[Tasks.ZINV] = inventory.execute
 execute[Tasks.BARS] = bars.execute
+execute[Tasks.WGFX] = graphics.execute

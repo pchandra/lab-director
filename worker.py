@@ -213,6 +213,23 @@ def main():
                 _log_waiting(file_id, task, Tasks.STEM)
                 _requeue(file_id, task.upper() if force else task)
 
+        # Waveform png generation
+        elif task == Tasks.WGFX.value:
+            if not _check_ready(file_id, status, Tasks.ORIG):
+                _log_waiting(file_id, task, Tasks.ORIG)
+                _requeue(file_id, task.upper() if force else task)
+            elif not _check_ready(file_id, status, Tasks.STEM):
+                _log_waiting(file_id, task, Tasks.STEM)
+                _requeue(file_id, task.upper() if force else task)
+            elif not _check_ready(file_id, status, Tasks.MAST):
+                _log_waiting(file_id, task, Tasks.MAST)
+                _requeue(file_id, task.upper() if force else task)
+            elif not _check_ready(file_id, status, Tasks.INST):
+                _log_waiting(file_id, task, Tasks.INST)
+                _requeue(file_id, task.upper() if force else task)
+            else:
+                _run(file_id, Tasks.WGFX, force)
+
         # MIDI track from stems
         elif task == Tasks.MIDI.value:
             api.mark_notavailable(file_id, task)

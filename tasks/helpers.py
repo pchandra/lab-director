@@ -10,6 +10,7 @@ import taskapi as api
 
 FFMPEG_BIN = conf['FFMPEG_BIN']
 FFPROBE_BIN = conf['FFPROBE_BIN']
+BARTENDER_BIN = conf['BARTENDER_BIN']
 WORK_DIR = conf['WORK_DIR']
 SILENCE_THRESHOLD = conf['SILENCE_THRESHOLD']
 SILENCE_PERCENT = conf['SILENCE_PERCENT']
@@ -86,6 +87,31 @@ def get_media_info(wavfile):
     stdout, _ = process.communicate()
     # Validate and write JSON output to tempfile
     return json.loads(stdout)
+
+def make_wave_png(wavfile, factor=None):
+    # Build the command line to run
+    cmdline = []
+    cmdline.append(BARTENDER_BIN)
+    cmdline.extend([ "-i", wavfile,
+                     "-o", "/dev/null",
+                     "-p", wavfile + ".png",
+                     "-F", wavfile + ".json",
+                     "-b", "2000",
+                     "-H", "200",
+                     "-W", "2000",
+                     "-w"
+                   ])
+    if factor is not None:
+        cmdline.extend(["-f", str(factor)])
+    # Execute the command
+    process = subprocess.Popen(cmdline,
+                               stdout=subprocess.PIPE,
+                               universal_newlines=True)
+    stdout, _ = process.communicate()
+    ret = 0
+    with open(wavfile + ".json") as f:
+        ret = json.load(f)['factor']
+    return ret
 
 scratch_dirs = []
 def create_scratch_dir():

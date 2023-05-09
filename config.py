@@ -9,6 +9,7 @@ CONFIG = {}
 # The tasks that must be run for each Beat/Song
 CONFIG['TASKS_BEAT'] = [ Tasks.ORIG,
                          Tasks.BARS,
+                         Tasks.WGFX,
                          Tasks.WTRM,
                          Tasks.KBPM,
                          Tasks.STEM,

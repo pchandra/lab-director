@@ -12,6 +12,7 @@ class Tasks(Enum):
     COVR = 'coverart' # Generate cover art automatically
     STAT = 'status' # Save the status as JSON at the end
     BARS = 'bars' # Generate bar/waveform graphics for an original
+    WGFX = 'gfx' # Generate detailed waveform graphics
     OGSK = 'soundkit' # Initialize filestore with soundkit
     ZINV = 'inventory' # Gather metadata about the contents of a zip
 
