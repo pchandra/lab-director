@@ -41,8 +41,14 @@ def execute(file_id, force=False):
     if not metadata['instrumental']:
         inst = filestore.retrieve_file(file_id, f"{Tasks.INST.value}.wav", scratch, FILESTORE_BEATS)
         helpers.make_wave_png(inst, factor=factor)
-        ret['inst'] = filestore.store_file(file_id, inst + ".png", f"{Tasks.INST.value}.png", FILESTORE_PUBLIC)
+        ret[Tasks.INST.value] = filestore.store_file(file_id, inst + ".png", f"{Tasks.INST.value}.png", FILESTORE_PUBLIC)
 
-    ret['mast'] = filestore.store_file(file_id, master + ".png", f"{Tasks.MAST.value}.png", FILESTORE_PUBLIC)
-    ret['orig'] = filestore.store_file(file_id, orig + ".png", f"{Tasks.ORIG.value}.png", FILESTORE_PUBLIC)
+    ret[Tasks.MAST.value] = filestore.store_file(file_id, master + ".png", f"{Tasks.MAST.value}.png", FILESTORE_PUBLIC)
+    ret[Tasks.ORIG.value] = filestore.store_file(file_id, orig + ".png", f"{Tasks.ORIG.value}.png", FILESTORE_PUBLIC)
+
+    tempfile = f"{scratch}/{Tasks.WGFX.value}.json"
+    with open(tempfile, 'w') as f:
+        f.write(json.dumps(ret, indent=2))
+    filestore.store_file(file_id, tempfile, f"{Tasks.WGFX.value}.json", FILESTORE_PUBLIC)
+
     return ret
