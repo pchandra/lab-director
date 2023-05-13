@@ -94,7 +94,7 @@ CONFIG['MULTIPART_THRESHOLD'] = 64 * 1024 * 1024
 CONFIG['WATERMARK_WAV'] = '/Users/chandra/ll/co/wav-mixer/stamps/ll-stamp.wav'
 
 # Relative strength to apply to the watermark mixing (mark-maker tool)
-CONFIG['WATERMARK_STRENGTH'] = "4"
+CONFIG['WATERMARK_STRENGTH'] = "1"
 
 # Relative strength to apply to the watermark mixing (mark-maker tool)
 CONFIG['WATERMARK_DELAY'] = "2"
