@@ -35,6 +35,7 @@ def execute(file_id, force=False):
 
     # Return quickly if stemmer says this is an instrumental
     if metadata['instrumental']:
+        helpers.destroy_scratch_dir(scratch)
         return
 
     # Grab the vocal track to analyze

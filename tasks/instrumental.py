@@ -29,6 +29,7 @@ def execute(file_id, force=False):
 
     # Return quickly if this is already tagged instrumental from stemming
     if metadata['instrumental']:
+        helpers.destroy_scratch_dir(scratch)
         return
 
     # Get the info for the original file to get the bit depth
