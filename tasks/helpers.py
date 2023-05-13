@@ -123,3 +123,4 @@ def create_scratch_dir():
 def destroy_scratch_dir(path):
     if path in scratch_dirs:
         shutil.rmtree(path)
+        scratch_dirs.remove(path)

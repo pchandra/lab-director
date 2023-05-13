@@ -51,4 +51,5 @@ def execute(file_id, force=False):
         f.write(json.dumps(ret, indent=2))
     filestore.store_file(file_id, tempfile, f"{Tasks.WGFX.value}.json", FILESTORE_PUBLIC)
 
+    helpers.destroy_scratch_dir(scratch)
     return ret
