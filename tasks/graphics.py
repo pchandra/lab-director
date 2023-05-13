@@ -1,3 +1,4 @@
+import os
 import json
 from taskdef import *
 from . import helpers
@@ -23,7 +24,25 @@ def execute(file_id, force=False):
     factor = helpers.make_wave_png(master)
     helpers.make_wave_png(orig, factor=factor)
 
+    # Get the stem metadata from the filestore
+    stem_json = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}.json", scratch, FILESTORE_PUBLIC)
+    metadata = None
+    with open(stem_json, 'r') as f:
+        metadata = json.load(f)
+
     ret = {}
+
+    for stem in metadata['stems']:
+        filename = filestore.retrieve_file(file_id, stem, scratch, FILESTORE_BEATS)
+        helpers.make_wave_png(filename, factor=factor)
+        base = os.path.splitext(stem)[0]
+        ret[stem] = filestore.store_file(file_id, filename + ".png", f"{base}.png", FILESTORE_PUBLIC)
+
+    if not metadata['instrumental']:
+        inst = filestore.retrieve_file(file_id, f"{Tasks.INST.value}.wav", scratch, FILESTORE_BEATS)
+        helpers.make_wave_png(inst, factor=factor)
+        ret['inst'] = filestore.store_file(file_id, inst + ".png", f"{Tasks.INST.value}.png", FILESTORE_PUBLIC)
+
     ret['mast'] = filestore.store_file(file_id, master + ".png", f"{Tasks.MAST.value}.png", FILESTORE_PUBLIC)
     ret['orig'] = filestore.store_file(file_id, orig + ".png", f"{Tasks.ORIG.value}.png", FILESTORE_PUBLIC)
     return ret
