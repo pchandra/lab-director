@@ -99,7 +99,7 @@ def make_wave_png(wavfile, factor=None):
                      "-b", "2000",
                      "-H", "200",
                      "-W", "2000",
-                     "-w"
+                     "-m"
                    ])
     if factor is not None:
         cmdline.extend(["-f", str(factor)])
