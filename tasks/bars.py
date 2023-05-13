@@ -33,6 +33,7 @@ def execute(file_id, force=False):
                      "-s", "2",
                      "-H", "200",
                      "-W", "1600",
+                     "-M", "0.8",
                      "-n"
                    ])
     # Execute the command
@@ -54,6 +55,7 @@ def execute(file_id, force=False):
                      "-s", "2",
                      "-H", "100",
                      "-W", "800",
+                     "-M", "0.8",
                      "-n"
                    ])
     # Execute the command
