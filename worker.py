@@ -128,24 +128,19 @@ def main():
             _warn("Forced command: %s" % task)
             task = task.lower()
 
-        # Get the status for this file and validate the file_id we received
+        # Get the status for this file
         status = api.get_status(file_id)
-        is_beat = task in [x.value for x in TASKS_BEAT] and api.get_beat_info(file_id) is not None
-        is_skit = task in [x.value for x in TASKS_SOUNDKIT] and api.get_soundkit_info(file_id) is not None
-        if not is_beat and not is_skit:
-            _warn(f"Not a valid request: {task} {file_id}")
-            continue
 
         # Check that the task is legit before proceeding
         if not any(x for x in Tasks if x.value == task):
             _warn("COMMAND NOT RECOGNIZED")
             continue
 
-        # Store an original beat/song in the file store
+        # Analyze an original beat/song in the file store
         if task == Tasks.ORIG.value:
             _run(file_id, Tasks.ORIG, force)
 
-        # Store an original soundkit in the file store
+        # Analyze an original soundkit in the file store
         elif task == Tasks.OGSK.value:
             _run(file_id, Tasks.OGSK, force)
 

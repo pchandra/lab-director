@@ -2,7 +2,6 @@ import os
 import json
 import subprocess
 from taskdef import *
-import taskapi as api
 from . import helpers
 from . import filestore
 from config import CONFIG as conf
@@ -25,16 +24,13 @@ def execute(file_id, force=False):
     if FILESTORE_BACKEND == "local":
         local_file = os.getenv('TESTFILE')
     else:
-        local_file = filestore.download_file(api.get_beat_file_url(file_id), scratch)
+        local_file = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}", scratch, FILESTORE_BEATS)
     metadata = helpers.get_media_info(local_file)
     if not metadata:
         return { 'message': f'File format not recognized', 'failed': True }
     fmt = metadata['format'].get('format_name')
     if fmt != 'wav' and fmt != 'aiff':
         return { 'message': f'Not accepting this file format: {fmt}', 'failed': True }
-
-    # Store the original
-    ret['original'] = filestore.store_file(file_id, local_file, f"{Tasks.ORIG.value}", FILESTORE_BEATS)
 
     # Save the file info along side it
     tempfile = f"{scratch}/{Tasks.ORIG.value}.json"

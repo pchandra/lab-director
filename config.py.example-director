@@ -17,14 +17,11 @@ CONFIG['TASKS_BEAT'] = [ Tasks.ORIG,
                          Tasks.INST,
                          Tasks.LYRC,
                          Tasks.MIDI,
-                         Tasks.COVR,
                          Tasks.STAT
                        ]
 
 # The tasks that must be run for each Soundkit
-CONFIG['TASKS_SOUNDKIT'] = [ Tasks.OGSK,
-                             Tasks.COVR,
-                             Tasks.ZINV,
+CONFIG['TASKS_SOUNDKIT'] = [ Tasks.ZINV,
                              Tasks.STAT
                            ]
 
