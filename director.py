@@ -80,9 +80,8 @@ def stub_soundkit(file_id):
 @app.route('/load_beat/<file_id>')
 def load_beat(file_id):
     STATUS = flask_shelve.get_shelve()
-    if file_id in STATUS:
-        return _msg(f"Beat already exists: {file_id}"), 400
-    STATUS[file_id] = _create_status(file_id, 'beat')
+    if not file_id in STATUS:
+        STATUS[file_id] = _create_status(file_id, 'beat')
     for task in [x.value for x in TASKS_BEAT]:
         sender.send_string(f"{task} {file_id}")
     return _msg(f"Queued all tasks for beat: {file_id}")
@@ -94,9 +93,8 @@ def load_song(file_id):
 @app.route('/load_soundkit/<file_id>')
 def load_soundkit(file_id):
     STATUS = flask_shelve.get_shelve()
-    if file_id in STATUS:
-        return _msg(f"Soundkit already exists: {file_id}"), 400
-    STATUS[file_id] = _create_status(file_id, 'soundkit')
+    if not file_id in STATUS:
+        STATUS[file_id] = _create_status(file_id, 'soundkit')
     for task in [x.value for x in TASKS_SOUNDKIT]:
         sender.send_string(f"{task} {file_id}")
     return _msg(f"Queued all tasks for soundkit: {file_id}")
