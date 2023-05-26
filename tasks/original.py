@@ -21,10 +21,13 @@ def execute(file_id, force=False):
     ret = {}
     scratch = helpers.create_scratch_dir()
     # Get the external file and grab it's metadata
-    if FILESTORE_BACKEND == "local":
-        local_file = os.getenv('TESTFILE')
-    else:
-        local_file = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}", scratch, FILESTORE_BEATS)
+    try:
+        if FILESTORE_BACKEND == "local":
+            local_file = os.getenv('TESTFILE')
+        else:
+            local_file = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}", scratch, FILESTORE_BEATS)
+    except:
+        return { 'message': f'File not found', 'failed': True }
     metadata = helpers.get_media_info(local_file)
     if not metadata:
         return { 'message': f'File format not recognized', 'failed': True }
