@@ -44,6 +44,7 @@ def main():
         # Switch messages forever
         _log("Starting up router with PID: %d" % pid)
         counter = 0
+        inprogress = {}
         while True:
             counter += 1
             # Extract the queue from the shelf
@@ -60,7 +61,7 @@ def main():
                 _log("Frontend got task: %s" % message[0])
                 if task.lower() == 'stop':
                     queue.insert(0, message[0])
-                elif message[0] not in queue:
+                elif message[0] not in queue and message[0] not in inprogress.values():
                     queue.append(message[0])
 
             if len(queue) > 0 and socks.get(backend) == zmq.POLLIN:
@@ -78,6 +79,7 @@ def main():
                         if j.split()[0].lower() in acceptable:
                             job = j
                             queue.remove(job)
+                            inprogress[address] = job
                             break
                     _log("Worker %s reports as ready, sending task: %s" % (address.hex(), job))
                 backend.send_multipart([address, b'', job])
