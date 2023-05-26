@@ -60,7 +60,7 @@ def main():
                 _log("Frontend got task: %s" % message[0])
                 if task.lower() == 'stop':
                     queue.insert(0, message[0])
-                else:
+                elif message[0] not in queue:
                     queue.append(message[0])
 
             if len(queue) > 0 and socks.get(backend) == zmq.POLLIN:
