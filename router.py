@@ -44,20 +44,15 @@ def main():
         # Switch messages forever
         _log("Starting up router with PID: %d" % pid)
         counter = 0
-        reset = 0
         inprogress = {}
         while True:
             counter += 1
             # Extract the queue from the shelf
             queue = store['queue']
             time.sleep(0.01)
-            if counter > 60:
+            if counter > 20:
                 _log("Router is polling for new messages, queue depth: %d" % len(queue))
                 counter = 0
-                reset = 0 if len(queue) > 0 else reset + 1
-                if reset > 300:
-                    reset = 0
-                    inprogress = {}
             socks = dict(poller.poll())
 
             if socks.get(frontend) == zmq.POLLIN:
