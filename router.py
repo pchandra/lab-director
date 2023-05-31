@@ -58,7 +58,7 @@ def main():
                 message = frontend.recv_multipart()
                 task, file_id = message[0].split()
                 _log("Frontend got task: %s" % message[0])
-                if task.lower() == 'stop':
+                if task.lower() == b'stop':
                     queue.insert(0, message[0])
                 elif message[0] not in queue:
                     queue.append(message[0])
@@ -73,7 +73,7 @@ def main():
                     _log(f"Worker version mismatch! Expected: {proto_ver}, got: {tokens[1]}")
                 else:
                     acceptable = tokens[2:]
-                    acceptable.append('stop')
+                    acceptable.append(b'stop')
                     for j in queue:
                         if j.split()[0].lower() in acceptable:
                             job = j
