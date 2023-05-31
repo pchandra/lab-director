@@ -110,7 +110,7 @@ def _check_stems(demucs, model):
 def execute(file_id, force=False):
     # Short-circuit if the filestore already has assets we would produce
     output_keys = [ f"{Tasks.STEM.value}.json" ]
-    if not force and filestore.check_keys(file_id, output_keys, FILESTORE_PUBLIC):
+    if not force and filestore.check_keys(file_id, output_keys, FILESTORE_BEATS):
         return None
 
     # Proceed with running this task
@@ -156,6 +156,7 @@ def execute(file_id, force=False):
     with open(tempfile, 'w') as f:
         f.write(json.dumps(stem_obj, indent=2))
     filestore.store_file(file_id, tempfile, f"{Tasks.STEM.value}.json", FILESTORE_PUBLIC)
+    filestore.store_file(file_id, tempfile, f"{Tasks.STEM.value}.json", FILESTORE_BEATS)
 
     ret['output'] = stem_obj
     helpers.destroy_scratch_dir(scratch)
