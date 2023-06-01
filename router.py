@@ -44,6 +44,7 @@ def main():
         # Switch messages forever
         _log("Starting up router with PID: %d" % pid)
         counter = 0
+        workers = {}
         while True:
             counter += 1
             # Extract the queue from the shelf
@@ -80,6 +81,7 @@ def main():
                             queue.remove(job)
                             break
                     _log("Worker %s reports as ready, sending task: %s" % (address.hex(), job))
+                workers[address] = (job, time.time())
                 backend.send_multipart([address, b'', job])
             # Put the queue back into the shelf for persistence
             store['queue'] = queue
