@@ -14,7 +14,7 @@ FILESTORE_BEATS = conf['FILESTORE_BEATS']
 def execute(file_id, force=False):
     # Short-circuit if the filestore already has assets we would produce
     output_keys = [ f"{Tasks.ORIG.value}.json" ]
-    if not force and filestore.check_keys(file_id, output_keys, FILESTORE_BEATS):
+    if not force and filestore.check_keys(file_id, output_keys, FILESTORE_PUBLIC):
         return
 
     # Proceed with running this task
@@ -40,7 +40,6 @@ def execute(file_id, force=False):
     with open(tempfile, 'w') as f:
         f.write(json.dumps(metadata, indent=2))
     ret['info'] = filestore.store_file(file_id, tempfile, f"{Tasks.ORIG.value}.json", FILESTORE_PUBLIC)
-    filestore.store_file(file_id, tempfile, f"{Tasks.ORIG.value}.json", FILESTORE_BEATS)
 
     # Screen to ensure we have an AIFF or WAV file
     channels = metadata['streams'][0]['channels']
