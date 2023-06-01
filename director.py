@@ -60,8 +60,6 @@ def index():
 @app.route('/stub_beat/<file_id>')
 def stub_beat(file_id):
     STATUS = flask_shelve.get_shelve()
-    if file_id in STATUS:
-        return _msg(f"Beat already exists: {file_id}"), 400
     STATUS[file_id] = _create_status(file_id, 'beat')
     return _msg(f"Status entry created for beat: {file_id}")
 
@@ -72,8 +70,6 @@ def stub_song(file_id):
 @app.route('/stub_soundkit/<file_id>')
 def stub_soundkit(file_id):
     STATUS = flask_shelve.get_shelve()
-    if file_id in STATUS:
-        return _msg(f"Soundkit already exists: {file_id}"), 400
     STATUS[file_id] = _create_status(file_id, 'soundkit')
     return _msg(f"Status entry created for soundkit: {file_id}")
 
