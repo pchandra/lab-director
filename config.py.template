@@ -1,0 +1,142 @@
+from taskdef import *
+
+# Some commononly tweaked, system-dependent variables
+CONFIG = {}
+
+
+###### General config for the whole suite
+
+# The tasks that must be run for each Beat/Song
+CONFIG['TASKS_BEAT'] = [ Tasks.ORIG,
+                         Tasks.BARS,
+                         Tasks.WGFX,
+                         Tasks.WTRM,
+                         Tasks.KBPM,
+                         Tasks.STEM,
+                         Tasks.MAST,
+                         Tasks.INST,
+                         Tasks.LYRC,
+                         Tasks.MIDI,
+                         Tasks.STAT
+                       ]
+
+# The tasks that must be run for each Soundkit
+CONFIG['TASKS_SOUNDKIT'] = [ Tasks.ZINV,
+                             Tasks.STAT
+                           ]
+
+###### Config section for Router
+
+# Address for clients to use to talk to the Router
+CONFIG['ROUTER_ADDR'] = '%%ROUTER_ADDR%%'
+
+# Address and port for the Router's frontend ZMQ sockets (Director is the client)
+CONFIG['ROUTER_FRONTEND_BIND'] = '0.0.0.0'
+CONFIG['ROUTER_FRONTEND_PORT'] = 1234
+
+# Address and port for the Router's backend ZMQ sockets (Workers are the clients)
+CONFIG['ROUTER_BACKEND_BIND'] = '0.0.0.0'
+CONFIG['ROUTER_BACKEND_PORT'] = 3456
+
+# Python 'Shelve' file used for the router to save state
+CONFIG['ROUTER_SHELVE'] = 'saved-queue'
+
+
+###### Config section for DIRECTOR
+
+# Address for clients to use to talk to the Director
+CONFIG['DIRECTOR_ADDR'] = '%%DIRECTOR_ADDR%%'
+
+# Address and port for the Director HTTP API to bind to (Workers and external tools are the clients)
+CONFIG['DIRECTOR_BIND'] = '0.0.0.0'
+CONFIG['DIRECTOR_PORT'] = 5678
+
+# Python 'Shelve' file used for the director to save state
+CONFIG['DIRECTOR_SHELVE'] = 'saved-status'
+
+
+###### Config section for Workers
+
+# Only run tasks from the following list on this worker node
+CONFIG['ACCEPTABLE_WORK'] = [ %%ACCEPTABLE_WORK%% ]
+#CONFIG['ACCEPTABLE_WORK']  = [ Tasks.ORIG.value, Tasks.WTRM.value,
+#                               Tasks.MAST.value, Tasks.KBPM.value,
+#                               Tasks.STEM.value, Tasks.INST.value,
+#                               Tasks.LYRC.value, Tasks.MIDI.value,
+#                               Tasks.COVR.value, Tasks.STAT.value
+#                             ]
+
+# Directory Workers should use for scratch space when running tasks
+CONFIG['WORK_DIR'] = '/tmp/SCRATCH'
+
+# Should be either 'local' or 's3'
+CONFIG['FILESTORE_BACKEND']='s3'
+
+# Directory to use for local filestore, if enabled
+CONFIG['FILESTORE_DIR'] = '/tmp/STORE'
+
+# Section name for public files, local: subdirectory, s3: bucket name
+CONFIG['FILESTORE_PUBLIC'] = '%%FILESTORE_PUBLIC%%'
+
+# Section name for beat files, local: subdirectory, s3: bucket name
+CONFIG['FILESTORE_BEATS'] = '%%FILESTORE_BEATS%%'
+
+# Section name for soundkit files, local: subdirectory, s3: bucket name
+CONFIG['FILESTORE_SOUNDKITS'] = '%%FILESTORE_SOUNDKITS%%'
+
+# Multipart threshold setting for S3 uploads and downloads
+CONFIG['MULTIPART_THRESHOLD'] = 64 * 1024 * 1024
+
+# Wav file to use for watermarking process
+CONFIG['WATERMARK_WAV'] = '/home/ubuntu/wav-mixer/stamps/ll-stamp.wav'
+
+# Relative strength to apply to the watermark mixing (mark-maker tool)
+CONFIG['WATERMARK_STRENGTH'] = "1"
+
+# Relative strength to apply to the watermark mixing (mark-maker tool)
+CONFIG['WATERMARK_DELAY'] = "2"
+
+# Relative strength to apply to the watermark mixing (mark-maker tool)
+CONFIG['WATERMARK_GAP'] = "0"
+
+# Sound level for considering audio input to be silent
+CONFIG['SILENCE_THRESHOLD'] = '-32dB'
+
+# Max percent of silence allowed in a track, otherwise considered empty
+CONFIG['SILENCE_PERCENT'] = 0.90
+
+# Binary to run 'ffmpeg' tool
+CONFIG['FFMPEG_BIN'] = '/usr/bin/ffmpeg'
+
+# Binary to run 'ffprobe' tool
+CONFIG['FFPROBE_BIN'] = '/usr/bin/ffprobe'
+
+# Command to run 'keymaster' tool
+CONFIG['KEYMASTER_BIN'] = '/home/ubuntu/key-bpm-finder/keymaster.py'
+
+# Command to run the 'demucs' tool
+CONFIG['DEMUCS_BIN'] = '/home/ubuntu/.local/bin/demucs'
+
+# Command to run the 'phase_limiter' tool
+CONFIG['PHASELIMITER_BIN'] = '/home/ubuntu/bin/phase_limiter'
+
+# Command to run for 'wav-mixer' tool
+CONFIG['WAVMIXER_BIN'] = '/home/ubuntu/wav-mixer/wav-mixer.py'
+
+# Command to run for 'mark-maker' tool
+CONFIG['MARKMAKER_BIN'] = '/home/ubuntu/wav-mixer/mark-maker.py'
+
+# Command to run for 'bar-tender' tool
+CONFIG['BARTENDER_BIN'] = '/home/ubuntu/wav-mixer/bar-tender.py'
+
+# Command to run for 'zip-liner' tool
+CONFIG['ZIPLINER_BIN'] = '/home/ubuntu/wav-mixer/zip-liner.py'
+
+# Command to run for 'whisper' tool
+CONFIG['WHISPER_BIN'] = '/home/ubuntu/.local/bin/whisper'
+
+# Model for vocals to text, common choices are 'tiny', 'small', 'medium', 'large'
+CONFIG['WHISPER_MODEL'] = "medium"
+
+# Device to use for ML tools, either "cpu" or "cuda"
+CONFIG['ML_DEVICE'] = "cuda"
