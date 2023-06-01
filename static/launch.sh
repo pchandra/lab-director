@@ -3,7 +3,7 @@
 ## TEST-ONLY VARS
 ROUTER_ADDR="172.31.25.52"
 DIRECTOR_ADDR="172.31.25.52"
-ACCEPTABLE_WORK="Tasks.STEM.value, Tasks.LYRC.value"
+ACCEPTABLE_WORK="x.value for x in Tasks"
 FILESTORE_PUBLIC="licenselounge-public-test"
 FILESTORE_BEATS="licenselounge-beats-test"
 FILESTORE_SOUNDKITS="licenselounge-soundkits-test"
