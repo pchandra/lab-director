@@ -8,8 +8,10 @@ FILESTORE_PUBLIC="licenselounge-public-test"
 FILESTORE_BEATS="licenselounge-beats-test"
 FILESTORE_SOUNDKITS="licenselounge-soundkits-test"
 
-# Switch to ubuntu user
-sudo -u ubuntu /usr/bin/bash
+# Run as ubuntu user
+if [ $USER != "ubuntu" ]; then \
+    exec sudo -u ubuntu /bin/bash "$0" "$@"
+fi
 cd /home/ubuntu
 
 # Do config file generation from template
@@ -30,4 +32,5 @@ done
 
 # Launch workers in tmux
 for n in work1 work2; do \
-	tmux new-session -s "$n" "cd lab-director; python3 worker.py;bash -i" \; detach
+    tmux new-session -s "$n" "cd lab-director; python3 worker.py;bash -i" \; detach
+done
