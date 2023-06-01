@@ -63,7 +63,7 @@ def main():
                 elif message[0] not in queue:
                     queue.append(message[0])
 
-            if len(queue) > 0 and socks.get(backend) == zmq.POLLIN:
+            if socks.get(backend) == zmq.POLLIN:
                 address, empty, ready = backend.recv_multipart()
                 job = b"noop noop"
                 tokens = ready.split()

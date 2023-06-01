@@ -110,8 +110,8 @@ def main():
 
         # Detect if we got a no-op
         if task == "noop":
-            _warn("No-op received, sleeping a second")
-            time.sleep(1)
+            _warn("No-op received, sleeping 5 seconds")
+            time.sleep(5)
             continue
 
         # If this node shouldn't do the task, sleep for a second and requeue it
