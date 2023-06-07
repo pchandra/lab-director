@@ -140,17 +140,9 @@ def main():
         if task == Tasks.ORIG.value:
             _run(file_id, Tasks.ORIG, force)
 
-        # Analyze an original soundkit in the file store
-        elif task == Tasks.OGSK.value:
-            _run(file_id, Tasks.OGSK, force)
-
         # Gather Zip inventory and metadata
         elif task == Tasks.ZINV.value:
-            if _check_ready(file_id, status, Tasks.OGSK):
-                _run(file_id, Tasks.ZINV, force)
-            else:
-                _log_waiting(file_id, task, Tasks.OGSK)
-                _requeue(file_id, task.upper() if force else task)
+            _run(file_id, Tasks.ZINV, force)
 
         # Bar graphics generation
         elif task == Tasks.BARS.value:
