@@ -145,7 +145,7 @@ def main():
 
         if _check_failed(file_id, status, Tasks.ORIG):
             _log(f"Task \"{task}\" FAILED executing for {file_id}")
-            api.mark_failed(file_id, task, { 'message': f'{Tasks.ORIG.value} failed', 'failed': True })
+            api.mark_failed(file_id, task, { 'message': "Task original has failed", 'failed': True })
 
         # Analyze an original beat/song in the file store
         if task == Tasks.ORIG.value:
