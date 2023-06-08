@@ -42,6 +42,13 @@ def _check_ready(file_id, status, dep):
     else:
         return True
 
+# Check if a task has failed
+def _check_failed(file_id, status, dep):
+    if status[dep.value]['status'] == State.FAIL.value:
+        return True
+    else:
+        return False
+
 # Put a waiting task back in the queue
 def _requeue(file_id, task, mark_waiting=True):
     _log(f"Requeuing, task \"{task}\" for {file_id}")
@@ -135,6 +142,10 @@ def main():
         if not any(x for x in Tasks if x.value == task):
             _warn("COMMAND NOT RECOGNIZED")
             continue
+
+        if _check_failed(file_id, status, Tasks.ORIG):
+            _log(f"Task \"{task}\" FAILED executing for {file_id}")
+            api.mark_failed(file_id, task, { 'message': f'{Tasks.ORIG.value} failed', 'failed': True })
 
         # Analyze an original beat/song in the file store
         if task == Tasks.ORIG.value:
