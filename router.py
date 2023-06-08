@@ -46,7 +46,6 @@ def main():
         counter = time.time()
         workers = {}
         while True:
-            counter += 1
             # Extract the queue from the shelf
             queue = store['queue']
             time.sleep(0.01)
