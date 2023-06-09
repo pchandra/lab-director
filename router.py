@@ -72,7 +72,7 @@ def main():
                     job = b"stop stop"
                     _log(f"Worker version mismatch! Expected: {proto_ver}, got: {tokens[1]}")
                 else:
-                    acceptable = tokens[2:]
+                    acceptable = tokens[3:]
                     acceptable.append(b'stop')
                     for j in queue:
                         if j.split()[0].lower() in acceptable:
@@ -80,7 +80,7 @@ def main():
                             queue.remove(job)
                             break
                     _log("Worker %s reports as ready, sending task: %s" % (address.hex(), job))
-                workers[address] = (job, time.time())
+                workers[address] = (job, tokens[2], time.time())
                 backend.send_multipart([address, b'', job])
             # Put the queue back into the shelf for persistence
             store['queue'] = queue

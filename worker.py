@@ -96,6 +96,11 @@ def main():
     # Process tasks forever
     _log("Starting up worker with PID: %d" % pid)
 
+    url = "http://169.254.169.254/latest/dynamic/instance-identity/document"
+    response = urlopen(url)
+    instance_data = json.loads(response.read())
+    instance_id = instance_data["instanceId"]
+
     # Read protocol version string
     with open('version-token') as f:
         proto_ver = f.read().strip()
@@ -103,7 +108,7 @@ def main():
     while True:
         # Send 'ready' and ACCEPTABLE_WORK then await a task assignment
         _log("Ready to accept new tasks")
-        receiver.send(f"ready {proto_ver} ".encode('ascii') + ' '.join(ACCEPTABLE_WORK).encode('ascii'))
+        receiver.send(f"ready {proto_ver} {instance_id} ".encode('ascii') + ' '.join(ACCEPTABLE_WORK).encode('ascii'))
         message = receiver.recv_string()
         _log("Got task: %s" % message)
         tokens = message.split()
