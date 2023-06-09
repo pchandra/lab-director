@@ -153,7 +153,7 @@ def main():
             _warn("COMMAND NOT RECOGNIZED")
             continue
 
-        if _check_failed(file_id, status, Tasks.ORIG):
+        if status['type'] == 'beat' and _check_failed(file_id, status, Tasks.ORIG):
             _log(f"Task \"{task}\" FAILED executing for {file_id}")
             error = { 'message': f"Task {Tasks.ORIG.value} failed", 'failed': True }
             data = json.dumps(error).encode('ascii')
