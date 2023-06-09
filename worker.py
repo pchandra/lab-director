@@ -96,10 +96,15 @@ def main():
     # Process tasks forever
     _log("Starting up worker with PID: %d" % pid)
 
-    url = "http://169.254.169.254/latest/dynamic/instance-identity/document"
-    response = urlopen(url)
-    instance_data = json.loads(response.read())
-    instance_id = instance_data["instanceId"]
+    # Get an ID for this instance
+    try:
+        url = "http://169.254.169.254/latest/dynamic/instance-identity/document"
+        response = urlopen(url)
+        instance_data = json.loads(response.read())
+        instance_id = instance_data["instanceId"]
+    except:
+        import socket
+        instance_id = socket.gethostname()
 
     # Read protocol version string
     with open('version-token') as f:
