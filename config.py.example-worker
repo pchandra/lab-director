@@ -12,6 +12,7 @@ CONFIG['TASKS_BEAT'] = [ Tasks.ORIG,
                          Tasks.WGFX,
                          Tasks.WTRM,
                          Tasks.KBPM,
+                         Tasks.GENR,
                          Tasks.STEM,
                          Tasks.MAST,
                          Tasks.INST,
@@ -119,6 +120,9 @@ CONFIG['DEMUCS_BIN'] = '/home/ubuntu/.local/bin/demucs'
 
 # Command to run the 'phase_limiter' tool
 CONFIG['PHASELIMITER_BIN'] = '/home/ubuntu/bin/phase_limiter'
+
+# Command to run genre detection models
+CONFIG['GENRE_BIN'] = '/home/ubuntu/genre-classifier/genre-detect.sh'
 
 # Command to run for 'wav-mixer' tool
 CONFIG['WAVMIXER_BIN'] = '/home/ubuntu/wav-mixer/wav-mixer.py'

@@ -176,6 +176,14 @@ def main():
                 _log_waiting(file_id, task, Tasks.ORIG)
                 _requeue(file_id, task.upper() if force else task)
 
+        # Genre autodetection
+        elif task == Tasks.GENR.value:
+            if _check_ready(file_id, status, Tasks.ORIG):
+                _run(file_id, Tasks.GENR, force)
+            else:
+                _log_waiting(file_id, task, Tasks.ORIG)
+                _requeue(file_id, task.upper() if force else task)
+
         # Watermarking original file
         elif task == Tasks.WTRM.value:
             if _check_ready(file_id, status, Tasks.MAST):

@@ -14,6 +14,7 @@ from . import soundkit
 from . import inventory
 from . import bars
 from . import graphics
+from . import genre
 
 __all__ = ["execute"]
 
@@ -32,3 +33,4 @@ execute[Tasks.OGSK] = soundkit.execute
 execute[Tasks.ZINV] = inventory.execute
 execute[Tasks.BARS] = bars.execute
 execute[Tasks.WGFX] = graphics.execute
+execute[Tasks.GENR] = genre.execute
