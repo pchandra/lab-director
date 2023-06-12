@@ -160,6 +160,13 @@ def main():
             api.mark_failed(file_id, task, data)
             continue
 
+        if status['type'] == 'soundkit' and _check_failed(file_id, status, Tasks.ZINV):
+            _log(f"Task \"{task}\" FAILED executing for {file_id}")
+            error = { 'message': f"Task {Tasks.ZINV.value} failed", 'failed': True }
+            data = json.dumps(error).encode('ascii')
+            api.mark_failed(file_id, task, data)
+            continue
+
         # Analyze an original beat/song in the file store
         if task == Tasks.ORIG.value:
             _run(file_id, Tasks.ORIG, force)

@@ -27,12 +27,15 @@ def execute(file_id, force=False):
         else:
             local_file = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}", scratch, FILESTORE_BEATS)
     except:
+        helpers.destroy_scratch_dir(scratch)
         return { 'message': f'File not found', 'failed': True }
     metadata = helpers.get_media_info(local_file)
     if not metadata:
+        helpers.destroy_scratch_dir(scratch)
         return { 'message': f'File format not recognized', 'failed': True }
     fmt = metadata['format'].get('format_name')
     if fmt != 'wav' and fmt != 'aiff':
+        helpers.destroy_scratch_dir(scratch)
         return { 'message': f'Not accepting this file format: {fmt}', 'failed': True }
 
     # Save the file info along side it
