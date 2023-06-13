@@ -32,7 +32,8 @@ def execute(file_id, force=False):
 
     ret = {}
 
-    for stem in metadata['stems']:
+    stems = metadata['stems-core'] + metadata['stems-extra']
+    for stem in stems:
         filename = filestore.retrieve_file(file_id, stem, scratch, FILESTORE_BEATS)
         helpers.make_wave_png(filename, factor=factor)
         base = os.path.splitext(stem)[0]
