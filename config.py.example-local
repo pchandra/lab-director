@@ -20,6 +20,7 @@ CONFIG['TASKS_BEAT'] = [ Tasks.ORIG,
                          Tasks.MIDI,
                          Tasks.STAT
                        ]
+CONFIG['TASKS_SONG'] = CONFIG['TASKS_BEAT']
 
 # The tasks that must be run for each Soundkit
 CONFIG['TASKS_SOUNDKIT'] = [ Tasks.ZINV,
@@ -81,6 +82,9 @@ CONFIG['FILESTORE_PUBLIC'] = 'licenselounge-public'
 
 # Section name for beat files, local: subdirectory, s3: bucket name
 CONFIG['FILESTORE_BEATS'] = 'licenselounge-beats'
+
+# Section name for song files, local: subdirectory, s3: bucket name
+CONFIG['FILESTORE_SONGS'] = 'licenselounge-songs'
 
 # Section name for soundkit files, local: subdirectory, s3: bucket name
 CONFIG['FILESTORE_SOUNDKITS'] = 'licenselounge-soundkits'

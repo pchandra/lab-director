@@ -15,6 +15,7 @@ ROUTER_ADDR = conf['ROUTER_ADDR']
 ROUTER_PORT = conf['ROUTER_BACKEND_PORT']
 ACCEPTABLE_WORK = conf['ACCEPTABLE_WORK']
 TASKS_BEAT = conf['TASKS_BEAT']
+TASKS_SONG = conf['TASKS_SONG']
 TASKS_SOUNDKIT = conf['TASKS_SOUNDKIT']
 
 # Setup ZeroMQ connection to receive tasks from the director
@@ -160,6 +161,13 @@ def main():
             api.mark_failed(file_id, task, data)
             continue
 
+        if status['type'] == 'song' and _check_failed(file_id, status, Tasks.ORIG):
+            _log(f"Task \"{task}\" FAILED executing for {file_id}")
+            error = { 'message': f"Task {Tasks.ORIG.value} failed", 'failed': True }
+            data = json.dumps(error).encode('ascii')
+            api.mark_failed(file_id, task, data)
+            continue
+
         if status['type'] == 'soundkit' and _check_failed(file_id, status, Tasks.ZINV):
             _log(f"Task \"{task}\" FAILED executing for {file_id}")
             error = { 'message': f"Task {Tasks.ZINV.value} failed", 'failed': True }
@@ -267,7 +275,13 @@ def main():
         # Save the status as a last step
         elif task == Tasks.STAT.value:
             all_done = True
-            to_do = TASKS_BEAT if status['type'] == 'beat' else TASKS_SOUNDKIT
+            to_do = None
+            if status['type'] == 'beat':
+                to_do = TASKS_BEAT
+            elif status['type'] == 'song':
+                to_do = TASKS_SONG
+            elif status['type'] == 'soundkit':
+                to_do = TASKS_SOUNDKIT
             for t in to_do:
                 if t == Tasks.STAT:
                     continue

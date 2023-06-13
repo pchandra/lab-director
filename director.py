@@ -16,6 +16,7 @@ flask_shelve.init_app(app)
 ROUTER_ADDR = conf['ROUTER_ADDR']
 ROUTER_PORT = conf['ROUTER_FRONTEND_PORT']
 TASKS_BEAT = conf['TASKS_BEAT']
+TASKS_SONG = conf['TASKS_SONG']
 TASKS_SOUNDKIT = conf['TASKS_SOUNDKIT']
 
 # Prepare our context and socket to push jobs to workers 
@@ -46,6 +47,8 @@ def _create_status(file_id, audio_type):
     target = None
     if audio_type == 'beat':
         target = TASKS_BEAT
+    elif audio_type == 'song':
+        target = TASKS_SONG
     elif audio_type == 'soundkit':
         target = TASKS_SOUNDKIT
     for task in [x.value for x in target]:
@@ -65,7 +68,9 @@ def stub_beat(file_id):
 
 @app.route('/stub_song/<file_id>')
 def stub_song(file_id):
-    return stub_beat(file_id)
+    STATUS = flask_shelve.get_shelve()
+    STATUS[file_id] = _create_status(file_id, 'song')
+    return _msg(f"Status entry created for song: {file_id}")
 
 @app.route('/stub_soundkit/<file_id>')
 def stub_soundkit(file_id):
@@ -84,7 +89,12 @@ def load_beat(file_id):
 
 @app.route('/load_song/<file_id>')
 def load_song(file_id):
-    return load_beat(file_id)
+    STATUS = flask_shelve.get_shelve()
+    if not file_id in STATUS:
+        STATUS[file_id] = _create_status(file_id, 'song')
+    for task in [x.value for x in TASKS_SONG]:
+        sender.send_string(f"{task} {file_id}")
+    return _msg(f"Queued all tasks for song: {file_id}")
 
 @app.route('/load_soundkit/<file_id>')
 def load_soundkit(file_id):
