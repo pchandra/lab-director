@@ -25,8 +25,9 @@ context = zmq.Context()
 sender = context.socket(zmq.PUSH)
 sender.connect(f"tcp://{ROUTER_ADDR}:{ROUTER_PORT}")
 
-def _msg(msg):
-    return { "message": f"{msg}" }
+def _msg(msg, base={}):
+    base['message'] = f"{msg}"
+    return base
 
 def _err_no_file(file_id):
     return _msg(f"No such file_id {file_id}"), 400
@@ -66,8 +67,10 @@ def convert(file_id, key, fmt):
     STATUS = flask_shelve.get_shelve()
     if not file_id in STATUS:
         return _err_no_file(file_id)
-    sender.send_string(f"{Tasks.CONV.value} {file_id} {str(uuid.uuid4())} {key} {fmt}")
-    return _msg(f"Sent conversion task: {key} to {fmt} for: {file_id}")
+    runid = str(uuid.uuid4())
+    sender.send_string(f"{Tasks.CONV.value} {file_id} {runid} {key} {fmt}")
+    base = { 'uuid' : runid }
+    return _msg(f"Sent conversion task: {key} to {fmt} for: {file_id}", base)
 
 @app.route('/stub_beat/<file_id>')
 def stub_beat(file_id):
