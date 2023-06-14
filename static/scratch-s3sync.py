@@ -2,6 +2,7 @@ import sys
 raise Exception()
 sys.exit()
 
+import os
 import boto3
 import re
 import mimetypes
@@ -12,7 +13,7 @@ config = TransferConfig(multipart_threshold=64 * 1024 * 1024)
 
 scratchfile = '/tmp/scratchfile'
 
-srcname = 'licenselounge-beats'
+srcname = 'licenselounge-audiolab'
 dstname = 'licenselounge-audiolab'
 src = s3.Bucket(srcname)
 dst = s3.Bucket(dstname)
@@ -32,11 +33,12 @@ def key_exists(key, section):
 #files = [ "stems-.*", "stems.json" ]
 ### NOWHERE YET
 #files = [ "instrumental.wav", "lyrics.json", "lyrics.srt", "lyrics.tsv", "lyrics.txt", "lyrics.vtt" ]
+files = [ ".*.mp3" ]
 
 pats = {}
 
 for f in files:
-    pats[f] = re.compile(f'.*/{f}')
+    pats[f] = re.compile(f'jake/blues/{f}')
 
 for o in src.objects.all():
     for f in files:
@@ -44,16 +46,19 @@ for o in src.objects.all():
         if m is not None:
             print(f'*Found: {o.key}')
             #s3.Object(srcname, o.key).delete()
-            if key_exists(o.key, dstname):
-                print("**Key exists in dst, skipping...")
-                continue
-            else:
-                file_mime_type, _ = mimetypes.guess_type(o.key)
-                extra = {'ContentType': file_mime_type} if file_mime_type is not None else None
-                s3.Object(srcname, o.key).download_file(scratchfile, Config=config)
-                print(f'>Downloaded: {src.name}/{o.key} to {scratchfile}')
-                dst.upload_file(Filename=scratchfile, Key=o.key, Config=config, ExtraArgs=extra)
-                print(f'<Uploaded: {scratchfile} to {dst.name}/{o.key}')
+            filename = scratchfile + "/" + o.key
+            os.makedirs(os.path.split(scratchfile + "/" + o.key)[0], exist_ok=True)
+            s3.Object(srcname, o.key).download_file(filename, Config=config)
+            #if key_exists(o.key, dstname):
+            #    print("**Key exists in dst, skipping...")
+            #    continue
+            #else:
+            #    file_mime_type, _ = mimetypes.guess_type(o.key)
+            #    extra = {'ContentType': file_mime_type} if file_mime_type is not None else None
+            #    s3.Object(srcname, o.key).download_file(scratchfile, Config=config)
+            #    print(f'>Downloaded: {src.name}/{o.key} to {scratchfile}')
+            #    dst.upload_file(Filename=scratchfile, Key=o.key, Config=config, ExtraArgs=extra)
+            #    print(f'<Uploaded: {scratchfile} to {dst.name}/{o.key}')
 
 
 sys.exit()
