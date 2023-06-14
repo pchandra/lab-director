@@ -9,8 +9,6 @@ from config import CONFIG as conf
 
 DEMUCS_BIN = conf['DEMUCS_BIN']
 ML_DEVICE = conf['ML_DEVICE']
-FILESTORE_PUBLIC = conf['FILESTORE_PUBLIC']
-FILESTORE_BEATS = conf['FILESTORE_BEATS']
 
 def _stems_for_model(model):
     stems = [ "bass", "drums", "other", "vocals"]
@@ -19,12 +17,12 @@ def _stems_for_model(model):
         stems.append("piano")
     return stems
 
-def _run_demucs_model(file_id, filename, scratch, model, progress_start=0, progress_size=100):
+def _run_demucs_model(file_id, filename, scratch, public, model, progress_start=0, progress_size=100):
     outbase = f"{scratch}/{model}/{os.path.splitext(os.path.basename(filename))[0]}"
     stems = _stems_for_model(model)
 
     # Get the info for the original file to get the bit depth
-    infofile = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.json", scratch, FILESTORE_PUBLIC)
+    infofile = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.json", scratch, public)
     with open(infofile, 'r') as f:
         info = json.load(f)
     bitdepth = info['streams'][0]['bits_per_sample']
@@ -108,21 +106,22 @@ def _check_stems(demucs, model):
     return stems_present, stems_good
 
 def execute(file_id, force=False):
+    private, public = helpers.get_bucketnames(file_id)
     # Short-circuit if the filestore already has assets we would produce
     output_keys = [ f"{Tasks.STEM.value}.json" ]
-    if not force and filestore.check_keys(file_id, output_keys, FILESTORE_PUBLIC):
+    if not force and filestore.check_keys(file_id, output_keys, public):
         return None
 
     # Proceed with running this task
     scratch = helpers.create_scratch_dir()
-    filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.wav", scratch, FILESTORE_BEATS)
+    filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.wav", scratch, private)
     ret = {}
     # Run the high quality 4 source model and filter for non-silent
-    ret['htdemucs_ft'] = _run_demucs_model(file_id, filename, scratch, 'htdemucs_ft', progress_size = 50)
+    ret['htdemucs_ft'] = _run_demucs_model(file_id, filename, scratch, public, 'htdemucs_ft', progress_size = 50)
     stems_core, stems_good = _check_stems(ret['htdemucs_ft'], 'htdemucs_ft')
 
     # Run the 6 source and see if there's a good guitar or piano stem
-    ret['htdemucs_6s'] = _run_demucs_model(file_id, filename, scratch, 'htdemucs_6s', progress_start = 50, progress_size = 50)
+    ret['htdemucs_6s'] = _run_demucs_model(file_id, filename, scratch, public, 'htdemucs_6s', progress_start = 50, progress_size = 50)
     _, stems6g = _check_stems(ret['htdemucs_6s'], 'htdemucs_6s')
 
     # Done with the tool execution
@@ -140,10 +139,10 @@ def execute(file_id, force=False):
 
     # Save each stem back to filestore
     for stem in stems_core.keys():
-        stored_location = filestore.store_file(file_id, stems_core[stem], f'{Tasks.STEM.value}-{stem}.wav', FILESTORE_BEATS)
+        stored_location = filestore.store_file(file_id, stems_core[stem], f'{Tasks.STEM.value}-{stem}.wav', private)
         stems_core[stem] = stored_location
     for stem in stems_extra.keys():
-        stored_location = filestore.store_file(file_id, stems_extra[stem], f'{Tasks.STEM.value}-{stem}.wav', FILESTORE_BEATS)
+        stored_location = filestore.store_file(file_id, stems_extra[stem], f'{Tasks.STEM.value}-{stem}.wav', private)
         stems_extra[stem] = stored_location
 
     # Build a metadata dict to save to filestore
@@ -155,7 +154,7 @@ def execute(file_id, force=False):
     tempfile = f"{scratch}/{Tasks.STEM.value}.json"
     with open(tempfile, 'w') as f:
         f.write(json.dumps(stem_obj, indent=2))
-    filestore.store_file(file_id, tempfile, f"{Tasks.STEM.value}.json", FILESTORE_PUBLIC)
+    filestore.store_file(file_id, tempfile, f"{Tasks.STEM.value}.json", public)
 
     ret['output'] = stem_obj
     helpers.destroy_scratch_dir(scratch)

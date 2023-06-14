@@ -8,13 +8,12 @@ from . import filestore
 from config import CONFIG as conf
 
 WAVMIXER_BIN = conf['WAVMIXER_BIN']
-FILESTORE_PUBLIC = conf['FILESTORE_PUBLIC']
-FILESTORE_BEATS = conf['FILESTORE_BEATS']
 
 def execute(file_id, force=False):
+    private, public = helpers.get_bucketnames(file_id)
     # Short-circuit if the filestore already has assets we would produce
     output_keys = [ f"{Tasks.INST.value}.wav" ]
-    if not force and filestore.check_keys(file_id, output_keys, FILESTORE_BEATS):
+    if not force and filestore.check_keys(file_id, output_keys, private):
         return
 
     # Proceed with running this task
@@ -22,7 +21,7 @@ def execute(file_id, force=False):
     outfile = f"{scratch}/{Tasks.INST.value}.wav"
 
     # Get the stem metadata from the filestore
-    stem_json = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}.json", scratch, FILESTORE_PUBLIC)
+    stem_json = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}.json", scratch, public)
     metadata = None
     with open(stem_json, 'r') as f:
         metadata = json.load(f)
@@ -33,7 +32,7 @@ def execute(file_id, force=False):
         return
 
     # Get the info for the original file to get the bit depth
-    infofile = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.json", scratch, FILESTORE_PUBLIC)
+    infofile = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.json", scratch, public)
     with open(infofile, 'r') as f:
         info = json.load(f)
     bitdepth = info['streams'][0]['bits_per_sample']
@@ -50,7 +49,7 @@ def execute(file_id, force=False):
     for stem in metadata['stems-core']:
         if stem == f'{Tasks.STEM.value}-vocals.wav':
             continue
-        filename = filestore.retrieve_file(file_id, stem, scratch, FILESTORE_BEATS)
+        filename = filestore.retrieve_file(file_id, stem, scratch, private)
         filenames.append(filename)
     cmdline.extend(filenames)
 
@@ -65,7 +64,7 @@ def execute(file_id, force=False):
     stdout, stderr = process.communicate(input="\n\n\n\n\n")
 
     # Store the resulting file
-    stored_location = filestore.store_file(file_id, outfile, f"{Tasks.INST.value}.wav", FILESTORE_BEATS)
+    stored_location = filestore.store_file(file_id, outfile, f"{Tasks.INST.value}.wav", private)
 
     # Build the dict to return to caller
     ret = { "command": { "stdout": stdout, "stderr": stderr } }

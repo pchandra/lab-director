@@ -6,20 +6,19 @@ from . import filestore
 from config import CONFIG as conf
 
 BARTENDER_BIN = conf['BARTENDER_BIN']
-FILESTORE_PUBLIC = conf['FILESTORE_PUBLIC']
-FILESTORE_BEATS = conf['FILESTORE_BEATS']
 
 def execute(file_id, force=False):
+    private, public = helpers.get_bucketnames(file_id)
     # Short-circuit if the filestore already has assets we would produce
     output_keys = [ f"{Tasks.BARS.value}-desktop.png", f"{Tasks.BARS.value}-mobile.png" ]
-    if not force and filestore.check_keys(file_id, output_keys, FILESTORE_PUBLIC):
+    if not force and filestore.check_keys(file_id, output_keys, public):
         return
 
     # Proceed with running this task
     scratch = helpers.create_scratch_dir()
 
     # Use the mp3 version of the original to make the graphics
-    filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.mp3", scratch, FILESTORE_BEATS)
+    filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.mp3", scratch, private)
     svgname = scratch + f"/{Tasks.BARS.value}.svg"
     pngname = scratch + f"/{Tasks.BARS.value}.png"
 
@@ -43,7 +42,7 @@ def execute(file_id, force=False):
     stdout, _ = process.communicate()
     # Save the desktop version
     ret = {}
-    ret['desktop'] = filestore.store_file(file_id, pngname, f"{Tasks.BARS.value}-desktop.png", FILESTORE_PUBLIC)
+    ret['desktop'] = filestore.store_file(file_id, pngname, f"{Tasks.BARS.value}-desktop.png", public)
 
     # Run it again for the mobile version
     cmdline = []
@@ -64,7 +63,7 @@ def execute(file_id, force=False):
                                universal_newlines=True)
     stdout, _ = process.communicate()
     # Save the mobile version
-    ret['mobile'] = filestore.store_file(file_id, pngname, f"{Tasks.BARS.value}-mobile.png", FILESTORE_PUBLIC)
+    ret['mobile'] = filestore.store_file(file_id, pngname, f"{Tasks.BARS.value}-mobile.png", public)
 
     helpers.destroy_scratch_dir(scratch)
     return ret
