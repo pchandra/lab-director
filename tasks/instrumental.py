@@ -70,10 +70,11 @@ def execute(file_id, force=False):
     mp3file = f"{scratch}/{Tasks.INST.value}.mp3"
     helpers.make_website_mp3(outfile, mp3file)
     # Store the resulting file
-    ret['mp3'] = filestore.store_file(file_id, mp3file, f"{Tasks.INST.value}.mp3", private)
+    mp3_location = filestore.store_file(file_id, mp3file, f"{Tasks.INST.value}.mp3", private)
 
     # Build the dict to return to caller
     ret = { "command": { "stdout": stdout, "stderr": stderr } }
     ret["output"] = stored_location
+    ret['mp3'] = mp3_location
     helpers.destroy_scratch_dir(scratch)
     return ret
