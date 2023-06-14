@@ -128,6 +128,23 @@ def get_bucketnames(file_id):
         private = FILESTORE_SOUNDKITS
     return private, FILESTORE_PUBLIC
 
+def make_website_mp3(infile, mp3file):
+    # Run an FFMPEG cmd to compress to mp3
+    cmdline = []
+    cmdline.append(FFMPEG_BIN)
+    cmdline.extend([ "-i", infile,
+                     "-v", "quiet",
+                     "-q:a", "3",
+                     "-y"
+                   ])
+    cmdline.append(mp3file)
+    process = subprocess.Popen(cmdline,
+                               stdin=subprocess.PIPE,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE,
+                               universal_newlines=True)
+    stdout, stderr = process.communicate(input="\n\n\n\n\n")
+
 scratch_dirs = []
 def create_scratch_dir():
     path = WORK_DIR + f"/{str(uuid.uuid4())}"
