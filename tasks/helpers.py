@@ -134,7 +134,7 @@ def make_website_mp3(infile, mp3file):
     cmdline.append(FFMPEG_BIN)
     cmdline.extend([ "-i", infile,
                      "-v", "quiet",
-                     "-q:a", "3",
+                     "-q:a", "2",
                      "-y"
                    ])
     cmdline.append(mp3file)
