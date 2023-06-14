@@ -142,12 +142,17 @@ def execute(file_id, force=False):
     for stem in stems.keys():
         # Make an MP3 website version
         mp3file = f"{scratch}/{Tasks.STEM.value}-{stem}.mp3"
-        helpers.make_website_mp3(stems_core[stem], mp3file)
+        helpers.make_website_mp3(stems[stem], mp3file)
         # Store the mp3 stem
         mp3_location = filestore.store_file(file_id, mp3file, f"{Tasks.STEM.value}-{stem}.mp3", private)
         # Store the wav stem
-        stored_location = filestore.store_file(file_id, stems_core[stem], f'{Tasks.STEM.value}-{stem}.wav', private)
-        stems_core[stem] = stored_location
+        stored_location = filestore.store_file(file_id, stems[stem], f'{Tasks.STEM.value}-{stem}.wav', private)
+        stems[stem] = stored_location
+
+    # Unpack stored locations for stem object
+    for i in [ stems_core, stems_extra]:
+        for k in i.keys():
+            i[k] = stems[k]
 
     # Build a metadata dict to save to filestore
     stem_obj = {}
