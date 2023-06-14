@@ -138,12 +138,16 @@ def execute(file_id, force=False):
     ret['instrumental'] = "vocals" not in stems_good.keys()
 
     # Save each stem back to filestore
-    for stem in stems_core.keys():
+    stems = stems_core | stems_extra
+    for stem in stems.keys():
         stored_location = filestore.store_file(file_id, stems_core[stem], f'{Tasks.STEM.value}-{stem}.wav', private)
         stems_core[stem] = stored_location
-    for stem in stems_extra.keys():
-        stored_location = filestore.store_file(file_id, stems_extra[stem], f'{Tasks.STEM.value}-{stem}.wav', private)
-        stems_extra[stem] = stored_location
+
+        # Make an MP3 website version
+        mp3file = f"{scratch}/{Tasks.STEM.value}-{stem}.mp3"
+        helpers.make_website_mp3(stems_core[stem], mp3file)
+        # Store the resulting file
+        mp3_location = filestore.store_file(file_id, mp3file, f"{Tasks.STEM.value}-{stem}.mp3", private)
 
     # Build a metadata dict to save to filestore
     stem_obj = {}

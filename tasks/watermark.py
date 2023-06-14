@@ -49,23 +49,9 @@ def execute(file_id, force=False):
     ret = {}
     ret["phase1"] = { "stdout": stdout, "stderr": stderr }
 
-    # Run FFMPEG to make MP3 version
+    # Make an MP3 website version
     mp3file = f"{scratch}/{Tasks.WTRM.value}.mp3"
-    # Run an FFMPEG cmd to compress to mp3
-    cmdline = []
-    cmdline.append(FFMPEG_BIN)
-    cmdline.extend([ "-i", outfile,
-                     "-q:a", "3",
-                     "-y"
-                   ])
-    cmdline.append(mp3file)
-    process = subprocess.Popen(cmdline,
-                               stdin=subprocess.PIPE,
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE,
-                               universal_newlines=True)
-    stdout, stderr = process.communicate(input="\n\n\n\n\n")
-
+    helpers.make_website_mp3(outfile, mp3file)
     # Store the resulting file
     ret['output'] = filestore.store_file(file_id, mp3file, f"{Tasks.WTRM.value}.mp3", public)
     ret["phase2"] = { "stdout": stdout, "stderr": stderr }

@@ -82,24 +82,9 @@ def execute(file_id, force=False):
     # Save it as the wav version of original to the filestore
     ret['output'] = filestore.store_file(file_id, outfile, f"{Tasks.ORIG.value}.wav", private)
 
-    # Run FFMPEG to make MP3 version
+    # Make an MP3 website version
     mp3file = f"{scratch}/{Tasks.ORIG.value}.mp3"
-    # Run an FFMPEG cmd to compress to mp3
-    cmdline = []
-    cmdline.append(FFMPEG_BIN)
-    cmdline.extend([ "-i", outfile,
-                     "-v", "quiet",
-                     "-b:a", "320k",
-                     "-y"
-                   ])
-    cmdline.append(mp3file)
-    process = subprocess.Popen(cmdline,
-                               stdin=subprocess.PIPE,
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE,
-                               universal_newlines=True)
-    stdout, stderr = process.communicate(input="\n\n\n\n\n")
-
+    helpers.make_website_mp3(outfile, mp3file)
     # Store the resulting file
     ret['mp3'] = filestore.store_file(file_id, mp3file, f"{Tasks.ORIG.value}.mp3", private)
 
