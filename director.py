@@ -1,4 +1,3 @@
-import uuid
 import zmq
 from random import randrange
 from flask import request
@@ -67,10 +66,8 @@ def convert(file_id, key, fmt):
     STATUS = flask_shelve.get_shelve()
     if not file_id in STATUS:
         return _err_no_file(file_id)
-    runid = str(uuid.uuid4())
-    sender.send_string(f"{Tasks.CONV.value} {file_id} {runid} {key} {fmt}")
-    base = { 'uuid' : runid }
-    return _msg(f"Sent conversion task: {key} to {fmt} for: {file_id}", base)
+    sender.send_string(f"{Tasks.CONV.value} {file_id} {key} {fmt}")
+    return _msg(f"Sent conversion task: {key} to {fmt} for: {file_id}")
 
 @app.route('/stub_beat/<file_id>')
 def stub_beat(file_id):

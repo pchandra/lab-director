@@ -177,10 +177,9 @@ def main():
         # File conversion task
         if task == Tasks.CONV.value:
             from tasks import convert
-            out_id = tokens[2]
-            key = tokens[3]
-            fmt = tokens[4]
-            convert.convert(file_id, out_id, key, fmt)
+            key = tokens[2]
+            fmt = tokens[3]
+            convert.convert(file_id, key, fmt)
 
         # Analyze an original beat/song in the file store
         elif task == Tasks.ORIG.value:

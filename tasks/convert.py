@@ -8,12 +8,17 @@ from config import CONFIG as conf
 FFMPEG_BIN = conf['FFMPEG_BIN']
 FILESTORE_SCRATCH = conf['FILESTORE_SCRATCH']
 
-def convert(file_id, out_id, key, fmt):
+def convert(file_id, key, fmt):
     private, public = helpers.get_bucketnames(file_id)
     status = api.get_status(file_id)
 
     # Screen for formats we'll support
     if not fmt in [ 'mp3', 'aiff', 'flac', 'ogg']:
+        return
+
+    # Short-circuit if the filestore already has assets we would produce
+    output_keys = [ f"{key}.{fmt}" ]
+    if filestore.check_keys(file_id, output_keys, FILESTORE_SCRATCH):
         return
 
     scratch = helpers.create_scratch_dir()
@@ -37,5 +42,5 @@ def convert(file_id, out_id, key, fmt):
                                universal_newlines=True)
     stdout, stderr = process.communicate(input="\n\n\n\n\n")
 
-    filestore.store_file(file_id, outfile, f"{out_id}/{key}.{fmt}", FILESTORE_SCRATCH)
+    filestore.store_file(file_id, outfile, f"{key}.{fmt}", FILESTORE_SCRATCH)
     helpers.destroy_scratch_dir(scratch)
