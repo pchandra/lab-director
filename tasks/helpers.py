@@ -14,6 +14,10 @@ BARTENDER_BIN = conf['BARTENDER_BIN']
 WORK_DIR = conf['WORK_DIR']
 SILENCE_THRESHOLD = conf['SILENCE_THRESHOLD']
 SILENCE_PERCENT = conf['SILENCE_PERCENT']
+FILESTORE_PUBLIC = conf['FILESTORE_PUBLIC']
+FILESTORE_BEATS = conf['FILESTORE_BEATS']
+FILESTORE_SONGS = conf['FILESTORE_SONGS']
+FILESTORE_SOUNDKITS = conf['FILESTORE_SOUNDKITS']
 
 
 def setprogress(file_id, task_type, percent=0):
@@ -112,6 +116,17 @@ def make_wave_png(wavfile, factor=None):
     with open(wavfile + ".json") as f:
         ret = json.load(f)['factor']
     return ret
+
+def get_bucketnames(file_id):
+    status = api.get_status(file_id)
+    private = None
+    if status['type'] == 'beat':
+        private = FILESTORE_BEATS
+    elif status['type'] == 'song':
+        private = FILESTORE_SONGS
+    elif status['type'] == 'soundkit':
+        private = FILESTORE_SOUNDKITS
+    return private, FILESTORE_PUBLIC
 
 scratch_dirs = []
 def create_scratch_dir():
