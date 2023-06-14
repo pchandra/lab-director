@@ -22,7 +22,12 @@ def convert(file_id, key, fmt):
         return
 
     scratch = helpers.create_scratch_dir()
-    infile = filestore.retrieve_file(file_id, f"{key}.wav", scratch, private)
+    try:
+        infile = filestore.retrieve_file(file_id, f"{key}.wav", scratch, private)
+    except:
+        helpers.destroy_scratch_dir(scratch)
+        return
+
     outfile = f"{scratch}/{key}.{fmt}"
 
     # #execute the command
