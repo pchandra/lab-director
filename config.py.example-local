@@ -89,6 +89,9 @@ CONFIG['FILESTORE_SONGS'] = 'licenselounge-songs'
 # Section name for soundkit files, local: subdirectory, s3: bucket name
 CONFIG['FILESTORE_SOUNDKITS'] = 'licenselounge-soundkits'
 
+# Section name for scratch output
+CONFIG['FILESTORE_SCRATCH'] = 'licenselounge-scratch'
+
 # Multipart threshold setting for S3 uploads and downloads
 CONFIG['MULTIPART_THRESHOLD'] = 64 * 1024 * 1024
 

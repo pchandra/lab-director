@@ -84,10 +84,13 @@ CONFIG['FILESTORE_PUBLIC'] = '%%FILESTORE_PUBLIC%%'
 CONFIG['FILESTORE_BEATS'] = '%%FILESTORE_BEATS%%'
 
 # Section name for song files, local: subdirectory, s3: bucket name
-CONFIG['FILESTORE_SONGS'] = 'licenselounge-songs'
+CONFIG['FILESTORE_SONGS'] = '%%FILESTORE_SONGS%%'
 
 # Section name for soundkit files, local: subdirectory, s3: bucket name
 CONFIG['FILESTORE_SOUNDKITS'] = '%%FILESTORE_SOUNDKITS%%'
+
+# Section name for scratch output
+CONFIG['FILESTORE_SCRATCH'] = '%%FILESTORE_SCRATCH%%'
 
 # Multipart threshold setting for S3 uploads and downloads
 CONFIG['MULTIPART_THRESHOLD'] = 64 * 1024 * 1024

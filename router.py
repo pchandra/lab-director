@@ -58,7 +58,7 @@ def main():
                 message = frontend.recv_multipart()
                 task, file_id = message[0].split()
                 _log("Frontend got task: %s" % message[0])
-                if task.lower() == b'stop':
+                if task == b'convert' or task.lower() == b'stop':
                     queue.insert(0, message[0])
                 elif message[0] not in queue:
                     queue.append(message[0])

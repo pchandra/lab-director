@@ -154,20 +154,19 @@ def main():
             _warn("COMMAND NOT RECOGNIZED")
             continue
 
+        # Short-circuit tasks whose main dependency has failed
         if status['type'] == 'beat' and _check_failed(file_id, status, Tasks.ORIG):
             _log(f"Task \"{task}\" FAILED executing for {file_id}")
             error = { 'message': f"Task {Tasks.ORIG.value} failed", 'failed': True }
             data = json.dumps(error).encode('ascii')
             api.mark_failed(file_id, task, data)
             continue
-
         if status['type'] == 'song' and _check_failed(file_id, status, Tasks.ORIG):
             _log(f"Task \"{task}\" FAILED executing for {file_id}")
             error = { 'message': f"Task {Tasks.ORIG.value} failed", 'failed': True }
             data = json.dumps(error).encode('ascii')
             api.mark_failed(file_id, task, data)
             continue
-
         if status['type'] == 'soundkit' and _check_failed(file_id, status, Tasks.ZINV):
             _log(f"Task \"{task}\" FAILED executing for {file_id}")
             error = { 'message': f"Task {Tasks.ZINV.value} failed", 'failed': True }
@@ -175,8 +174,16 @@ def main():
             api.mark_failed(file_id, task, data)
             continue
 
+        # File conversion task
+        if task == Tasks.CONV.value:
+            from tasks import convert
+            out_id = tokens[2]
+            key = tokens[3]
+            fmt = tokens[4]
+            convert.convert(file_id, out_id, key, fmt)
+
         # Analyze an original beat/song in the file store
-        if task == Tasks.ORIG.value:
+        elif task == Tasks.ORIG.value:
             _run(file_id, Tasks.ORIG, force)
 
         # Gather Zip inventory and metadata

@@ -1,3 +1,4 @@
+import uuid
 import zmq
 from random import randrange
 from flask import request
@@ -59,6 +60,14 @@ def _create_status(file_id, audio_type):
 @app.route('/')
 def index():
     return _msg('AudioLab HTTP API Service')
+
+@app.route('/convert/<file_id>/<key>/<fmt>')
+def convert():
+    STATUS = flask_shelve.get_shelve()
+    if not file_id in STATUS:
+        return _err_no_file(file_id)
+    sender.send_string(f"{Tasks.CONV.value} {file_id} {str(uuid.uuid4())} {key} {fmt}")
+    return _msg(f"Sent conversion task: {key} to {fmt} for: {file_id}")
 
 @app.route('/stub_beat/<file_id>')
 def stub_beat(file_id):

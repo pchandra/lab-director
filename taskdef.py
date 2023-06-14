@@ -16,6 +16,7 @@ class Tasks(Enum):
     OGSK = 'soundkit' # Initialize filestore with soundkit
     ZINV = 'inventory' # Gather metadata about the contents of a zip
     GENR = 'genre' # Run models to detect music genre
+    CONV = 'convert' # Run a conversion task
 
 class State(Enum):
     INIT = "initial"
