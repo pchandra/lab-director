@@ -140,14 +140,14 @@ def execute(file_id, force=False):
     # Save each stem back to filestore
     stems = stems_core | stems_extra
     for stem in stems.keys():
-        stored_location = filestore.store_file(file_id, stems_core[stem], f'{Tasks.STEM.value}-{stem}.wav', private)
-        stems_core[stem] = stored_location
-
         # Make an MP3 website version
         mp3file = f"{scratch}/{Tasks.STEM.value}-{stem}.mp3"
         helpers.make_website_mp3(stems_core[stem], mp3file)
-        # Store the resulting file
+        # Store the mp3 stem
         mp3_location = filestore.store_file(file_id, mp3file, f"{Tasks.STEM.value}-{stem}.mp3", private)
+        # Store the wav stem
+        stored_location = filestore.store_file(file_id, stems_core[stem], f'{Tasks.STEM.value}-{stem}.wav', private)
+        stems_core[stem] = stored_location
 
     # Build a metadata dict to save to filestore
     stem_obj = {}
