@@ -1,5 +1,6 @@
 import subprocess
 from taskdef import *
+import taskapi as api
 from . import helpers
 from . import filestore
 from config import CONFIG as conf
@@ -11,7 +12,10 @@ def convert(file_id, out_id, key, fmt):
     private, public = helpers.get_bucketnames(file_id)
     status = api.get_status(file_id)
 
-    if not key in [ 'mp3', 'aiff', 'flac', 'ogg']
+    # Screen for formats we'll support
+    if not fmt in [ 'mp3', 'aiff', 'flac', 'ogg']:
+        return
+
     scratch = helpers.create_scratch_dir()
     infile = filestore.retrieve_file(file_id, f"{key}.wav", scratch, private)
     outfile = f"{scratch}/{key}.{fmt}"

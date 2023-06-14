@@ -62,7 +62,7 @@ def index():
     return _msg('AudioLab HTTP API Service')
 
 @app.route('/convert/<file_id>/<key>/<fmt>')
-def convert():
+def convert(file_id, key, fmt):
     STATUS = flask_shelve.get_shelve()
     if not file_id in STATUS:
         return _err_no_file(file_id)

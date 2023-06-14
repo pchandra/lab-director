@@ -56,7 +56,8 @@ def main():
 
             if socks.get(frontend) == zmq.POLLIN:
                 message = frontend.recv_multipart()
-                task, file_id = message[0].split()
+                tokens = message[0].split()
+                task = tokens[0]
                 _log("Frontend got task: %s" % message[0])
                 if task == b'convert' or task.lower() == b'stop':
                     queue.insert(0, message[0])
