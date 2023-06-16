@@ -167,7 +167,7 @@ def main():
             data = json.dumps(error).encode('ascii')
             api.mark_failed(file_id, task, data)
             continue
-        if status['type'] == 'soundkit' and _check_failed(file_id, status, Tasks.ZINV and task != Tasks.ZINV.value):
+        if status['type'] == 'soundkit' and _check_failed(file_id, status, Tasks.ZINV) and task != Tasks.ZINV.value:
             _log(f"Task \"{task}\" FAILED executing for {file_id}")
             error = { 'message': f"Task {Tasks.ZINV.value} failed", 'failed': True }
             data = json.dumps(error).encode('ascii')
