@@ -155,19 +155,19 @@ def main():
             continue
 
         # Short-circuit tasks whose main dependency has failed
-        if status['type'] == 'beat' and _check_failed(file_id, status, Tasks.ORIG):
+        if status['type'] == 'beat' and _check_failed(file_id, status, Tasks.ORIG) and task != Tasks.ORIG.value:
             _log(f"Task \"{task}\" FAILED executing for {file_id}")
             error = { 'message': f"Task {Tasks.ORIG.value} failed", 'failed': True }
             data = json.dumps(error).encode('ascii')
             api.mark_failed(file_id, task, data)
             continue
-        if status['type'] == 'song' and _check_failed(file_id, status, Tasks.ORIG):
+        if status['type'] == 'song' and _check_failed(file_id, status, Tasks.ORIG) and task != Tasks.ORIG.value:
             _log(f"Task \"{task}\" FAILED executing for {file_id}")
             error = { 'message': f"Task {Tasks.ORIG.value} failed", 'failed': True }
             data = json.dumps(error).encode('ascii')
             api.mark_failed(file_id, task, data)
             continue
-        if status['type'] == 'soundkit' and _check_failed(file_id, status, Tasks.ZINV):
+        if status['type'] == 'soundkit' and _check_failed(file_id, status, Tasks.ZINV and task != Tasks.ZINV.value):
             _log(f"Task \"{task}\" FAILED executing for {file_id}")
             error = { 'message': f"Task {Tasks.ZINV.value} failed", 'failed': True }
             data = json.dumps(error).encode('ascii')
