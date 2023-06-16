@@ -9,11 +9,9 @@ class Tasks(Enum):
     INST = 'instrumental' # Produce and intrumental version from stems
     LYRC = 'lyrics' # Get the lyrics from the vocals stem
     MIDI = 'midi' # Produce a MIDI file (per stem?)
-    COVR = 'coverart' # Generate cover art automatically
     STAT = 'status' # Save the status as JSON at the end
     BARS = 'bars' # Generate bar/waveform graphics for an original
     WGFX = 'gfx' # Generate detailed waveform graphics
-    OGSK = 'soundkit' # Initialize filestore with soundkit
     ZINV = 'inventory' # Gather metadata about the contents of a zip
     GENR = 'genre' # Run models to detect music genre
     CONV = 'convert' # Run a conversion task
