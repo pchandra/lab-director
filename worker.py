@@ -274,10 +274,6 @@ def main():
         elif task == Tasks.MIDI.value:
             api.mark_notavailable(file_id, task)
 
-        # Cover art generation
-        elif task == Tasks.COVR.value:
-            _run(file_id, Tasks.COVR, force)
-
         # Save the status as a last step
         elif task == Tasks.STAT.value:
             all_done = True
