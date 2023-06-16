@@ -16,16 +16,13 @@ CONFIG['TASKS_BEAT'] = [ Tasks.ORIG,
                          Tasks.STEM,
                          Tasks.MAST,
                          Tasks.INST,
-                         Tasks.LYRC,
-                         Tasks.MIDI,
-                         Tasks.STAT
+                         Tasks.LYRC
                        ]
 CONFIG['TASKS_SONG'] = CONFIG['TASKS_BEAT']
 
 # The tasks that must be run for each Soundkit
 CONFIG['TASKS_SOUNDKIT'] = [ Tasks.ZINV,
-                             Tasks.KGFX,
-                             Tasks.STAT
+                             Tasks.KGFX
                            ]
 
 ###### Config section for Router
