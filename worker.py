@@ -189,6 +189,10 @@ def main():
         elif task == Tasks.ZINV.value:
             _run(file_id, Tasks.ZINV, force)
 
+        # Create soundkit graphics if there's a preview
+        elif task == Tasks.KGFX.value:
+            _run(file_id, Tasks.KGFX, force)
+
         # Bar graphics generation
         elif task == Tasks.BARS.value:
             if _check_ready(file_id, status, Tasks.ORIG):
