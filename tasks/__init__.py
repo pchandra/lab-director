@@ -10,6 +10,7 @@ from . import original
 from . import watermark
 from . import status
 from . import inventory
+from . import kitgfx
 from . import bars
 from . import graphics
 from . import genre
@@ -27,6 +28,7 @@ execute[Tasks.ORIG] = original.execute
 execute[Tasks.WTRM] = watermark.execute
 execute[Tasks.STAT] = status.execute
 execute[Tasks.ZINV] = inventory.execute
+execute[Tasks.KGFX] = kitgfx.execute
 execute[Tasks.BARS] = bars.execute
 execute[Tasks.WGFX] = graphics.execute
 execute[Tasks.GENR] = genre.execute

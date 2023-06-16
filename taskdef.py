@@ -13,6 +13,7 @@ class Tasks(Enum):
     BARS = 'bars' # Generate bar/waveform graphics for an original
     WGFX = 'gfx' # Generate detailed waveform graphics
     ZINV = 'inventory' # Gather metadata about the contents of a zip
+    KGFX = 'soundkit-gfx' # Create graphics for a soundkit preview file
     GENR = 'genre' # Run models to detect music genre
     CONV = 'convert' # Run a conversion task
 
