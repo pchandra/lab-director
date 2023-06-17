@@ -167,9 +167,9 @@ def main():
             data = json.dumps(error).encode('ascii')
             api.mark_failed(file_id, task, data)
             continue
-        if status['type'] == 'soundkit' and _check_failed(file_id, status, Tasks.ZINV) and task != Tasks.ZINV.value:
+        if status['type'] == 'soundkit' and _check_failed(file_id, status, Tasks.OGSK) and task != Tasks.OGSK.value:
             _log(f"Task \"{task}\" FAILED executing for {file_id}")
-            error = { 'message': f"Task {Tasks.ZINV.value} failed", 'failed': True }
+            error = { 'message': f"Task {Tasks.OGSK.value} failed", 'failed': True }
             data = json.dumps(error).encode('ascii')
             api.mark_failed(file_id, task, data)
             continue
@@ -185,9 +185,17 @@ def main():
         elif task == Tasks.ORIG.value:
             _run(file_id, Tasks.ORIG, force)
 
+        # Check initial soundkit upload
+        elif task == Tasks.OGSK.value:
+            _run(file_id, Tasks.OGSK, force)
+
         # Gather Zip inventory and metadata
         elif task == Tasks.ZINV.value:
-            _run(file_id, Tasks.ZINV, force)
+            if _check_ready(file_id, status, Tasks.OGSK):
+                _run(file_id, Tasks.ZINV, force)
+            else:
+                _log_waiting(file_id, task, Tasks.OGSK)
+                _requeue(file_id, task.upper() if force else task)
 
         # Create soundkit graphics if there's a preview
         elif task == Tasks.KGFX.value:

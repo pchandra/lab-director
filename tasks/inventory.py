@@ -19,7 +19,7 @@ def execute(file_id, force=False):
     # Proceed with running this task
     scratch = helpers.create_scratch_dir()
     try:
-        filename = filestore.retrieve_file(file_id, f"soundkit.zip", scratch, private)
+        filename = filestore.retrieve_file(file_id, f"{Tasks.OGSK.value}.zip", scratch, private)
         outfile = scratch + f"/{Tasks.ZINV.value}.json"
     except:
         helpers.destroy_scratch_dir(scratch)

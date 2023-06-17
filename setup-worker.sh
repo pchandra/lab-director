@@ -56,4 +56,4 @@ python3 -m pip install -U demucs openai-whisper basic-pitch
 
 # Dependencies for the home-made tools we just cloned
 sudo apt install libcairo2-dev
-python3 -m pip install -U librosa matplotlib numpy numba pycairo boto3 pytaglib Pillow
+python3 -m pip install -U librosa matplotlib numpy numba pycairo boto3 pytaglib Pillow python-magic
