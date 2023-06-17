@@ -1,6 +1,7 @@
 import os
 import re
 import magic
+import json
 from taskdef import *
 from . import helpers
 from . import filestore
@@ -31,7 +32,7 @@ def execute(file_id, force=False):
         return { 'message': f'File is not ZIP format', 'failed': True }
 
     ret = {}
-    ret['magic'] = info
+    ret['info'] = info
     ret['size'] = size
     tempfile = f"{scratch}/{Tasks.OGSK.value}.json"
     with open(tempfile, 'w') as f:
