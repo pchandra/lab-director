@@ -17,7 +17,7 @@ def execute(file_id, force=False):
     # Proceed with running this task
     scratch = helpers.create_scratch_dir()
     filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.wav", scratch, private)
-    genres = [ 'blues', 'classical', 'country', 'electronic', 'hiphop', 'jazz', 'metal', 'reggae', 'rock']
+    genres = [ 'core', 'blues', 'classical', 'country', 'electronic', 'hiphop', 'jazz', 'metal', 'reggae', 'rock']
     output = {}
     for g in genres:
         # Build the command line to run
