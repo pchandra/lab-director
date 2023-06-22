@@ -27,6 +27,8 @@ def execute(file_id, force=False):
     with open(infofile, 'r') as f:
         info = json.load(f)
     bitdepth = info['streams'][0]['bits_per_sample']
+    # 16 bit-depth minimum since phase_limiter doesn't like 8
+    bitdepth = 16 if bitdepth == 8 else bitdepth
 
     # Build the command line to run
     cmdline = []
