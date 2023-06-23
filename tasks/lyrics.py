@@ -46,6 +46,9 @@ def execute(file_id, force=False):
     cmdline.extend([ "--model", WHISPER_MODEL,
                      "--language", "en",
                      "--device", ML_DEVICE,
+                     "--word_timestamps", "True",
+                     "--prepend_punctuations", "",
+                     "--append_punctuations", "",
                      "--output_dir", outdir
                    ])
     cmdline.append(vocalsfile)
