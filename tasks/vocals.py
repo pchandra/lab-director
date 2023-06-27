@@ -25,14 +25,14 @@ def execute(file_id, force=False):
 
     output = {}
     output['instrumental'] = metadata['instrumental']
-    output['vocal'] = {}
+    output['vocals'] = {}
     # Do the work if it isn't an instrumental
     if not metadata['instrumental']:
         filename = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}-vocals.mp3", scratch, private)
         # Build the command line to run
         cmdline = []
         cmdline.append(GENRE_BIN)
-        cmdline.append('vocal')
+        cmdline.append('vocals')
         cmdline.append(filename)
         # Execute the command
         process = subprocess.Popen(cmdline,
@@ -40,7 +40,7 @@ def execute(file_id, force=False):
                                    universal_newlines=True)
         stdout, _ = process.communicate()
         # Load JSON object
-        output['vocal'] = json.loads(stdout)
+        output['vocals'] = json.loads(stdout)
 
     tempfile = f"{scratch}/{Tasks.VOCL.value}.json"
     with open(tempfile, 'w') as f:
