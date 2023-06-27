@@ -4,7 +4,7 @@ from . import keybpm
 from . import stemmer
 from . import mastering
 from . import instrumental
-from . import vocal
+from . import vocals
 from . import lyrics
 from . import midi
 from . import original
@@ -24,7 +24,7 @@ execute[Tasks.KBPM] = keybpm.execute
 execute[Tasks.STEM] = stemmer.execute
 execute[Tasks.MAST] = mastering.execute
 execute[Tasks.INST] = instrumental.execute
-execute[Tasks.VOCL] = vocal.execute
+execute[Tasks.VOCL] = vocals.execute
 execute[Tasks.LYRC] = lyrics.execute
 execute[Tasks.MIDI] = midi.execute
 execute[Tasks.ORIG] = original.execute
