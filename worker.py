@@ -257,6 +257,14 @@ def main():
                 _log_waiting(file_id, task, Tasks.STEM)
                 _requeue(file_id, task.upper() if force else task)
 
+        # Vocal analysis from stems
+        elif task == Tasks.VOCL.value:
+            if _check_ready(file_id, status, Tasks.STEM):
+                _run(file_id, Tasks.VOCL, force)
+            else:
+                _log_waiting(file_id, task, Tasks.STEM)
+                _requeue(file_id, task.upper() if force else task)
+
         # Lyrics from vocals
         elif task == Tasks.LYRC.value:
             if _check_ready(file_id, status, Tasks.STEM):
