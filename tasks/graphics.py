@@ -28,6 +28,7 @@ def execute(file_id, force=False):
         metadata = json.load(f)
 
     ret = {}
+    ret['scaling'] = factor
 
     stems = metadata['stems-core'] + metadata['stems-extra']
     for stem in stems:
