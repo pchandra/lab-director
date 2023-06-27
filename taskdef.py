@@ -7,7 +7,7 @@ class Tasks(Enum):
     STEM = 'stems' # Identify and isolate stems from original
     MAST = 'mastering' # Master the original track
     INST = 'instrumental' # Produce and intrumental version from stems
-    VOCL = 'vocal' # Analyze vocal stem
+    VOCL = 'vocals' # Analyze vocal stem
     LYRC = 'lyrics' # Get the lyrics from the vocals stem
     MIDI = 'midi' # Produce a MIDI file (per stem?)
     STAT = 'status' # Save the status as JSON at the end
