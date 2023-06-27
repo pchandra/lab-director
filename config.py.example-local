@@ -16,6 +16,7 @@ CONFIG['TASKS_BEAT'] = [ Tasks.ORIG,
                          Tasks.STEM,
                          Tasks.MAST,
                          Tasks.INST,
+                         Tasks.VOCL,
                          Tasks.LYRC,
                          Tasks.STAT
                        ]
