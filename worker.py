@@ -154,6 +154,14 @@ def main():
             _warn("COMMAND NOT RECOGNIZED")
             continue
 
+        # Process any file conversion tasks since they fail gracefully
+        if task == Tasks.CONV.value:
+            from tasks import convert
+            key = tokens[2]
+            fmt = tokens[3]
+            convert.convert(file_id, key, fmt)
+            continue
+
         # Short-circuit tasks whose main dependency has failed
         if status['type'] == 'beat' and _check_failed(file_id, status, Tasks.ORIG) and task != Tasks.ORIG.value:
             _log(f"Task \"{task}\" FAILED executing for {file_id}")
@@ -174,15 +182,9 @@ def main():
             api.mark_failed(file_id, task, data)
             continue
 
-        # File conversion task
-        if task == Tasks.CONV.value:
-            from tasks import convert
-            key = tokens[2]
-            fmt = tokens[3]
-            convert.convert(file_id, key, fmt)
 
         # Analyze an original beat/song in the file store
-        elif task == Tasks.ORIG.value:
+        if task == Tasks.ORIG.value:
             _run(file_id, Tasks.ORIG, force)
 
         # Check initial soundkit upload
