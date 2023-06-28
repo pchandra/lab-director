@@ -29,22 +29,23 @@ def execute(file_id, force=False):
     # Do the work if it isn't an instrumental
     if not metadata['instrumental']:
         filename = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}-vocals.mp3", scratch, private)
-
         # Chomp all silence from the file
-        trimmed_file = helpers.make_nonsilent_wave(filename)
+        trimfile = helpers.make_nonsilent_wave(filename)
 
-        # Build the command line to run
-        cmdline = []
-        cmdline.append(GENRE_BIN)
-        cmdline.append('vocals')
-        cmdline.append(trimmed_file)
-        # Execute the command
-        process = subprocess.Popen(cmdline,
-                                   stdout=subprocess.PIPE,
-                                   universal_newlines=True)
-        stdout, _ = process.communicate()
-        # Load JSON object
-        output['vocals'] = json.loads(stdout)
+        # Run both through the vocal detection tool
+        for name, file in [('full', filename), ('trim', trimfile)]:
+            # Build the command line to run
+            cmdline = []
+            cmdline.append(GENRE_BIN)
+            cmdline.append('vocals')
+            cmdline.append(file)
+            # Execute the command
+            process = subprocess.Popen(cmdline,
+                                       stdout=subprocess.PIPE,
+                                       universal_newlines=True)
+            stdout, _ = process.communicate()
+            # Load JSON object
+            output['vocals'][name] = json.loads(stdout)
 
     tempfile = f"{scratch}/{Tasks.VOCL.value}.json"
     with open(tempfile, 'w') as f:
