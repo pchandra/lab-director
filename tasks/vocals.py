@@ -28,7 +28,7 @@ def execute(file_id, force=False):
     output['vocals'] = {}
     # Do the work if it isn't an instrumental
     if not metadata['instrumental']:
-        filename = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}-vocals.mp3", scratch, private)
+        filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.mp3", scratch, private)
         # Build the command line to run
         cmdline = []
         cmdline.append(GENRE_BIN)
