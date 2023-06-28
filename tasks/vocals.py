@@ -46,6 +46,8 @@ def execute(file_id, force=False):
             stdout, _ = process.communicate()
             # Load JSON object
             output['vocals'][name] = json.loads(stdout)
+        output['duration'] = { 'full': helpers.get_duration(filename),
+                               'trim': helpers.get_duration(trimfile) }
 
     tempfile = f"{scratch}/{Tasks.VOCL.value}.json"
     with open(tempfile, 'w') as f:
