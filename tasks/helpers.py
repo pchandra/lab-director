@@ -117,6 +117,23 @@ def make_wave_png(wavfile, factor=None):
         ret = json.load(f)['factor']
     return ret
 
+def make_nonsilent_wave(wavfile):
+    # Build the command line to run
+    cmdline = []
+    cmdline.append(FFMPEG_BIN)
+    cmdline.extend([ "-i", wavfile,
+                     "-af", "silenceremove=stop_periods=-1:stop_duration=0.1:stop_threshold=-36dB",
+                     "-ac", "1",
+                     "-ss", "0",
+                     wavfile + '.wav', "-y"
+                   ])
+    process = subprocess.Popen(cmdline,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT,
+                               universal_newlines=True)
+    process.wait()
+    return wavfile + '.wav'
+
 def get_bucketnames(file_id):
     status = api.get_status(file_id)
     private = None
