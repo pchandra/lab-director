@@ -13,7 +13,7 @@ def convert(file_id, key, fmt):
     status = api.get_status(file_id)
 
     # Screen for formats we'll support
-    if not fmt in [ 'mp3', 'aiff', 'flac', 'ogg']:
+    if not fmt in [ 'mp3', 'aiff', 'flac', 'ogg', 'wav' ]:
         return
 
     # Short-circuit if the filestore already has assets we would produce
@@ -28,24 +28,28 @@ def convert(file_id, key, fmt):
         helpers.destroy_scratch_dir(scratch)
         return
 
-    outfile = f"{scratch}/{key}.{fmt}"
+    # Special case for WAV requests
+    if fmt == 'wav':
+        outfile = infile
+    else:
+        outfile = f"{scratch}/{key}.{fmt}"
 
-    # #execute the command
-    cmdline = []
-    cmdline.append(FFMPEG_BIN)
-    cmdline.extend([ "-i", infile,
-                     "-v", "quiet",
-                     "-y"
-                   ])
-    if key == 'mp3' or key == 'ogg':
-        cmdline.append("-b:a", "320k")
-    cmdline.append(outfile)
-    process = subprocess.Popen(cmdline,
-                               stdin=subprocess.PIPE,
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE,
-                               universal_newlines=True)
-    stdout, stderr = process.communicate(input="\n\n\n\n\n")
+        # #execute the command
+        cmdline = []
+        cmdline.append(FFMPEG_BIN)
+        cmdline.extend([ "-i", infile,
+                         "-v", "quiet",
+                         "-y"
+                       ])
+        if key == 'mp3' or key == 'ogg':
+            cmdline.append("-b:a", "320k")
+        cmdline.append(outfile)
+        process = subprocess.Popen(cmdline,
+                                   stdin=subprocess.PIPE,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE,
+                                   universal_newlines=True)
+        stdout, stderr = process.communicate(input="\n\n\n\n\n")
 
     filestore.store_file(file_id, outfile, f"{key}.{fmt}", FILESTORE_SCRATCH)
     helpers.destroy_scratch_dir(scratch)
