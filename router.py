@@ -35,7 +35,7 @@ def main():
 
     # Read protocol version string
     with open('version-token') as f:
-        proto_ver = f.read().strip().encode('ascii')
+        PROTO = f.read().strip().encode('ascii')
 
     with shelve.open(SHELVE_FILENAME) as store:
         if not 'queue' in store:
@@ -68,10 +68,12 @@ def main():
                 address, empty, ready = backend.recv_multipart()
                 job = b"noop noop"
                 tokens = ready.split()
+                proto = tokens[1]
+                instance_id = tokens[2]
                 # Check protocol version
-                if tokens[1] != proto_ver:
+                if proto != PROTO:
                     job = b"stop stop"
-                    _log(f"Worker version mismatch! Expected: {proto_ver}, got: {tokens[1]}")
+                    _log(f"Worker version mismatch from {instance_id} - Expected: {PROTO}, got: {proto}")
                 else:
                     acceptable = tokens[3:]
                     acceptable.append(b'stop')
@@ -80,8 +82,8 @@ def main():
                             job = j
                             queue.remove(job)
                             break
-                    _log("Worker %s reports as ready, sending task: %s" % (address.hex(), job))
-                workers[address] = (job, tokens[2], time.time())
+                    _log(f"Worker {instance_id}-{address.hex()} reports ready, sending: {job}")
+                workers[address] = (job, instance_id, time.time())
                 backend.send_multipart([address, b'', job])
             # Put the queue back into the shelf for persistence
             store['queue'] = queue
