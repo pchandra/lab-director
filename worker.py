@@ -36,7 +36,7 @@ def _warn(str):
 
 # Check if a different task is finished
 def _check_ready(file_id, status, dep):
-    if status[dep.value]['status'] != State.COMP.value:
+    if status[dep.value]['status'] != TaskState.COMP.value:
         # Throttle this since we might be waiting a while
         time.sleep(1)
         return False
@@ -45,7 +45,7 @@ def _check_ready(file_id, status, dep):
 
 # Check if a task has failed
 def _check_failed(file_id, status, dep):
-    if status[dep.value]['status'] == State.FAIL.value:
+    if status[dep.value]['status'] == TaskState.FAIL.value:
         return True
     else:
         return False
@@ -87,7 +87,7 @@ def _run(file_id, task_type, force=False):
             api.mark_complete(file_id, task_type.value, data)
 
 def _is_finished(file_id, status, task_type):
-    finished_states = [ x.value for x in [ State.COMP, State.FAIL, State.NA ] ]
+    finished_states = [ x.value for x in [ TaskState.COMP, TaskState.FAIL, TaskState.NA ] ]
     return status[task_type.value]['status'] in finished_states
 
 def _acceptable_work(task):

@@ -19,7 +19,7 @@ class Tasks(Enum):
     GENR = 'genre' # Run models to detect music genre
     CONV = 'convert' # Run a conversion task
 
-class State(Enum):
+class TaskState(Enum):
     INIT = "initial"
     PROG = "in-progress"
     WAIT = "waiting"

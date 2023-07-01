@@ -54,7 +54,7 @@ def _create_status(file_id, audio_type):
         target = TASKS_SOUNDKIT
     for task in [x.value for x in target]:
         ret[task] = {}
-        ret[task]['status'] = State.INIT.value
+        ret[task]['status'] = TaskState.INIT.value
     return ret
 
 @app.route('/')
@@ -144,9 +144,9 @@ def update_inprogress(file_id, task):
     if not ok:
         return msg
     current = STATUS[file_id]
-    current[task]['status'] = State.PROG.value
+    current[task]['status'] = TaskState.PROG.value
     if request.method == 'POST':
-        current[task][State.PROG.value] = request.get_json(force=True)
+        current[task][TaskState.PROG.value] = request.get_json(force=True)
     STATUS[file_id] = current
     return _msg("ok")
 
@@ -157,9 +157,9 @@ def update_waiting(file_id, task):
     if not ok:
         return msg
     current = STATUS[file_id]
-    current[task]['status'] = State.WAIT.value
+    current[task]['status'] = TaskState.WAIT.value
     if request.method == 'POST':
-        current[task][State.WAIT.value] = request.get_json(force=True)
+        current[task][TaskState.WAIT.value] = request.get_json(force=True)
     STATUS[file_id] = current
     return _msg("ok")
 
@@ -170,9 +170,9 @@ def update_complete(file_id, task):
     if not ok:
         return msg
     current = STATUS[file_id]
-    current[task]['status'] = State.COMP.value
+    current[task]['status'] = TaskState.COMP.value
     if request.method == 'POST':
-        current[task][State.COMP.value] = request.get_json(force=True)
+        current[task][TaskState.COMP.value] = request.get_json(force=True)
     STATUS[file_id] = current
     return _msg("ok")
 
@@ -183,9 +183,9 @@ def update_failed(file_id, task):
     if not ok:
         return msg
     current = STATUS[file_id]
-    current[task]['status'] = State.FAIL.value
+    current[task]['status'] = TaskState.FAIL.value
     if request.method == 'POST':
-        current[task][State.FAIL.value] = request.get_json(force=True)
+        current[task][TaskState.FAIL.value] = request.get_json(force=True)
     STATUS[file_id] = current
     return _msg("ok")
 
@@ -196,7 +196,7 @@ def update_notavailable(file_id, task):
     if not ok:
         return msg
     current = STATUS[file_id]
-    current[task]['status'] = State.NA.value
+    current[task]['status'] = TaskState.NA.value
     STATUS[file_id] = current
     return _msg("ok")
 
