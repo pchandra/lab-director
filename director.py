@@ -114,12 +114,6 @@ def load_soundkit(file_id):
         sender.send_string(f"{task} {file_id}")
     return _msg(f"Queued all tasks for soundkit: {file_id}")
 
-@app.route('/stop')
-def stop_worker():
-    STATUS = flask_shelve.get_shelve()
-    sender.send_string(f"stop stop")
-    return _msg("Sending command to stop a worker")
-
 @app.route('/requeue/<file_id>/<task>')
 def requeue_task(file_id, task):
     STATUS = flask_shelve.get_shelve()

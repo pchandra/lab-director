@@ -65,7 +65,7 @@ def main():
                 tokens = message[0].split()
                 task = tokens[0]
                 _log("Frontend got task: %s" % message[0])
-                if task == b'convert' or task.lower() == b'stop':
+                if task == b'convert':
                     queue.insert(0, message[0])
                 elif message[0] not in queue:
                     queue.append(message[0])
@@ -82,7 +82,6 @@ def main():
                     _log(f"Worker version mismatch from {instance_id} - Expected: {PROTO}, got: {proto}")
                 else:
                     acceptable = tokens[3:]
-                    acceptable.append(b'stop')
                     for j in queue:
                         if j.split()[0].lower() in acceptable:
                             job = j
