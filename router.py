@@ -45,13 +45,19 @@ def main():
         _log("Starting up router with PID: %d" % pid)
         counter = time.time()
         workers = {}
+        last_msg = time.time()
+
         while True:
             # Extract the queue from the shelf
             queue = store['queue']
             time.sleep(0.01)
-            if time.time() - counter > 1:
+
+            # Do time sensitive checks first
+            now = time.time()
+            if now - last_msg > 1:
                 _log("Router is polling for new messages, queue depth: %d" % len(queue))
-                counter = time.time()
+                last = now
+
             socks = dict(poller.poll())
 
             if socks.get(frontend) == zmq.POLLIN:
