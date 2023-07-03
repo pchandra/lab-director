@@ -1,11 +1,10 @@
-import os
 import sys
 import time
 from datetime import datetime
-import shutil
 import zmq
 from urllib.request import urlopen
 import json
+from log import Logger
 from taskdef import *
 import taskapi as api
 import tasks
@@ -22,17 +21,6 @@ TASKS_SOUNDKIT = conf['TASKS_SOUNDKIT']
 context = zmq.Context()
 receiver = context.socket(zmq.REQ)
 receiver.connect(f"tcp://{ROUTER_ADDR}:{ROUTER_PORT}")
-
-pid = os.getpid()
-
-# Logging helper
-def _log(str):
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    sys.stdout.write(f"[{timestamp}] [Worker-{pid}] {str}\n")
-    sys.stdout.flush()
-
-def _warn(str):
-    _log("WARN: " + str)
 
 # Check if a different task is finished
 def _check_ready(file_id, status, dep):
@@ -52,13 +40,13 @@ def _check_failed(file_id, status, dep):
 
 # Put a waiting task back in the queue
 def _requeue(file_id, task, mark_waiting=True):
-    _log(f"Requeuing, task \"{task}\" for {file_id}")
+    log.info(f"Requeuing, task \"{task}\" for {file_id}")
     if mark_waiting:
         api.mark_waiting(file_id, task.lower())
     api.requeue(file_id, task)
 
 def _log_waiting(file_id, task, dep):
-    _log(f"Task \"{task}\" for {file_id} is waiting on \"{dep.value}\"")
+    log.info(f"Task \"{task}\" for {file_id} is waiting on \"{dep.value}\"")
 
 def _run(file_id, task_type, force=False):
     api.mark_inprogress(file_id, task_type.value)
@@ -69,7 +57,7 @@ def _run(file_id, task_type, force=False):
     # Check if this was short-circuited (task detected it had already run on 'file_id')
     data = None
     if ret is None:
-        _log(f"Task \"{task_type.value}\" reports already done for {file_id}")
+        log.info(f"Task \"{task_type.value}\" reports already done for {file_id}")
         api.mark_complete(file_id, task_type.value, data)
     else:
         ret['perf'] = {}
@@ -80,10 +68,10 @@ def _run(file_id, task_type, force=False):
         ret['perf']['time_elapsed'] = stop - start
         data = json.dumps(ret).encode('ascii')
         if ret.get('failed', False):
-            _log(f"Task \"{task_type.value}\" FAILED executing for {file_id}")
+            log.info(f"Task \"{task_type.value}\" FAILED executing for {file_id}")
             api.mark_failed(file_id, task_type.value, data)
         else:
-            _log(f"Task \"{task_type.value}\" completed executing for {file_id}")
+            log.info(f"Task \"{task_type.value}\" completed executing for {file_id}")
             api.mark_complete(file_id, task_type.value, data)
 
 def _is_finished(file_id, status, task_type):
@@ -94,8 +82,9 @@ def _acceptable_work(task):
     return task.lower() in ACCEPTABLE_WORK
 
 def main():
+    log = Logger('worker')
     # Process tasks forever
-    _log("Starting up worker with PID: %d" % pid)
+    log.info("Starting up worker")
 
     # Get an ID for this instance
     try:
@@ -113,28 +102,28 @@ def main():
 
     while True:
         # Send 'ready' and ACCEPTABLE_WORK then await a task assignment
-        _log("Ready to accept new tasks")
+        log.info("Ready to accept new tasks")
         receiver.send(f"ready {proto_ver} {instance_id} ".encode('ascii') + ' '.join(ACCEPTABLE_WORK).encode('ascii'))
         message = receiver.recv_string()
-        _log("Got task: %s" % message)
+        log.info("Got task: %s" % message)
         tokens = message.split()
         task = tokens[0]
         file_id = tokens[1]
 
         # Detect if we're supposed to stop
         if task == "stop":
-            _warn("Stopping worker...")
+            log.warn("Stopping worker...")
             break
 
         # Detect if we got a no-op
         if task == "noop":
-            _warn("No-op received, sleeping 5 seconds")
+            log.warn("No-op received, sleeping 5 seconds")
             time.sleep(5)
             continue
 
         # If this node shouldn't do the task, sleep for a second and requeue it
         if not _acceptable_work(task):
-            _warn(f"Not processing tasks of type \"{task}\" on this worker")
+            log.warn(f"Not processing tasks of type \"{task}\" on this worker")
             time.sleep(1)
             _requeue(file_id, task, mark_waiting=False)
             continue
@@ -143,7 +132,7 @@ def main():
         force = False
         if any(x for x in Tasks if x.value.upper() == task):
             force = True
-            _warn("Forced command: %s" % task)
+            log.warn("Forced command: %s" % task)
             task = task.lower()
 
         # Get the status for this file
@@ -151,7 +140,7 @@ def main():
 
         # Check that the task is legit before proceeding
         if not any(x for x in Tasks if x.value == task):
-            _warn("COMMAND NOT RECOGNIZED")
+            log.warn("COMMAND NOT RECOGNIZED")
             continue
 
         # Process any file conversion tasks since they fail gracefully
@@ -164,19 +153,19 @@ def main():
 
         # Short-circuit tasks whose main dependency has failed
         if status['type'] == 'beat' and _check_failed(file_id, status, Tasks.ORIG) and task != Tasks.ORIG.value:
-            _log(f"Task \"{task}\" FAILED executing for {file_id}")
+            log.info(f"Task \"{task}\" FAILED executing for {file_id}")
             error = { 'message': f"Task {Tasks.ORIG.value} failed", 'failed': True }
             data = json.dumps(error).encode('ascii')
             api.mark_failed(file_id, task, data)
             continue
         if status['type'] == 'song' and _check_failed(file_id, status, Tasks.ORIG) and task != Tasks.ORIG.value:
-            _log(f"Task \"{task}\" FAILED executing for {file_id}")
+            log.info(f"Task \"{task}\" FAILED executing for {file_id}")
             error = { 'message': f"Task {Tasks.ORIG.value} failed", 'failed': True }
             data = json.dumps(error).encode('ascii')
             api.mark_failed(file_id, task, data)
             continue
         if status['type'] == 'soundkit' and _check_failed(file_id, status, Tasks.OGSK) and task != Tasks.OGSK.value:
-            _log(f"Task \"{task}\" FAILED executing for {file_id}")
+            log.info(f"Task \"{task}\" FAILED executing for {file_id}")
             error = { 'message': f"Task {Tasks.OGSK.value} failed", 'failed': True }
             data = json.dumps(error).encode('ascii')
             api.mark_failed(file_id, task, data)
