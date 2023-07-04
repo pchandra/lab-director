@@ -22,6 +22,9 @@ context = zmq.Context()
 receiver = context.socket(zmq.REQ)
 receiver.connect(f"tcp://{ROUTER_ADDR}:{ROUTER_PORT}")
 
+# Get Logger instance
+log = Logger('worker')
+
 # Check if a different task is finished
 def _check_ready(file_id, status, dep):
     if status[dep.value]['status'] != TaskState.COMP.value:
@@ -82,7 +85,6 @@ def _acceptable_work(task):
     return task.lower() in ACCEPTABLE_WORK
 
 def main():
-    log = Logger('worker')
     # Process tasks forever
     log.info("Starting up worker")
 
