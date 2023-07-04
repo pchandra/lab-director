@@ -150,7 +150,9 @@ def main():
             from tasks import export
             key = tokens[2]
             fmt = tokens[3]
-            export.export(file_id, key, fmt)
+            success, msg = export.export(file_id, key, fmt)
+            l = log.info if success else log.warn
+            l(msg)
             continue
 
         # Short-circuit tasks whose main dependency has failed

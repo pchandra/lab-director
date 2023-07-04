@@ -15,12 +15,12 @@ def export(file_id, key, fmt):
 
     # Screen for formats we'll support
     if not fmt in [ 'mp3', 'aiff', 'flac', 'ogg', 'wav' ]:
-        return
+        return False, f"EXPT: format {fmt} isn't accepted for {key}"
 
     # Short-circuit if the filestore already has assets we would produce
     output_keys = [ f"{key}.{fmt}" ]
     if filestore.check_keys(file_id, output_keys, FILESTORE_SCRATCH):
-        return
+        return True, f"EXPT: {key}.{fmt} already exists for {file_id}"
 
 
     scratch = helpers.create_scratch_dir()
@@ -28,7 +28,7 @@ def export(file_id, key, fmt):
         infile = filestore.retrieve_file(file_id, f"{key}.wav", scratch, private)
     except:
         helpers.destroy_scratch_dir(scratch)
-        return
+        return False, f"EXPT: file {key}.wav isn't found for {file_id}"
 
     # Special case for WAV requests
     if fmt == 'wav':
@@ -55,3 +55,4 @@ def export(file_id, key, fmt):
 
     filestore.store_file(file_id, outfile, f"{key}.{fmt}", FILESTORE_SCRATCH)
     helpers.destroy_scratch_dir(scratch)
+    return True, f"EXPT: {key}.{fmt} successfully created for {file_id}"
