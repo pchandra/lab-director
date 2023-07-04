@@ -1,3 +1,4 @@
+import os
 import subprocess
 from taskdef import *
 import taskapi as api
@@ -9,18 +10,21 @@ FFMPEG_BIN = conf['FFMPEG_BIN']
 FILESTORE_SCRATCH = conf['FILESTORE_SCRATCH']
 FILESTORE_PURCHASES = conf['FILESTORE_PURCHASES']
 
+def _tag(msg):
+    return f"{os.path.basename(__file__)}: {msg}"
+
 def export(file_id, key, fmt):
     private, public = helpers.get_bucketnames(file_id)
     status = api.get_status(file_id)
 
     # Screen for formats we'll support
     if not fmt in [ 'mp3', 'aiff', 'flac', 'ogg', 'wav' ]:
-        return False, f"EXPT: format {fmt} isn't accepted for {key}"
+        return False, _tag(f"format {fmt} isn't accepted for {key}")
 
     # Short-circuit if the filestore already has assets we would produce
     output_keys = [ f"{key}.{fmt}" ]
     if filestore.check_keys(file_id, output_keys, FILESTORE_SCRATCH):
-        return True, f"EXPT: {key}.{fmt} already exists for {file_id}"
+        return True, _tag(f"{key}.{fmt} already exists for {file_id}")
 
 
     scratch = helpers.create_scratch_dir()
@@ -28,7 +32,7 @@ def export(file_id, key, fmt):
         infile = filestore.retrieve_file(file_id, f"{key}.wav", scratch, private)
     except:
         helpers.destroy_scratch_dir(scratch)
-        return False, f"EXPT: file {key}.wav isn't found for {file_id}"
+        return False, _tag(f"file {key}.wav isn't found for {file_id}")
 
     # Special case for WAV requests
     if fmt == 'wav':
@@ -55,4 +59,4 @@ def export(file_id, key, fmt):
 
     filestore.store_file(file_id, outfile, f"{key}.{fmt}", FILESTORE_SCRATCH)
     helpers.destroy_scratch_dir(scratch)
-    return True, f"EXPT: {key}.{fmt} successfully created for {file_id}"
+    return True, _tag(f"{key}.{fmt} successfully created for {file_id}")
