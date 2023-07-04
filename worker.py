@@ -143,12 +143,12 @@ def main():
             log.warn("COMMAND NOT RECOGNIZED")
             continue
 
-        # Process any file conversion tasks since they fail gracefully
-        if task == Tasks.CONV.value:
-            from tasks import convert
+        # Process any export requests since they fail gracefully
+        if task == Tasks.EXPT.value:
+            from tasks import export
             key = tokens[2]
             fmt = tokens[3]
-            convert.convert(file_id, key, fmt)
+            export.export(file_id, key, fmt)
             continue
 
         # Short-circuit tasks whose main dependency has failed

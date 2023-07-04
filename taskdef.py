@@ -17,7 +17,7 @@ class Tasks(Enum):
     ZINV = 'inventory' # Gather metadata about the contents of a zip
     KGFX = 'soundkit-gfx' # Create graphics for a soundkit preview file
     GENR = 'genre' # Run models to detect music genre
-    CONV = 'convert' # Run a conversion task
+    EXPT = 'export' # Run an export task
 
 class TaskState(Enum):
     INIT = "initial"

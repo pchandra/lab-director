@@ -8,7 +8,7 @@ from config import CONFIG as conf
 FFMPEG_BIN = conf['FFMPEG_BIN']
 FILESTORE_SCRATCH = conf['FILESTORE_SCRATCH']
 
-def convert(file_id, key, fmt):
+def export(file_id, key, fmt):
     private, public = helpers.get_bucketnames(file_id)
     status = api.get_status(file_id)
 
