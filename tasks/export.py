@@ -7,6 +7,7 @@ from config import CONFIG as conf
 
 FFMPEG_BIN = conf['FFMPEG_BIN']
 FILESTORE_SCRATCH = conf['FILESTORE_SCRATCH']
+FILESTORE_PURCHASES = conf['FILESTORE_PURCHASES']
 
 def export(file_id, key, fmt):
     private, public = helpers.get_bucketnames(file_id)
@@ -20,6 +21,7 @@ def export(file_id, key, fmt):
     output_keys = [ f"{key}.{fmt}" ]
     if filestore.check_keys(file_id, output_keys, FILESTORE_SCRATCH):
         return
+
 
     scratch = helpers.create_scratch_dir()
     try:

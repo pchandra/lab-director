@@ -94,6 +94,9 @@ CONFIG['FILESTORE_SOUNDKITS'] = '%%FILESTORE_SOUNDKITS%%'
 # Section name for scratch output
 CONFIG['FILESTORE_SCRATCH'] = '%%FILESTORE_SCRATCH%%'
 
+# Section name for purchases output
+CONFIG['FILESTORE_PURCHASES'] = '%%FILESTORE_PURCHASES%%'
+
 # Multipart threshold setting for S3 uploads and downloads
 CONFIG['MULTIPART_THRESHOLD'] = 64 * 1024 * 1024
 

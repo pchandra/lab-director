@@ -94,6 +94,9 @@ CONFIG['FILESTORE_SOUNDKITS'] = 'licenselounge-soundkits-test'
 # Section name for scratch output
 CONFIG['FILESTORE_SCRATCH'] = 'licenselounge-scratch'
 
+# Section name for purchases output
+CONFIG['FILESTORE_PURCHASES'] = 'licenselounge-purchases-test'
+
 # Multipart threshold setting for S3 uploads and downloads
 CONFIG['MULTIPART_THRESHOLD'] = 64 * 1024 * 1024
 
