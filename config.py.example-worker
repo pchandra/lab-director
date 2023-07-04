@@ -80,16 +80,16 @@ CONFIG['FILESTORE_BACKEND']='s3'
 CONFIG['FILESTORE_DIR'] = '/tmp/STORE'
 
 # Section name for public files, local: subdirectory, s3: bucket name
-CONFIG['FILESTORE_PUBLIC'] = 'licenselounge-public'
+CONFIG['FILESTORE_PUBLIC'] = 'licenselounge-public-test'
 
 # Section name for beat files, local: subdirectory, s3: bucket name
-CONFIG['FILESTORE_BEATS'] = 'licenselounge-beats'
+CONFIG['FILESTORE_BEATS'] = 'licenselounge-beats-test'
 
 # Section name for song files, local: subdirectory, s3: bucket name
-CONFIG['FILESTORE_SONGS'] = 'licenselounge-songs'
+CONFIG['FILESTORE_SONGS'] = 'licenselounge-songs-test'
 
 # Section name for soundkit files, local: subdirectory, s3: bucket name
-CONFIG['FILESTORE_SOUNDKITS'] = 'licenselounge-soundkits'
+CONFIG['FILESTORE_SOUNDKITS'] = 'licenselounge-soundkits-test'
 
 # Section name for scratch output
 CONFIG['FILESTORE_SCRATCH'] = 'licenselounge-scratch'
