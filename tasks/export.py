@@ -125,7 +125,7 @@ def export(file_id, key, fmt):
         helpers.destroy_scratch_dir(scratch)
         return True, _tag(f"{key}.{fmt} successfully created for {file_id}")
     elif status['type'] == 'soundkit':
-        special = [ 'all', 'purchase' ]
+        special = [ 'all', 'purchase', Tasks.OGSK.value ]
         formats = [ 'zip' ]
         if not key in special:
             return False, _tag(f"key {key} isn't accepted for {file_id}")
