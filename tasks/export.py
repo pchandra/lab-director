@@ -20,7 +20,7 @@ def _make_archive(arch_file, fmt, arch_dir):
         with zipfile.ZipFile(arch_file, 'w') as archive:
             for file in os.listdir(arch_dir):
                 archive.write(f"{arch_dir}/{file}", arcname=file, compress_type = zipfile.ZIP_DEFLATED)
-    else fmt == 'tgz':
+    elif fmt == 'tgz':
         import tarfile
         with tarfile.open(arch_file, "w:gz") as archive:
             for file in os.listdir(arch_dir):
