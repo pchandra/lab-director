@@ -145,13 +145,14 @@ def get_bucketnames(file_id):
         private = FILESTORE_SOUNDKITS
     return private, FILESTORE_PUBLIC
 
-def make_website_mp3(infile, mp3file):
+def make_website_mp3(infile, mp3file, high_quality=False):
+    quality = [ "-b:a", "320k" ] if high_quality else [ "-q:a", "2" ]
     # Run an FFMPEG cmd to compress to mp3
     cmdline = []
     cmdline.append(FFMPEG_BIN)
     cmdline.extend([ "-i", infile,
                      "-v", "quiet",
-                     "-q:a", "2",
+                     quality[0], quality[1],
                      "-y"
                    ])
     cmdline.append(mp3file)
