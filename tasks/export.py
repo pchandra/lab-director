@@ -1,4 +1,5 @@
 import os
+import json
 import subprocess
 from taskdef import *
 import taskapi as api
@@ -67,6 +68,7 @@ def export(file_id, key, fmt):
         # Do special cases
         if key in special:
             arch_dir = f"{scratch}/{key}"
+            os.makedirs(arch_dir, exist_ok=True)
             arch_file = f"{scratch}/{key}.{fmt}"
             if _get_assets(file_id, arch_dir, key, private, public):
                 #helpers.make_archive(arch_file, fmt, arch_dir)
