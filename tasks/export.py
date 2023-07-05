@@ -125,6 +125,21 @@ def export(file_id, key, fmt):
         helpers.destroy_scratch_dir(scratch)
         return True, _tag(f"{key}.{fmt} successfully created for {file_id}")
     elif status['type'] == 'soundkit':
-        return True, _tag("stub")
+        special = [ 'all', 'purchase' ]
+        formats = [ 'zip' ]
+        if not key in special:
+            return False, _tag(f"key {key} isn't accepted for {file_id}")
+        if not fmt in formats:
+            return False, _tag(f"format {fmt} isn't accepted for {key}")
+        scratch = helpers.create_scratch_dir()
+        try:
+            skfile = filestore.retrieve_file(file_id, f"{Tasks.OGSK.value}.zip", scratch, private)
+        except:
+            helpers.destroy_scratch_dir(scratch)
+            return False, _tag(f"file {Tasks.OGSK.value}.zip isn't found for {file_id}")
+        bucket = FILESTORE_SCRATCH if key == 'all' else FILESTORE_PURCHASES
+        filestore.store_file(file_id, skfile, f"{key}.{fmt}", bucket)
+        helpers.destroy_scratch_dir(scratch)
+        return True, _tag(f"{key}.{fmt} successfully created for {file_id}")
 
     return False, _tag(f"request {fmt} isn't accepted for {key}")
