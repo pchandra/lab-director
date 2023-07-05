@@ -14,6 +14,18 @@ FILESTORE_PURCHASES = conf['FILESTORE_PURCHASES']
 def _tag(msg):
     return f"{os.path.basename(__file__)}: {msg}"
 
+def _make_archive(arch_file, fmt, arch_dir):
+    if fmt == 'zip':
+        import zipfile
+        with zipfile.ZipFile(arch_file, 'w') as archive:
+            for file in os.listdir(arch_dir):
+                archive.write(f"{arch_dir}/{file}", arcname=file, compress_type = zipfile.ZIP_DEFLATED)
+    else fmt == 'tgz':
+        import tarfile
+        with tarfile.open(arch_file, "w:gz") as archive:
+            for file in os.listdir(arch_dir):
+                archive.add(f"{arch_dir}/{file}", file)
+
 def _get_assets(file_id, directory, key, private, public):
     """This function grabs all the assets for a special type"""
     try:
@@ -71,9 +83,9 @@ def export(file_id, key, fmt):
             os.makedirs(arch_dir, exist_ok=True)
             arch_file = f"{scratch}/{key}.{fmt}"
             if _get_assets(file_id, arch_dir, key, private, public):
-                #helpers.make_archive(arch_file, fmt, arch_dir)
-                #bucket = FILESTORE_SCRATCH if key == 'all' else FILESTORE_PURCHASES
-                #filestore.store_file(file_id, arch_file, f"{key}.{fmt}", bucket)
+                _make_archive(arch_file, fmt, arch_dir)
+                bucket = FILESTORE_SCRATCH if key == 'all' else FILESTORE_PURCHASES
+                filestore.store_file(file_id, arch_file, f"{key}.{fmt}", bucket)
                 ret = True, _tag(f"{key}.{fmt} successfully created for {file_id}")
             else:
                 ret = False, _tag(f"request {key} didn't find assets for {file_id}")
