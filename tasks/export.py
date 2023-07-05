@@ -137,7 +137,7 @@ def export(file_id, key, fmt):
         except:
             helpers.destroy_scratch_dir(scratch)
             return False, _tag(f"file {Tasks.OGSK.value}.zip isn't found for {file_id}")
-        bucket = FILESTORE_SCRATCH if key == 'all' else FILESTORE_PURCHASES
+        bucket = FILESTORE_PURCHASES if key == 'purchase' else FILESTORE_SCRATCH
         filestore.store_file(file_id, skfile, f"{key}.{fmt}", bucket)
         helpers.destroy_scratch_dir(scratch)
         return True, _tag(f"{key}.{fmt} successfully created for {file_id}")
