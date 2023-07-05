@@ -13,13 +13,40 @@ FILESTORE_PURCHASES = conf['FILESTORE_PURCHASES']
 def _tag(msg):
     return f"{os.path.basename(__file__)}: {msg}"
 
+def _get_assets(file_id, directory, key, private, public):
+    """This function grabs all the assets for a special type"""
+    try:
+        instrumental = None
+        # Always need the original WAV
+        filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.wav", directory, private)
+        helpers.make_website_mp3(f"{directory}/{Tasks.ORIG.value}.wav", f"{directory}/{Tasks.ORIG.value}.mp3", high_quality=True)
+        if key == 'purchase-mp3':
+            os.remove(f"{directory}/{Tasks.ORIG.value}.wav")
+        if key in [ 'all', 'purchase-stems' ]:
+            # Get the stem metadata from the filestore
+            stem_json = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}.json", directory, public)
+            metadata = None
+            with open(stem_json, 'r') as f:
+                metadata = json.load(f)
+            os.remove(f"{directory}/{Tasks.STEM.value}.json")
+            for stem in metadata['stems']:
+                filestore.retrieve_file(file_id, stem, directory, private)
+            instrumental = metadata['instrumental']
+        if key == 'all':
+            filestore.retrieve_file(file_id, f"{Tasks.MAST.value}.wav", directory, private)
+            if not instrumental:
+                filestore.retrieve_file(file_id, f"{Tasks.INST.value}.wav", directory, private)
+        return True
+    except:
+        return False
+
 def export(file_id, key, fmt):
     private, public = helpers.get_bucketnames(file_id)
     status = api.get_status(file_id)
 
     if status['type'] in [ 'beat', 'song' ]:
         # Lots of sanity and error checking first
-        special = [ 'all', 'purchase-mp3', 'purchase-wav', 'purchase-stem' ]
+        special = [ 'all', 'purchase-mp3', 'purchase-wav', 'purchase-stems' ]
         if key in special:
             formats = [ 'zip', 'tgz' ]
         else:
@@ -38,18 +65,18 @@ def export(file_id, key, fmt):
         scratch = helpers.create_scratch_dir()
 
         # Do special cases
-        if key == 'all':
-            helpers.destroy_scratch_dir(scratch)
-            return True, _tag("stub")
-        elif key =='purchase-mp3':
-            helpers.destroy_scratch_dir(scratch)
-            return True, _tag("stub")
-        elif key =='purchase-wav':
-            helpers.destroy_scratch_dir(scratch)
-            return True, _tag("stub")
-        elif key =='purchase-stem':
-            helpers.destroy_scratch_dir(scratch)
-            return True, _tag("stub")
+        if key in special:
+            arch_dir = f"{scratch}/{key}"
+            arch_file = f"{scratch}/{key}.{fmt}"
+            if _get_assets(file_id, arch_dir, key, private, public):
+                #helpers.make_archive(arch_file, fmt, arch_dir)
+                #bucket = FILESTORE_SCRATCH if key == 'all' else FILESTORE_PURCHASES
+                #filestore.store_file(file_id, arch_file, f"{key}.{fmt}", bucket)
+                ret = True, _tag(f"{key}.{fmt} successfully created for {file_id}")
+            else:
+                ret = False, _tag(f"request {key} didn't find assets for {file_id}")
+            #helpers.destroy_scratch_dir(scratch)
+            return ret
 
         try:
             infile = filestore.retrieve_file(file_id, f"{key}.wav", scratch, private)
