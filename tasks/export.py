@@ -89,7 +89,7 @@ def export(file_id, key, fmt):
                 ret = True, _tag(f"{key}.{fmt} successfully created for {file_id}")
             else:
                 ret = False, _tag(f"request {key} didn't find assets for {file_id}")
-            #helpers.destroy_scratch_dir(scratch)
+            helpers.destroy_scratch_dir(scratch)
             return ret
 
         try:
