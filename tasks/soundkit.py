@@ -16,13 +16,13 @@ def execute(file_id, force=False):
         if not filestore.check_keys(file_id, public_keys, public):
             filestore.copy_keys(file_id, public_keys, private, public)
         helpers.destroy_scratch_dir(scratch)
-        return
+        return True, helpers.msg('Already done')
 
     try:
         filename = filestore.retrieve_file(file_id, f"{Tasks.OGSK.value}.zip", scratch, private)
     except:
         helpers.destroy_scratch_dir(scratch)
-        return { 'message': f'File not found', 'failed': True }
+        return False, helpers.msg(f'Input file(s) not found')
 
     # Get size and check that it looks like a ZIP
     stats = os.stat(filename)
@@ -32,7 +32,7 @@ def execute(file_id, force=False):
     m = p.match(info)
     if m is None:
         helpers.destroy_scratch_dir(scratch)
-        return { 'message': f'File is not ZIP format', 'failed': True }
+        return False, helpers.msg(f'File is not ZIP format')
 
     ret = {}
     ret['info'] = info
@@ -44,6 +44,6 @@ def execute(file_id, force=False):
 
     filestore.copy_keys(file_id, public_keys, private, public)
     helpers.destroy_scratch_dir(scratch)
-    return ret
+    return True, ret
 
 

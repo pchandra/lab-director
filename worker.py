@@ -53,29 +53,24 @@ def _log_waiting(file_id, task, dep):
 
 def _run(file_id, task_type, force=False):
     api.mark_inprogress(file_id, task_type.value)
+    # Collect performance counters
     start = time.time()
-    ret = tasks.execute[task_type](file_id, force=force)
+    success, ret = tasks.execute[task_type](file_id, force=force)
     stop = time.time()
-
-    # Check if this was short-circuited (task detected it had already run on 'file_id')
-    data = None
-    if ret is None:
-        log.info(f"Task \"{task_type.value}\" reports already done for {file_id}")
-        api.mark_complete(file_id, task_type.value, data)
+    # Add the performance data and encode
+    ret['perf'] = {}
+    ret['perf']['start'] = datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S')
+    ret['perf']['stop'] = datetime.fromtimestamp(stop).strftime('%Y-%m-%d %H:%M:%S')
+    ret['perf']['time_start'] = start
+    ret['perf']['time_stop'] = stop
+    ret['perf']['time_elapsed'] = stop - start
+    data = json.dumps(ret).encode('ascii')
+    if not success:
+        log.warn(f"Task \"{task_type.value}\" FAILED executing for {file_id}")
+        api.mark_failed(file_id, task_type.value, data)
     else:
-        ret['perf'] = {}
-        ret['perf']['start'] = datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S')
-        ret['perf']['stop'] = datetime.fromtimestamp(stop).strftime('%Y-%m-%d %H:%M:%S')
-        ret['perf']['time_start'] = start
-        ret['perf']['time_stop'] = stop
-        ret['perf']['time_elapsed'] = stop - start
-        data = json.dumps(ret).encode('ascii')
-        if ret.get('failed', False):
-            log.info(f"Task \"{task_type.value}\" FAILED executing for {file_id}")
-            api.mark_failed(file_id, task_type.value, data)
-        else:
-            log.info(f"Task \"{task_type.value}\" completed executing for {file_id}")
-            api.mark_complete(file_id, task_type.value, data)
+        log.info(f"Task \"{task_type.value}\" finished executing for {file_id}")
+        api.mark_complete(file_id, task_type.value, data)
 
 def _is_finished(file_id, status, task_type):
     finished_states = [ x.value for x in [ TaskState.COMP, TaskState.FAIL, TaskState.NA ] ]

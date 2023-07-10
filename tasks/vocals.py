@@ -17,10 +17,14 @@ def execute(file_id, force=False):
         if not filestore.check_keys(file_id, public_keys, public):
             filestore.copy_keys(file_id, public_keys, private, public)
         helpers.destroy_scratch_dir(scratch)
-        return
+        return True, helpers.msg('Already done')
 
     # Get the stem metadata from the filestore
-    stem_json = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}.json", scratch, private)
+    try:
+        stem_json = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}.json", scratch, private)
+    except:
+        helpers.destroy_scratch_dir(scratch)
+        return False, helpers.msg(f'Input file(s) not found')
     metadata = None
     with open(stem_json, 'r') as f:
         metadata = json.load(f)
@@ -61,4 +65,4 @@ def execute(file_id, force=False):
     ret['output'] = stored_location
     filestore.copy_keys(file_id, public_keys, private, public)
     helpers.destroy_scratch_dir(scratch)
-    return ret
+    return True, ret

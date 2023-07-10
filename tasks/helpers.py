@@ -20,6 +20,10 @@ FILESTORE_SONGS = conf['FILESTORE_SONGS']
 FILESTORE_SOUNDKITS = conf['FILESTORE_SOUNDKITS']
 
 
+def msg(msg, base={}):
+    base['message'] = f"{msg}"
+    return base
+
 def setprogress(file_id, task_type, percent=0):
     update = json.dumps({"percent": percent}).encode('ascii')
     api.mark_inprogress(file_id, task_type.value, update)

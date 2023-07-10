@@ -20,9 +20,13 @@ def execute(file_id, force=False):
         if not filestore.check_keys(file_id, public_keys, public):
             filestore.copy_keys(file_id, public_keys, private, public)
         helpers.destroy_scratch_dir(scratch)
-        return
+        return True, helpers.msg('Already done')
 
-    filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.wav", scratch, private)
+    try:
+        filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.wav", scratch, private)
+    except:
+        helpers.destroy_scratch_dir(scratch)
+        return False, helpers.msg(f'Input file(s) not found')
     outfile = f"{scratch}/{Tasks.MAST.value}.wav"
 
     # Get the info for the original file to get the bit depth
@@ -90,4 +94,4 @@ def execute(file_id, force=False):
     ret['mp3'] = mp3_location
     filestore.copy_keys(file_id, public_keys, private, public)
     helpers.destroy_scratch_dir(scratch)
-    return ret
+    return True, ret

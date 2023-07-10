@@ -20,22 +20,22 @@ def execute(file_id, force=False):
         if not filestore.check_keys(file_id, public_keys, public):
             filestore.copy_keys(file_id, public_keys, private, public)
         helpers.destroy_scratch_dir(scratch)
-        return
+        return True, helpers.msg('Already done')
 
     # Get the external file and grab it's metadata
     try:
         local_file = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}", scratch, private)
     except:
         helpers.destroy_scratch_dir(scratch)
-        return { 'message': f'File not found', 'failed': True }
+        return False, helpers.msg(f'Input file(s) not found')
     metadata = helpers.get_media_info(local_file)
     if not metadata:
         helpers.destroy_scratch_dir(scratch)
-        return { 'message': f'File format not recognized', 'failed': True }
+        return False, helpers.msg('File format not recognized')
     fmt = metadata['format'].get('format_name')
     if fmt != 'wav' and fmt != 'aiff':
         helpers.destroy_scratch_dir(scratch)
-        return { 'message': f'Not accepting this file format: {fmt}', 'failed': True }
+        return False, helpers.msg(f'Not accepting this file format: {fmt}')
 
     # Save the file info along side it
     ret = {}
@@ -93,4 +93,4 @@ def execute(file_id, force=False):
     ret["command"] = { "stdout": stdout, "stderr": stderr }
     filestore.copy_keys(file_id, public_keys, private, public)
     helpers.destroy_scratch_dir(scratch)
-    return ret
+    return True, ret

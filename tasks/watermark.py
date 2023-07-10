@@ -23,11 +23,14 @@ def execute(file_id, force=False):
         if not filestore.check_keys(file_id, public_keys, public):
             filestore.copy_keys(file_id, public_keys, private, public)
         helpers.destroy_scratch_dir(scratch)
-        return
+        return True, helpers.msg('Already done')
 
+    try:
+        filename = filestore.retrieve_file(file_id, f"{Tasks.MAST.value}.wav", scratch, private)
+    except:
+        helpers.destroy_scratch_dir(scratch)
+        return False, helpers.msg(f'Input file(s) not found')
     outfile = f"{scratch}/{Tasks.WTRM.value}.wav"
-    filename = filestore.retrieve_file(file_id, f"{Tasks.MAST.value}.wav", scratch, private)
-
     # Run the tool to make the watermarked version
     cmdline = []
     cmdline.append(MARKMAKER_BIN)
@@ -60,4 +63,4 @@ def execute(file_id, force=False):
     ret["phase2"] = { "stdout": stdout, "stderr": stderr }
     filestore.copy_keys(file_id, public_keys, private, public)
     helpers.destroy_scratch_dir(scratch)
-    return ret
+    return True, ret

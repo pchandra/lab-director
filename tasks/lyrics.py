@@ -25,12 +25,16 @@ def execute(file_id, force=False):
         if not filestore.check_keys(file_id, public_keys, public):
             filestore.copy_keys(file_id, public_keys, private, public)
         helpers.destroy_scratch_dir(scratch)
-        return
+        return True, helpers.msg('Already done')
 
     outdir = f"{scratch}/{Tasks.LYRC.value}"
 
     # Get the stem metadata from the filestore
-    stem_json = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}.json", scratch, private)
+    try:
+        stem_json = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}.json", scratch, private)
+    except:
+        helpers.destroy_scratch_dir(scratch)
+        return False, helpers.msg(f'Input file(s) not found')
     metadata = None
     with open(stem_json, 'r') as f:
         metadata = json.load(f)
@@ -38,10 +42,14 @@ def execute(file_id, force=False):
     # Return quickly if stemmer says this is an instrumental
     if metadata['instrumental']:
         helpers.destroy_scratch_dir(scratch)
-        return
+        return True, helpers.msg('Track is an intrumental already')
 
     # Grab the vocal track to analyze
-    vocalsfile = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}-vocals.wav", scratch, private)
+    try:
+        vocalsfile = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}-vocals.wav", scratch, private)
+    except:
+        helpers.destroy_scratch_dir(scratch)
+        return False, helpers.msg(f'Input file(s) not found')
 
     # Build the command line to run
     cmdline = []
@@ -96,4 +104,4 @@ def execute(file_id, force=False):
     ret['output'] = [ {'type':x,'file':output[x]} for x in output.keys()]
     filestore.copy_keys(file_id, public_keys, private, public)
     helpers.destroy_scratch_dir(scratch)
-    return ret
+    return True, ret

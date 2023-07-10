@@ -18,10 +18,15 @@ def execute(file_id, force=False):
         if not filestore.check_keys(file_id, public_keys, public):
             filestore.copy_keys(file_id, public_keys, private, public)
         helpers.destroy_scratch_dir(scratch)
-        return
+        return True, helpers.msg('Already done')
 
     # Use the mp3 version of the original to make the graphics
-    filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.mp3", scratch, private)
+    try:
+        filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.mp3", scratch, private)
+    except:
+        helpers.destroy_scratch_dir(scratch)
+        return False, helpers.msg(f'Input file(s) not found')
+
     svgname = scratch + f"/{Tasks.BARS.value}.svg"
     pngname = scratch + f"/{Tasks.BARS.value}.png"
 
@@ -70,4 +75,4 @@ def execute(file_id, force=False):
 
     filestore.copy_keys(file_id, public_keys, private, public)
     helpers.destroy_scratch_dir(scratch)
-    return ret
+    return True, ret

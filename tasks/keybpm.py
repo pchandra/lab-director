@@ -17,9 +17,13 @@ def execute(file_id, force=False):
         if not filestore.check_keys(file_id, public_keys, public):
             filestore.copy_keys(file_id, public_keys, private, public)
         helpers.destroy_scratch_dir(scratch)
-        return
+        return True, helpers.msg('Already done')
 
-    filename = filestore.retrieve_file(file_id, Tasks.ORIG.value, scratch, private)
+    try:
+        filename = filestore.retrieve_file(file_id, Tasks.ORIG.value, scratch, private)
+    except:
+        helpers.destroy_scratch_dir(scratch)
+        return False, helpers.msg(f'Input file(s) not found')
     # Build the command line to run
     cmdline = []
     cmdline.append(KEYMASTER_BIN)
@@ -41,4 +45,4 @@ def execute(file_id, force=False):
     ret['output'] = stored_location
     filestore.copy_keys(file_id, public_keys, private, public)
     helpers.destroy_scratch_dir(scratch)
-    return ret
+    return True, ret

@@ -13,14 +13,14 @@ def execute(file_id, force=False):
         if not filestore.check_keys(file_id, public_keys, public):
             filestore.copy_keys(file_id, public_keys, private, public)
         helpers.destroy_scratch_dir(scratch)
-        return
+        return True, helpers.msg('Already done')
 
     # Use the preview, aka 'watermark' to make the graphics
     try:
         preview = filestore.retrieve_file(file_id, f"{Tasks.WTRM.value}.mp3", scratch, public)
     except:
         helpers.destroy_scratch_dir(scratch)
-        return { 'message': f'File not found', 'failed': True }
+        return False, helpers.msg(f'Input file(s) not found')
 
     helpers.make_wave_png(preview)
     ret = {}
@@ -28,4 +28,4 @@ def execute(file_id, force=False):
 
     filestore.copy_keys(file_id, public_keys, private, public)
     helpers.destroy_scratch_dir(scratch)
-    return ret
+    return True, ret

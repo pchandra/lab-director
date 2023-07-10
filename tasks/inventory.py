@@ -18,15 +18,14 @@ def execute(file_id, force=False):
         if not filestore.check_keys(file_id, public_keys, public):
             filestore.copy_keys(file_id, public_keys, private, public)
         helpers.destroy_scratch_dir(scratch)
-        return
+        return True, helpers.msg('Already done')
 
     try:
         filename = filestore.retrieve_file(file_id, f"{Tasks.OGSK.value}.zip", scratch, private)
-        outfile = scratch + f"/{Tasks.ZINV.value}.json"
     except:
         helpers.destroy_scratch_dir(scratch)
-        return { 'message': f'File not found', 'failed': True }
-
+        return False, helpers.msg(f'Input file(s) not found')
+    outfile = scratch + f"/{Tasks.ZINV.value}.json"
     # Build the command line to run
     cmdline = []
     cmdline.append(ZIPLINER_BIN)
@@ -46,4 +45,4 @@ def execute(file_id, force=False):
     ret['output'] = stored_location
     filestore.copy_keys(file_id, public_keys, private, public)
     helpers.destroy_scratch_dir(scratch)
-    return ret
+    return True, ret

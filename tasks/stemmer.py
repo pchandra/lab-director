@@ -115,9 +115,13 @@ def execute(file_id, force=False):
         if not filestore.check_keys(file_id, public_keys, public):
             filestore.copy_keys(file_id, public_keys, private, public)
         helpers.destroy_scratch_dir(scratch)
-        return
+        return True, helpers.msg('Already done')
 
-    filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.wav", scratch, private)
+    try:
+        filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.wav", scratch, private)
+    except:
+        helpers.destroy_scratch_dir(scratch)
+        return False, helpers.msg(f'Input file(s) not found')
     ret = {}
     # Run the high quality 4 source model and filter for non-silent
     ret['htdemucs_ft'] = _run_demucs_model(file_id, filename, scratch, private, 'htdemucs_ft', progress_size = 50)
@@ -171,4 +175,4 @@ def execute(file_id, force=False):
     ret['output'] = stem_obj
     filestore.copy_keys(file_id, public_keys, private, public)
     helpers.destroy_scratch_dir(scratch)
-    return ret
+    return True, ret

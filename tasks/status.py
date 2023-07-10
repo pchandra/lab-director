@@ -15,7 +15,7 @@ def execute(file_id, force=False):
         if not filestore.check_keys(file_id, public_keys, public):
             filestore.copy_keys(file_id, public_keys, private, public)
         helpers.destroy_scratch_dir(scratch)
-        return
+        return True, helpers.msg('Already done')
 
     # Write 'status' as json to a local file
     tempfile = f"{scratch}/{Tasks.STAT.value}.json"
@@ -28,4 +28,4 @@ def execute(file_id, force=False):
     ret['output'] = stored_location
     filestore.copy_keys(file_id, public_keys, private, public)
     helpers.destroy_scratch_dir(scratch)
-    return ret
+    return True, ret
