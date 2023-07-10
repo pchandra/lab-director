@@ -12,8 +12,12 @@ FILESTORE_BACKEND = conf['FILESTORE_BACKEND']
 def execute(file_id, force=False):
     private, public = helpers.get_bucketnames(file_id)
     # Short-circuit if the filestore already has assets we would produce
-    output_keys = [ f"{Tasks.ORIG.value}.json" ]
-    if not force and filestore.check_keys(file_id, output_keys, public):
+    output_keys = [ f"{Tasks.ORIG.value}.wav",
+                    f"{Tasks.ORIG.value}.mp3" ]
+    public_keys = [ f"{Tasks.ORIG.value}.json" ]
+    if (not force and
+        filestore.check_keys(file_id, output_keys, private) and
+        filestore.check_keys(file_id, public_keys, public)):
         return
 
     # Proceed with running this task

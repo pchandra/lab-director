@@ -9,13 +9,15 @@ GENRE_BIN = conf['GENRE_BIN']
 
 def execute(file_id, force=False):
     private, public = helpers.get_bucketnames(file_id)
-    # Short-circuit if the filestore already has assets we would produce
-    output_keys = [ f"{Tasks.VOCL.value}.json" ]
-    if not force and filestore.check_keys(file_id, output_keys, public):
-        return
-
-    # Proceed with running this task
     scratch = helpers.create_scratch_dir()
+    # Short-circuit if the filestore already has assets we would produce
+    output_keys = [ ]
+    public_keys = [ f"{Tasks.VOCL.value}.json" ]
+    if (not force and
+        filestore.check_keys(file_id, output_keys, private) and
+        filestore.check_keys(file_id, public_keys, public)):
+        helpers.destroy_scratch_dir(scratch)
+        return
 
     # Get the stem metadata from the filestore
     stem_json = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}.json", scratch, public)

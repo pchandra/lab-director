@@ -9,13 +9,16 @@ BARTENDER_BIN = conf['BARTENDER_BIN']
 
 def execute(file_id, force=False):
     private, public = helpers.get_bucketnames(file_id)
-    # Short-circuit if the filestore already has assets we would produce
-    output_keys = [ f"{Tasks.BARS.value}-desktop.png", f"{Tasks.BARS.value}-mobile.png" ]
-    if not force and filestore.check_keys(file_id, output_keys, public):
-        return
-
-    # Proceed with running this task
     scratch = helpers.create_scratch_dir()
+    # Short-circuit if the filestore already has assets we would produce
+    output_keys = [ ]
+    public_keys = [ f"{Tasks.BARS.value}-desktop.png",
+                    f"{Tasks.BARS.value}-mobile.png" ]
+    if (not force and
+        filestore.check_keys(file_id, output_keys, private) and
+        filestore.check_keys(file_id, public_keys, public)):
+        helpers.destroy_scratch_dir(scratch)
+        return
 
     # Use the mp3 version of the original to make the graphics
     filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.mp3", scratch, private)

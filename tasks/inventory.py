@@ -10,13 +10,16 @@ ZIPLINER_BIN = conf['ZIPLINER_BIN']
 
 def execute(file_id, force=False):
     private, public = helpers.get_bucketnames(file_id)
+    scratch = helpers.create_scratch_dir()
     # Short-circuit if the filestore already has assets we would produce
-    output_keys = [ f"{Tasks.ZINV.value}.json" ]
-    if not force and filestore.check_keys(file_id, output_keys, public):
+    output_keys = [ ]
+    public_keys = [ f"{Tasks.ZINV.value}.json" ]
+    if (not force and
+        filestore.check_keys(file_id, output_keys, private) and
+        filestore.check_keys(file_id, public_keys, public)):
+        helpers.destroy_scratch_dir(scratch)
         return
 
-    # Proceed with running this task
-    scratch = helpers.create_scratch_dir()
     try:
         filename = filestore.retrieve_file(file_id, f"{Tasks.OGSK.value}.zip", scratch, private)
         outfile = scratch + f"/{Tasks.ZINV.value}.json"

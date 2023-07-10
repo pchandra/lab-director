@@ -14,16 +14,19 @@ ML_DEVICE = conf['ML_DEVICE']
 
 def execute(file_id, force=False):
     private, public = helpers.get_bucketnames(file_id)
+    scratch = helpers.create_scratch_dir()
     # Short-circuit if the filestore already has assets we would produce
-    output_keys = []
+    output_keys = [ ]
+    public_keys = [ ]
     output_fmts = [ 'json', 'srt', 'txt']
     for fmt in output_fmts:
         output_keys.append(f"{Tasks.LYRC.value}.{fmt}")
-    if not force and filestore.check_keys(file_id, output_keys, private):
+    if (not force and
+        filestore.check_keys(file_id, output_keys, private) and
+        filestore.check_keys(file_id, public_keys, public)):
+        helpers.destroy_scratch_dir(scratch)
         return
 
-    # Proceed with running this task
-    scratch = helpers.create_scratch_dir()
     outdir = f"{scratch}/{Tasks.LYRC.value}"
 
     # Get the stem metadata from the filestore

@@ -15,13 +15,16 @@ WATERMARK_GAP = conf['WATERMARK_GAP']
 
 def execute(file_id, force=False):
     private, public = helpers.get_bucketnames(file_id)
+    scratch = helpers.create_scratch_dir()
     # Short-circuit if the filestore already has assets we would produce
-    output_keys = [ f"{Tasks.WTRM.value}.mp3" ]
-    if not force and filestore.check_keys(file_id, output_keys, public):
+    output_keys = [ ]
+    public_keys = [ f"{Tasks.WTRM.value}.mp3" ]
+    if (not force and
+        filestore.check_keys(file_id, output_keys, private) and
+        filestore.check_keys(file_id, public_keys, public)):
+        helpers.destroy_scratch_dir(scratch)
         return
 
-    # Proceed with running this task
-    scratch = helpers.create_scratch_dir()
     outfile = f"{scratch}/{Tasks.WTRM.value}.wav"
     filename = filestore.retrieve_file(file_id, f"{Tasks.MAST.value}.wav", scratch, private)
 

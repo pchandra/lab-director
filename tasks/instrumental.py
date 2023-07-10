@@ -9,13 +9,17 @@ WAVMIXER_BIN = conf['WAVMIXER_BIN']
 
 def execute(file_id, force=False):
     private, public = helpers.get_bucketnames(file_id)
+    scratch = helpers.create_scratch_dir()
     # Short-circuit if the filestore already has assets we would produce
-    output_keys = [ f"{Tasks.INST.value}.wav" ]
-    if not force and filestore.check_keys(file_id, output_keys, private):
+    output_keys = [ f"{Tasks.INST.value}.wav",
+                    f"{Tasks.INST.value}.mp3" ]
+    public_keys = [ ]
+    if (not force and
+        filestore.check_keys(file_id, output_keys, private) and
+        filestore.check_keys(file_id, public_keys, public)):
+        helpers.destroy_scratch_dir(scratch)
         return
 
-    # Proceed with running this task
-    scratch = helpers.create_scratch_dir()
     outfile = f"{scratch}/{Tasks.INST.value}.wav"
 
     # Get the stem metadata from the filestore
