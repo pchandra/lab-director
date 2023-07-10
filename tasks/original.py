@@ -11,18 +11,17 @@ FILESTORE_BACKEND = conf['FILESTORE_BACKEND']
 
 def execute(file_id, force=False):
     private, public = helpers.get_bucketnames(file_id)
+    scratch = helpers.create_scratch_dir()
     # Short-circuit if the filestore already has assets we would produce
-    output_keys = [ f"{Tasks.ORIG.value}.wav",
-                    f"{Tasks.ORIG.value}.mp3" ]
     public_keys = [ f"{Tasks.ORIG.value}.json" ]
-    if (not force and
-        filestore.check_keys(file_id, output_keys, private) and
-        filestore.check_keys(file_id, public_keys, public)):
+    output_keys = [ f"{Tasks.ORIG.value}.wav",
+                    f"{Tasks.ORIG.value}.mp3" ] + public_keys
+    if not force and filestore.check_keys(file_id, output_keys, private):
+        if not filestore.check_keys(file_id, public_keys, public):
+            filestore.copy_keys(file_id, public_keys, private, public)
+        helpers.destroy_scratch_dir(scratch)
         return
 
-    # Proceed with running this task
-    ret = {}
-    scratch = helpers.create_scratch_dir()
     # Get the external file and grab it's metadata
     try:
         if FILESTORE_BACKEND == "local":
@@ -42,10 +41,11 @@ def execute(file_id, force=False):
         return { 'message': f'Not accepting this file format: {fmt}', 'failed': True }
 
     # Save the file info along side it
+    ret = {}
     tempfile = f"{scratch}/{Tasks.ORIG.value}.json"
     with open(tempfile, 'w') as f:
         f.write(json.dumps(metadata, indent=2))
-    ret['info'] = filestore.store_file(file_id, tempfile, f"{Tasks.ORIG.value}.json", public)
+    ret['info'] = filestore.store_file(file_id, tempfile, f"{Tasks.ORIG.value}.json", private)
 
     # Screen to ensure we have an AIFF or WAV file
     channels = metadata['streams'][0]['channels']
@@ -94,5 +94,6 @@ def execute(file_id, force=False):
 
     # Build the dict to return to caller
     ret["command"] = { "stdout": stdout, "stderr": stderr }
+    filestore.copy_keys(file_id, public_keys, private, public)
     helpers.destroy_scratch_dir(scratch)
     return ret

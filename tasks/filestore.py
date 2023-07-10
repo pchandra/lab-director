@@ -87,14 +87,32 @@ def check_keys(file_id, keylist, section):
             break
     return ret
 
+def copy_keys(file_id, keylist, src, dst):
+    return _backend['copy_keys'](file_id, keylist, src, dst)
+
+def _local_copy_keys(file_id, keylist, src, dst):
+    for key in keylist:
+        path = FILESTORE_DIR + f"/{src}/{file_id}" + f"/{key}"
+        outpath = FILESTORE_DIR + f"/{dst}/{file_id}"
+        os.makedirs(outpath, exist_ok=True)
+        shutil.copy(path, output_keys + f"/{key}")
+
+def _s3_copy_keys(file_id, keylist, src, dst):
+    target_bucket = s3.Bucket(dst)
+    for key in keylist:
+        source = { 'Bucket' : src, 'Key': f"{file_id}/{key}" }
+        target_bucket.copy(source, f"{file_id}/{key}")
+
 _backend_local = {}
 _backend_local['store_file'] = _local_store_file
 _backend_local['retrieve_file'] = _local_retrieve_file
 _backend_local['key_exists'] = _local_key_exists
+_backend_local['copy_keys'] = _local_copy_keys
 
 _backend_s3 = {}
 _backend_s3['store_file'] = _s3_store_file
 _backend_s3['retrieve_file'] = _s3_retrieve_file
 _backend_s3['key_exists'] = _s3_key_exists
+_backend_s3['copy_keys'] = _s3_copy_keys
 
 _backend = _backend_s3 if FILESTORE_BACKEND == "s3" else _backend_local
