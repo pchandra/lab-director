@@ -24,10 +24,7 @@ def execute(file_id, force=False):
 
     # Get the external file and grab it's metadata
     try:
-        if FILESTORE_BACKEND == "local":
-            local_file = os.getenv('TESTFILE')
-        else:
-            local_file = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}", scratch, private)
+        local_file = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}", scratch, private)
     except:
         helpers.destroy_scratch_dir(scratch)
         return { 'message': f'File not found', 'failed': True }
