@@ -46,7 +46,7 @@ def execute(file_id, force=False):
 
     # Grab the vocal track to analyze
     try:
-        vocalsfile = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}-vocals.wav", scratch, private)
+        vocalsfile = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}-vocals.mp3", scratch, private)
     except:
         helpers.destroy_scratch_dir(scratch)
         return False, helpers.msg(f'Input file(s) not found')

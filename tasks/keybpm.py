@@ -20,7 +20,7 @@ def execute(file_id, force=False):
         return True, helpers.msg('Already done')
 
     try:
-        filename = filestore.retrieve_file(file_id, Tasks.ORIG.value, scratch, private)
+        filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.mp3", scratch, private)
     except:
         helpers.destroy_scratch_dir(scratch)
         return False, helpers.msg(f'Input file(s) not found')

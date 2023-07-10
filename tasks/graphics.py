@@ -31,8 +31,8 @@ def execute(file_id, force=False):
 
     # Start with the master to make the graphics
     try:
-        master = filestore.retrieve_file(file_id, f"{Tasks.MAST.value}.wav", scratch, private)
-        orig = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.wav", scratch, private)
+        master = filestore.retrieve_file(file_id, f"{Tasks.MAST.value}.mp3", scratch, private)
+        orig = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.mp3", scratch, private)
     except:
         helpers.destroy_scratch_dir(scratch)
         return False, helpers.msg(f'Input file(s) not found')
@@ -50,7 +50,7 @@ def execute(file_id, force=False):
         ret[stem] = filestore.store_file(file_id, filename + ".png", f"{base}.png", private)
 
     if not metadata['instrumental']:
-        inst = filestore.retrieve_file(file_id, f"{Tasks.INST.value}.wav", scratch, private)
+        inst = filestore.retrieve_file(file_id, f"{Tasks.INST.value}.mp3", scratch, private)
         helpers.make_wave_png(inst, factor=factor)
         ret[Tasks.INST.value] = filestore.store_file(file_id, inst + ".png", f"{Tasks.INST.value}.png", private)
 

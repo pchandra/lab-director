@@ -21,7 +21,7 @@ def execute(file_id, force=False):
 
     # Use the WAV of the original for analysis
     try:
-        filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.wav", scratch, private)
+        filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.mp3", scratch, private)
     except:
         helpers.destroy_scratch_dir(scratch)
         return False, helpers.msg(f'Input file(s) not found')

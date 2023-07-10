@@ -66,10 +66,10 @@ def _run(file_id, task_type, force=False):
     ret['perf']['time_elapsed'] = stop - start
     data = json.dumps(ret).encode('ascii')
     if not success:
-        log.warn(f"Task \"{task_type.value}\" FAILED executing for {file_id}")
+        log.warn(f"Task \"{task_type.value}\" FAILED for {file_id}")
         api.mark_failed(file_id, task_type.value, data)
     else:
-        log.info(f"Task \"{task_type.value}\" finished executing for {file_id}")
+        log.info(f"Task \"{task_type.value}\" succeeded for {file_id}")
         api.mark_complete(file_id, task_type.value, data)
 
 def _is_finished(file_id, status, task_type):
