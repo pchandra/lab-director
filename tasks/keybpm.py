@@ -11,11 +11,11 @@ def execute(file_id, force=False):
     private, public = helpers.get_bucketnames(file_id)
     scratch = helpers.create_scratch_dir()
     # Short-circuit if the filestore already has assets we would produce
-    output_keys = [ ]
     public_keys = [ f"{Tasks.KBPM.value}.json" ]
-    if (not force and
-        filestore.check_keys(file_id, output_keys, private) and
-        filestore.check_keys(file_id, public_keys, public)):
+    output_keys = [ ] + public_keys
+    if not force and filestore.check_keys(file_id, output_keys, private):
+        if not filestore.check_keys(file_id, public_keys, public):
+            filestore.copy_keys(file_id, public_keys, private, public)
         helpers.destroy_scratch_dir(scratch)
         return
 
@@ -34,10 +34,11 @@ def execute(file_id, force=False):
     tempfile = f"{scratch}/{Tasks.KBPM.value}.json"
     with open(tempfile, 'w') as f:
         f.write(json.dumps(json_obj, indent=2))
-    stored_location = filestore.store_file(file_id, tempfile, f"{Tasks.KBPM.value}.json", public)
+    stored_location = filestore.store_file(file_id, tempfile, f"{Tasks.KBPM.value}.json", private)
     # The tool outputs JSON so return it as a dict
     ret = {}
     ret['data'] = json.loads(stdout)
     ret['output'] = stored_location
+    filestore.copy_keys(file_id, public_keys, private, public)
     helpers.destroy_scratch_dir(scratch)
     return ret

@@ -11,12 +11,12 @@ def execute(file_id, force=False):
     private, public = helpers.get_bucketnames(file_id)
     scratch = helpers.create_scratch_dir()
     # Short-circuit if the filestore already has assets we would produce
-    output_keys = [ ]
     public_keys = [ f"{Tasks.BARS.value}-desktop.png",
                     f"{Tasks.BARS.value}-mobile.png" ]
-    if (not force and
-        filestore.check_keys(file_id, output_keys, private) and
-        filestore.check_keys(file_id, public_keys, public)):
+    output_keys = [ ] + public_keys
+    if not force and filestore.check_keys(file_id, output_keys, private):
+        if not filestore.check_keys(file_id, public_keys, public):
+            filestore.copy_keys(file_id, public_keys, private, public)
         helpers.destroy_scratch_dir(scratch)
         return
 
@@ -45,7 +45,7 @@ def execute(file_id, force=False):
     stdout, _ = process.communicate()
     # Save the desktop version
     ret = {}
-    ret['desktop'] = filestore.store_file(file_id, pngname, f"{Tasks.BARS.value}-desktop.png", public)
+    ret['desktop'] = filestore.store_file(file_id, pngname, f"{Tasks.BARS.value}-desktop.png", private)
 
     # Run it again for the mobile version
     cmdline = []
@@ -66,7 +66,8 @@ def execute(file_id, force=False):
                                universal_newlines=True)
     stdout, _ = process.communicate()
     # Save the mobile version
-    ret['mobile'] = filestore.store_file(file_id, pngname, f"{Tasks.BARS.value}-mobile.png", public)
+    ret['mobile'] = filestore.store_file(file_id, pngname, f"{Tasks.BARS.value}-mobile.png", private)
 
+    filestore.copy_keys(file_id, public_keys, private, public)
     helpers.destroy_scratch_dir(scratch)
     return ret

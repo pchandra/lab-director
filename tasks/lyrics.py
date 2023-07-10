@@ -16,21 +16,21 @@ def execute(file_id, force=False):
     private, public = helpers.get_bucketnames(file_id)
     scratch = helpers.create_scratch_dir()
     # Short-circuit if the filestore already has assets we would produce
-    output_keys = [ ]
     public_keys = [ ]
+    output_keys = [ ] + public_keys
     output_fmts = [ 'json', 'srt', 'txt']
     for fmt in output_fmts:
         output_keys.append(f"{Tasks.LYRC.value}.{fmt}")
-    if (not force and
-        filestore.check_keys(file_id, output_keys, private) and
-        filestore.check_keys(file_id, public_keys, public)):
+    if not force and filestore.check_keys(file_id, output_keys, private):
+        if not filestore.check_keys(file_id, public_keys, public):
+            filestore.copy_keys(file_id, public_keys, private, public)
         helpers.destroy_scratch_dir(scratch)
         return
 
     outdir = f"{scratch}/{Tasks.LYRC.value}"
 
     # Get the stem metadata from the filestore
-    stem_json = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}.json", scratch, public)
+    stem_json = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}.json", scratch, private)
     metadata = None
     with open(stem_json, 'r') as f:
         metadata = json.load(f)
@@ -94,5 +94,6 @@ def execute(file_id, force=False):
     for fmt in output_fmts:
         output[fmt] = filestore.store_file(file_id, outdir + f"/{filebase}.{fmt}", f"{Tasks.LYRC.value}.{fmt}", private)
     ret['output'] = [ {'type':x,'file':output[x]} for x in output.keys()]
+    filestore.copy_keys(file_id, public_keys, private, public)
     helpers.destroy_scratch_dir(scratch)
     return ret
