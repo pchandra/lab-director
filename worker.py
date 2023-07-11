@@ -13,9 +13,6 @@ from config import CONFIG as conf
 ROUTER_ADDR = conf['ROUTER_ADDR']
 ROUTER_PORT = conf['ROUTER_BACKEND_PORT']
 ACCEPTABLE_WORK = conf['ACCEPTABLE_WORK']
-TASKS_BEAT = conf['TASKS_BEAT']
-TASKS_SONG = conf['TASKS_SONG']
-TASKS_SOUNDKIT = conf['TASKS_SOUNDKIT']
 
 # Setup ZeroMQ connection to receive tasks from the director
 context = zmq.Context()

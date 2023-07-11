@@ -15,9 +15,6 @@ flask_shelve.init_app(app)
 
 ROUTER_ADDR = conf['ROUTER_ADDR']
 ROUTER_PORT = conf['ROUTER_FRONTEND_PORT']
-TASKS_BEAT = conf['TASKS_BEAT']
-TASKS_SONG = conf['TASKS_SONG']
-TASKS_SOUNDKIT = conf['TASKS_SOUNDKIT']
 
 # Prepare our context and socket to push jobs to workers 
 context = zmq.Context()

@@ -26,3 +26,25 @@ class TaskState(Enum):
     COMP = "completed"
     FAIL = "failed"
     NA = "not-available"
+
+# The tasks that are automatically run for each beat/song
+TASKS_BEAT = [ Tasks.ORIG,
+               Tasks.BARS,
+               Tasks.KBPM,
+               Tasks.GENR,
+               Tasks.STEM,
+               Tasks.MAST,
+               Tasks.WTRM,
+               Tasks.INST,
+               Tasks.VOCL,
+               Tasks.LYRC,
+               Tasks.WGFX,
+               Tasks.STAT ]
+
+TASKS_SONG = TASKS_BEAT
+
+# The tasks that are automatically run for each soundkit
+TASKS_SOUNDKIT = [ Tasks.OGSK,
+                   Tasks.ZINV,
+                   Tasks.KGFX,
+                   Tasks.STAT ]
