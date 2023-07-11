@@ -34,10 +34,15 @@ def _err_no_file(file_id):
 def _err_no_task(task):
     return _msg(f"No such task {task}"), 400
 
+def _err_bad_request(file_id, task):
+    return _msg(f"Not accepting task {task} for {file_id}"), 400
+
 def _sanity_check(file_id, status, task=None, allow_upper=False):
     if not file_id in status:
         return False, _err_no_file(file_id)
-    if task is not None and (not any(x for x in Tasks if x.value == task)) and (allow_upper and not any(x for x in Tasks if x.value.upper() == task)):
+    if (task is not None and
+        (not any(x for x in Tasks if x.value == task)) and
+        (allow_upper and not any(x for x in Tasks if x.value.upper() == task))):
         return False, _err_no_task(task)
     return True, ""
 
@@ -121,6 +126,10 @@ def requeue_task(file_id, task):
     ok, msg = _sanity_check(file_id, STATUS, task, allow_upper=True)
     if not ok:
         return msg
+    if ((STATUS[file_id]['type'] != 'beat' or task.lower() not in [x.value for x in TASKS_BEAT]) and
+        (STATUS[file_id]['type'] != 'song' or task.lower() not in [x.value for x in TASKS_SONG]) and
+        (STATUS[file_id]['type'] != 'soundkit' or task.lower() not in [x.value for x in TASKS_SOUNDKIT])):
+        return _err_bad_request(file_id, task)
     sender.send_string(f"{task} {file_id}")
     return _msg(f"Re-queued task: {task} for: {file_id}")
 
