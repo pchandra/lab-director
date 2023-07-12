@@ -47,21 +47,33 @@ def _s3_store_file(file_id, path, key, section):
 
 
 # Download the file under 'key' in the filestore to the local filesystem
-def retrieve_file(file_id, key, directory, section):
-    return _backend['retrieve_file'](file_id, key, directory, section)
+def retrieve_file(file_id, key, directory, section, handle_exceptions=True):
+    return _backend['retrieve_file'](file_id, key, directory, section, handle_exceptions)
 
-def _local_retrieve_file(file_id, key, directory, section):
+def _local_retrieve_file(file_id, key, directory, section, handle_exceptions):
     src = FILESTORE_DIR + f"/{section}/{file_id}" + f"/{key}"
     dst = directory + f"/{key}"
-    shutil.copyfile(src, dst)
+    try:
+        shutil.copyfile(src, dst)
+    except Exception:
+        if handle_exceptions:
+            return None
+        else:
+            raise
     return dst
 
 # Download the file under 'key' from the new S3 bucket hierarchy
-def _s3_retrieve_file(file_id, key, directory, section):
+def _s3_retrieve_file(file_id, key, directory, section, handle_exceptions):
     s3path = f"{file_id}/{key}"
     basename = key.split('/')[-1]
     filename = directory + f'/{basename}'
-    s3.Object(section, s3path).download_file(filename, Config=config)
+    try:
+        s3.Object(section, s3path).download_file(filename, Config=config)
+    except Exception:
+        if handle_exceptions:
+            return None
+        else:
+            raise
     return filename
 
 
