@@ -13,8 +13,8 @@ config = TransferConfig(multipart_threshold=64 * 1024 * 1024)
 
 scratchfile = '/tmp/scratchfile'
 
-srcname = 'licenselounge-audiolab'
-dstname = 'licenselounge-audiolab'
+srcname = 'licenselounge-public'
+dstname = 'licenselounge-beats'
 src = s3.Bucket(srcname)
 dst = s3.Bucket(dstname)
 
@@ -33,7 +33,7 @@ def key_exists(key, section):
 #files = [ "stems-.*", "stems.json" ]
 ### NOWHERE YET
 #files = [ "instrumental.wav", "lyrics.json", "lyrics.srt", "lyrics.tsv", "lyrics.txt", "lyrics.vtt" ]
-files = [ ".*.mp3" ]
+#files = [ ".*.mp3" ]
 
 pats = {}
 
@@ -66,6 +66,7 @@ sys.exit()
 
 ##############
 
+from tasks import filestore
 import boto3
 import mimetypes
 from urllib.request import urlopen
@@ -77,20 +78,53 @@ config = TransferConfig(multipart_threshold=64 * 1024 * 1024)
 
 scratchfile = '/tmp/scratchfile'
 
-srcname = 'licenselounge-beats'
-dstname = 'licenselounge-audiolab'
-src = s3.Bucket(srcname)
-dst = s3.Bucket(dstname)
+srcname = 'licenselounge-public'
+dstname = 'licenselounge-beats'
+#src = s3.Bucket(srcname)
+#dst = s3.Bucket(dstname)
 
-with open('./website/beats.json') as f:
+with open('../rerun/beats.json') as f:
     b = json.load(f)
 
-with open('./website/soundkits.json') as f:
+with open('../rerun/soundkits.json') as f:
     s = json.load(f)
 
 bids = [y['id'] for y in b]
 sids = [y['id'] for y in s]
 
+blist = [ 'bars-desktop.png',
+          'bars-mobile.png',
+          'genre.json',
+          'gfx.json',
+          'instrumental.png',
+          'key-bpm.json',
+          'mastering.png',
+          'original.json',
+          'original.png',
+          'stems-bass.png',
+          'stems-drums.png',
+          'stems-guitar.png',
+          'stems-other.png',
+          'stems-piano.png',
+          'stems-vocals.png',
+          'stems.json',
+          'vocals.json',
+          'watermark.mp3' ]
+
+slist = [ 'inventory.json',
+          'watermark.png' ]
+
+for file_id in bids:
+    for file in blist:
+        if filestore.key_exists(file_id, file, srcname):
+            filestore.copy_keys(file_id, [file], srcname, dstname)
+
+for file_id in sids:
+    for file in slist:
+        if filestore.key_exists(file_id, file, srcname):
+            filestore.copy_keys(file_id, [file], srcname, dstname)
+
+sys.exit()
 
 found = [ (y['id'], y['moods'][0]['name']) for y in b if y['moods'] != [] ]
 
