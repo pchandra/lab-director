@@ -19,11 +19,10 @@ def execute(file_id, force=False):
         helpers.destroy_scratch_dir(scratch)
         return True, helpers.msg('Already done')
 
-    try:
-        filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.mp3", scratch, private)
-    except:
+    filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.mp3", scratch, private)
+    if filename is None:
         helpers.destroy_scratch_dir(scratch)
-        return False, helpers.msg(f'Input file(s) not found')
+        return False, helpers.msg(f'Input file not found: {Tasks.ORIG.value}.mp3')
     # Build the command line to run
     cmdline = []
     cmdline.append(KEYMASTER_BIN)

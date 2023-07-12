@@ -31,24 +31,24 @@ def _get_assets(file_id, directory, key, private, public):
     try:
         instrumental = None
         # Always need the original WAV
-        filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.wav", directory, private)
+        filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.wav", directory, private, handle_exceptions=False)
         helpers.make_website_mp3(f"{directory}/{Tasks.ORIG.value}.wav", f"{directory}/{Tasks.ORIG.value}.mp3", high_quality=True)
         if key == 'purchase-mp3':
             os.remove(f"{directory}/{Tasks.ORIG.value}.wav")
         if key in [ 'all', 'purchase-stems' ]:
             # Get the stem metadata from the filestore
-            stem_json = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}.json", directory, public)
+            stem_json = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}.json", directory, public, handle_exceptions=False)
             metadata = None
             with open(stem_json, 'r') as f:
                 metadata = json.load(f)
             os.remove(f"{directory}/{Tasks.STEM.value}.json")
             for stem in metadata['stems']:
-                filestore.retrieve_file(file_id, stem, directory, private)
+                filestore.retrieve_file(file_id, stem, directory, private, handle_exceptions=False)
             instrumental = metadata['instrumental']
         if key == 'all':
-            filestore.retrieve_file(file_id, f"{Tasks.MAST.value}.wav", directory, private)
+            filestore.retrieve_file(file_id, f"{Tasks.MAST.value}.wav", directory, private, handle_exceptions=False)
             if not instrumental:
-                filestore.retrieve_file(file_id, f"{Tasks.INST.value}.wav", directory, private)
+                filestore.retrieve_file(file_id, f"{Tasks.INST.value}.wav", directory, private, handle_exceptions=False)
         return True
     except:
         return False
@@ -92,9 +92,8 @@ def export(file_id, key, fmt):
             helpers.destroy_scratch_dir(scratch)
             return ret
 
-        try:
-            infile = filestore.retrieve_file(file_id, f"{key}.wav", scratch, private)
-        except:
+        infile = filestore.retrieve_file(file_id, f"{key}.wav", scratch, private)
+        if infile is None:
             helpers.destroy_scratch_dir(scratch)
             return False, _tag(f"file {key}.wav isn't found for {file_id}")
 
@@ -132,9 +131,8 @@ def export(file_id, key, fmt):
         if not fmt in formats:
             return False, _tag(f"format {fmt} isn't accepted for {key}")
         scratch = helpers.create_scratch_dir()
-        try:
-            skfile = filestore.retrieve_file(file_id, f"{Tasks.OGSK.value}.zip", scratch, private)
-        except:
+        skfile = filestore.retrieve_file(file_id, f"{Tasks.OGSK.value}.zip", scratch, private)
+        if skfile is None:
             helpers.destroy_scratch_dir(scratch)
             return False, _tag(f"file {Tasks.OGSK.value}.zip isn't found for {file_id}")
         bucket = FILESTORE_PURCHASES if key == 'purchase' else FILESTORE_SCRATCH

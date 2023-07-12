@@ -23,11 +23,10 @@ def execute(file_id, force=False):
     outfile = f"{scratch}/{Tasks.INST.value}.wav"
 
     # Get the stem metadata from the filestore
-    try:
-        stem_json = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}.json", scratch, private)
-    except:
+    stem_json = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}.json", scratch, private)
+    if stem_json is None:
         helpers.destroy_scratch_dir(scratch)
-        return False, helpers.msg(f'Input file(s) not found')
+        return False, helpers.msg(f'Input file not found: {Tasks.STEM.value}.json')
     metadata = None
     with open(stem_json, 'r') as f:
         metadata = json.load(f)
@@ -39,6 +38,9 @@ def execute(file_id, force=False):
 
     # Get the info for the original file to get the bit depth
     infofile = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.json", scratch, private)
+    if infofile is None:
+        helpers.destroy_scratch_dir(scratch)
+        return False, helpers.msg(f'Input file not found: {Tasks.ORIG.value}.json')
     with open(infofile, 'r') as f:
         info = json.load(f)
     bitdepth = info['streams'][0]['bits_per_sample']
@@ -56,6 +58,9 @@ def execute(file_id, force=False):
         if stem == f'{Tasks.STEM.value}-vocals.wav':
             continue
         filename = filestore.retrieve_file(file_id, stem, scratch, private)
+        if filename is None:
+            helpers.destroy_scratch_dir(scratch)
+            return False, helpers.msg(f'Input file not found: {stem}')
         filenames.append(filename)
     cmdline.extend(filenames)
 

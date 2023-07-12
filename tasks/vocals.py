@@ -20,11 +20,10 @@ def execute(file_id, force=False):
         return True, helpers.msg('Already done')
 
     # Get the stem metadata from the filestore
-    try:
-        stem_json = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}.json", scratch, private)
-    except:
+    stem_json = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}.json", scratch, private)
+    if stem_json is None:
         helpers.destroy_scratch_dir(scratch)
-        return False, helpers.msg(f'Input file(s) not found')
+        return False, helpers.msg(f'Input file not found: {Tasks.STEM.value}.json')
     metadata = None
     with open(stem_json, 'r') as f:
         metadata = json.load(f)
@@ -35,6 +34,9 @@ def execute(file_id, force=False):
     # Do the work if it isn't an instrumental
     if not metadata['instrumental']:
         filename = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}-vocals.mp3", scratch, private)
+        if filename is None:
+            helpers.destroy_scratch_dir(scratch)
+            return False, helpers.msg(f'Input file not found: {Tasks.STEM.value}-vocals.mp3')
         # Chomp all silence from the file
         trimfile = helpers.make_nonsilent_wave(filename)
 

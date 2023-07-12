@@ -22,15 +22,17 @@ def execute(file_id, force=False):
         helpers.destroy_scratch_dir(scratch)
         return True, helpers.msg('Already done')
 
-    try:
-        filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.wav", scratch, private)
-    except:
+    filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.wav", scratch, private)
+    if filename is None:
         helpers.destroy_scratch_dir(scratch)
-        return False, helpers.msg(f'Input file(s) not found')
+        return False, helpers.msg(f'Input file not found: {Tasks.ORIG.value}.wav')
     outfile = f"{scratch}/{Tasks.MAST.value}.wav"
 
     # Get the info for the original file to get the bit depth
     infofile = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.json", scratch, private)
+    if infofile is None:
+        helpers.destroy_scratch_dir(scratch)
+        return False, helpers.msg(f'Input file not found: {Tasks.ORIG.value}.json')
     with open(infofile, 'r') as f:
         info = json.load(f)
     bitdepth = info['streams'][0]['bits_per_sample']

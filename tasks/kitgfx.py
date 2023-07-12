@@ -16,11 +16,10 @@ def execute(file_id, force=False):
         return True, helpers.msg('Already done')
 
     # Use the preview, aka 'watermark' to make the graphics
-    try:
-        preview = filestore.retrieve_file(file_id, f"{Tasks.WTRM.value}.mp3", scratch, public)
-    except:
+    preview = filestore.retrieve_file(file_id, f"{Tasks.WTRM.value}.mp3", scratch, public)
+    if preview is None:
         helpers.destroy_scratch_dir(scratch)
-        return False, helpers.msg(f'Input file(s) not found')
+        return False, helpers.msg(f'Input file not found: {Tasks.WTRM.value}.mp3')
 
     helpers.make_wave_png(preview)
     ret = {}

@@ -14,6 +14,9 @@ def execute(file_id, force=False):
                     f"{Tasks.MAST.value}.png" ]
     # Get the stem metadata and add output/public keys
     stem_json = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}.json", scratch, private)
+    if stem_json is None:
+        helpers.destroy_scratch_dir(scratch)
+        return False, helpers.msg(f'Input file not found: {Tasks.STEM.value}.json')
     metadata = None
     with open(stem_json, 'r') as f:
         metadata = json.load(f)
@@ -30,37 +33,43 @@ def execute(file_id, force=False):
         return True, helpers.msg('Already done')
 
     # Start with the master to make the graphics
-    try:
-        master = filestore.retrieve_file(file_id, f"{Tasks.MAST.value}.mp3", scratch, private)
-        orig = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.mp3", scratch, private)
-    except:
+    master = filestore.retrieve_file(file_id, f"{Tasks.MAST.value}.mp3", scratch, private)
+    if master is None:
         helpers.destroy_scratch_dir(scratch)
-        return False, helpers.msg(f'Input file(s) not found')
+        return False, helpers.msg(f'Input file not found: {Tasks.MAST.value}.mp3')
+    orig = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.mp3", scratch, private)
+    if orig is None:
+        helpers.destroy_scratch_dir(scratch)
+        return False, helpers.msg(f'Input file not found: {Tasks.ORIG.value}.mp3')
     factor = helpers.make_wave_png(master)
     helpers.make_wave_png(orig, factor=factor)
 
     ret = {}
     ret['scaling'] = factor
 
-    stems = metadata['stems-core'] + metadata['stems-extra']
-    for stem in stems:
-        filename = filestore.retrieve_file(file_id, stem, scratch, private)
-        helpers.make_wave_png(filename, factor=factor)
-        base = os.path.splitext(stem)[0]
-        ret[stem] = filestore.store_file(file_id, filename + ".png", f"{base}.png", private)
+    try:
+        stems = metadata['stems-core'] + metadata['stems-extra']
+        for stem in stems:
+            filename = filestore.retrieve_file(file_id, stem, scratch, private, handle_exceptions=False)
+            helpers.make_wave_png(filename, factor=factor)
+            base = os.path.splitext(stem)[0]
+            ret[stem] = filestore.store_file(file_id, filename + ".png", f"{base}.png", private)
 
-    if not metadata['instrumental']:
-        inst = filestore.retrieve_file(file_id, f"{Tasks.INST.value}.mp3", scratch, private)
-        helpers.make_wave_png(inst, factor=factor)
-        ret[Tasks.INST.value] = filestore.store_file(file_id, inst + ".png", f"{Tasks.INST.value}.png", private)
+        if not metadata['instrumental']:
+            inst = filestore.retrieve_file(file_id, f"{Tasks.INST.value}.mp3", scratch, private, handle_exceptions=False)
+            helpers.make_wave_png(inst, factor=factor)
+            ret[Tasks.INST.value] = filestore.store_file(file_id, inst + ".png", f"{Tasks.INST.value}.png", private)
 
-    ret[Tasks.MAST.value] = filestore.store_file(file_id, master + ".png", f"{Tasks.MAST.value}.png", private)
-    ret[Tasks.ORIG.value] = filestore.store_file(file_id, orig + ".png", f"{Tasks.ORIG.value}.png", private)
+        ret[Tasks.MAST.value] = filestore.store_file(file_id, master + ".png", f"{Tasks.MAST.value}.png", private)
+        ret[Tasks.ORIG.value] = filestore.store_file(file_id, orig + ".png", f"{Tasks.ORIG.value}.png", private)
 
-    tempfile = f"{scratch}/{Tasks.WGFX.value}.json"
-    with open(tempfile, 'w') as f:
-        f.write(json.dumps(ret, indent=2))
-    filestore.store_file(file_id, tempfile, f"{Tasks.WGFX.value}.json", private)
+        tempfile = f"{scratch}/{Tasks.WGFX.value}.json"
+        with open(tempfile, 'w') as f:
+            f.write(json.dumps(ret, indent=2))
+        filestore.store_file(file_id, tempfile, f"{Tasks.WGFX.value}.json", private)
+    except:
+        helpers.destroy_scratch_dir(scratch)
+        return False, helpers.msg(f'Supporting file(s) not found/failed')
 
     filestore.copy_keys(file_id, public_keys, private, public)
     helpers.destroy_scratch_dir(scratch)

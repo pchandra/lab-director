@@ -22,7 +22,7 @@ def _run_demucs_model(file_id, filename, scratch, section, model, progress_start
     stems = _stems_for_model(model)
 
     # Get the info for the original file to get the bit depth
-    infofile = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.json", scratch, section)
+    infofile = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.json", scratch, section, handle_exceptions=False)
     with open(infofile, 'r') as f:
         info = json.load(f)
     bitdepth = info['streams'][0]['bits_per_sample']
@@ -117,19 +117,23 @@ def execute(file_id, force=False):
         helpers.destroy_scratch_dir(scratch)
         return True, helpers.msg('Already done')
 
+    filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.wav", scratch, private)
+    if filename is None:
+        helpers.destroy_scratch_dir(scratch)
+        return False, helpers.msg(f'Input file not found: {Tasks.ORIG.value}.wav')
+
+    ret = {}
     try:
-        filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.wav", scratch, private)
+        # Run the high quality 4 source model and filter for non-silent
+        ret['htdemucs_ft'] = _run_demucs_model(file_id, filename, scratch, private, 'htdemucs_ft', progress_size = 50)
+        stems_core, stems_good = _check_stems(ret['htdemucs_ft'], 'htdemucs_ft')
+    
+        # Run the 6 source and see if there's a good guitar or piano stem
+        ret['htdemucs_6s'] = _run_demucs_model(file_id, filename, scratch, private, 'htdemucs_6s', progress_start = 50, progress_size = 50)
+        _, stems6g = _check_stems(ret['htdemucs_6s'], 'htdemucs_6s')
     except:
         helpers.destroy_scratch_dir(scratch)
-        return False, helpers.msg(f'Input file(s) not found')
-    ret = {}
-    # Run the high quality 4 source model and filter for non-silent
-    ret['htdemucs_ft'] = _run_demucs_model(file_id, filename, scratch, private, 'htdemucs_ft', progress_size = 50)
-    stems_core, stems_good = _check_stems(ret['htdemucs_ft'], 'htdemucs_ft')
-
-    # Run the 6 source and see if there's a good guitar or piano stem
-    ret['htdemucs_6s'] = _run_demucs_model(file_id, filename, scratch, private, 'htdemucs_6s', progress_start = 50, progress_size = 50)
-    _, stems6g = _check_stems(ret['htdemucs_6s'], 'htdemucs_6s')
+        return False, helpers.msg(f'Failed to fun model')
 
     # Done with the tool execution
     helpers.setprogress(file_id, Tasks.STEM, 100)

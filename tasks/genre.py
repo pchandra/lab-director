@@ -20,11 +20,10 @@ def execute(file_id, force=False):
         return True, helpers.msg('Already done')
 
     # Use the WAV of the original for analysis
-    try:
-        filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.mp3", scratch, private)
-    except:
+    filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.mp3", scratch, private)
+    if filename is None:
         helpers.destroy_scratch_dir(scratch)
-        return False, helpers.msg(f'Input file(s) not found')
+        return False, helpers.msg(f'Input file not found: {Tasks.ORIG.value}.mp3')
     genres = [ 'core', 'mood', 'blues', 'classical', 'country', 'electronic', 'hiphop', 'jazz', 'metal', 'reggae', 'rock']
     output = {}
     for g in genres:

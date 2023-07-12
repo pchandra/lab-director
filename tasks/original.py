@@ -23,11 +23,10 @@ def execute(file_id, force=False):
         return True, helpers.msg('Already done')
 
     # Get the external file and grab it's metadata
-    try:
-        local_file = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}", scratch, private)
-    except:
+    local_file = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}", scratch, private)
+    if local_file is None:
         helpers.destroy_scratch_dir(scratch)
-        return False, helpers.msg(f'Input file(s) not found')
+        return False, helpers.msg(f'Input file not found: {Tasks.ORIG.value}')
     metadata = helpers.get_media_info(local_file)
     if not metadata:
         helpers.destroy_scratch_dir(scratch)

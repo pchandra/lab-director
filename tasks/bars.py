@@ -21,11 +21,10 @@ def execute(file_id, force=False):
         return True, helpers.msg('Already done')
 
     # Use the mp3 version of the original to make the graphics
-    try:
-        filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.mp3", scratch, private)
-    except:
+    filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.mp3", scratch, private)
+    if filename is None:
         helpers.destroy_scratch_dir(scratch)
-        return False, helpers.msg(f'Input file(s) not found')
+        return False, helpers.msg(f'Input file not found: {Tasks.ORIG.value}.mp3')
 
     svgname = scratch + f"/{Tasks.BARS.value}.svg"
     pngname = scratch + f"/{Tasks.BARS.value}.png"
