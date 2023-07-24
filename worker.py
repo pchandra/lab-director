@@ -50,8 +50,7 @@ def _log_waiting(file_id, task, dep):
 
 def _run(file_id, task_type, force=False):
     api.mark_inprogress(file_id, task_type.value)
-    success = False
-    ret = {}
+    success, ret = False, {}
     with tasks.helpers.TaskGuard(file_id) as tg:
         success, ret = tasks.execute[task_type](tg, force=force)
     # Add the performance data and encode
@@ -137,8 +136,7 @@ def main():
             from tasks import export
             key = tokens[2]
             fmt = tokens[3]
-            success = False
-            msg = {}
+            success, msg = False, f"Task \"{Tasks.EXPT.value}\" FAILED for {file_id} {key} {fmt}"
             with tasks.helpers.TaskGuard(file_id) as tg:
                 success, msg = export.export(tg, key, fmt)
             l = log.info if success else log.warn
