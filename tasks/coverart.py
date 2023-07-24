@@ -5,9 +5,6 @@ from config import CONFIG as conf
 
 STABLE_DIFFUSION_DIR = conf['STABLE_DIFFUSION_DIR']
 
-def _tag(msg):
-    return f"{os.path.basename(__file__)}: {msg}"
-
 def ondemand(tg, params, force=False):
     prompt = params['prompt']
     job_id = params['job_id']
@@ -34,7 +31,11 @@ def ondemand(tg, params, force=False):
                                universal_newlines=True)
     stdout, stderr = process.communicate(input="\n\n\n\n\n")
 
+    # Build the dict to return to caller
+    ret = { "command": { "stdout": stdout, "stderr": stderr } }
+    ret['files'] = []
     outfiles = os.listdir(tg.scratch)
     for i, file in enumerate([ f"{tg.scratch}/{x}" for x in outfiles ]):
-        tg.put_file(file, f"{job_id}/pic{i}.png")
-    return True, _tag(f"Finished processing job {job_id} for {tg.file_id}")
+        f = tg.put_file(file, f"{job_id}/pic{i}.png")
+        ret['files'].append(f)
+    return True, ret

@@ -133,14 +133,21 @@ def main():
 
         # Process any on-demand tasks since they fail gracefully
         if task in [ x.value for x in TASKS_ONDEMAND ]:
+            api.mark_inprogress(file_id, task)
             # Get the params from status for on-demand tasks
             jid = status['job_id']
             fid = status['file_id']
-            success, ret = False, f"On-demand task \"{task}\" FAILED for {file_id}"
+            success, ret = False, {}
             with tasks.helpers.TaskGuard(fid) as tg:
                 success, ret = tasks.ondemand[task](tg, status, force=force)
-            l = log.info if success else log.warn
-            l(ret)
+            ret['perf'] = tg.get_perf()
+            data = json.dumps(ret).encode('ascii')
+            if not success:
+                log.warn(f"Task \"{task}\" FAILED for {jid} on {fid}")
+                api.mark_failed(file_id, task, data)
+            else:
+                log.info(f"Task \"{task}\" succeeded for {jid} on {fid}")
+                api.mark_complete(file_id, task, data)
             continue
 
         # Short-circuit tasks whose main dependency has failed

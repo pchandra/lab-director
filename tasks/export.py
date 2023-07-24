@@ -12,7 +12,7 @@ FILESTORE_SCRATCH = conf['FILESTORE_SCRATCH']
 FILESTORE_PURCHASES = conf['FILESTORE_PURCHASES']
 
 def _tag(msg):
-    return f"{os.path.basename(__file__)}: {msg}"
+    return { 'message': f"{os.path.basename(__file__)}: {msg}" }
 
 def _make_archive(arch_file, fmt, arch_dir):
     if fmt == 'zip':
