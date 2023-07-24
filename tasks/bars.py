@@ -2,32 +2,24 @@ import json
 import subprocess
 from taskdef import *
 from . import helpers
-from . import filestore
 from config import CONFIG as conf
 
 BARTENDER_BIN = conf['BARTENDER_BIN']
 
-def execute(file_id, force=False):
-    private, public = helpers.get_bucketnames(file_id)
-    scratch = helpers.create_scratch_dir()
+def execute(tg, force=False):
     # Short-circuit if the filestore already has assets we would produce
-    public_keys = [ f"{Tasks.BARS.value}-desktop.png",
-                    f"{Tasks.BARS.value}-mobile.png" ]
-    output_keys = [ ] + public_keys
-    if not force and filestore.check_keys(file_id, output_keys, private):
-        if not filestore.check_keys(file_id, public_keys, public):
-            filestore.copy_keys(file_id, public_keys, private, public)
-        helpers.destroy_scratch_dir(scratch)
+    tg.add_public([ f"{Tasks.BARS.value}-desktop.png",
+                    f"{Tasks.BARS.value}-mobile.png" ])
+    if not force and tg.check_keys():
         return True, helpers.msg('Already done')
 
     # Use the mp3 version of the original to make the graphics
-    filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.mp3", scratch, private)
+    filename = tg.get_file(f"{Tasks.ORIG.value}.mp3")
     if filename is None:
-        helpers.destroy_scratch_dir(scratch)
         return False, helpers.msg(f'Input file not found: {Tasks.ORIG.value}.mp3')
 
-    svgname = scratch + f"/{Tasks.BARS.value}.svg"
-    pngname = scratch + f"/{Tasks.BARS.value}.png"
+    svgname = tg.scratch + f"/{Tasks.BARS.value}.svg"
+    pngname = tg.scratch + f"/{Tasks.BARS.value}.png"
 
     # Build the command line to run
     cmdline = []
@@ -49,7 +41,7 @@ def execute(file_id, force=False):
     stdout, _ = process.communicate()
     # Save the desktop version
     ret = {}
-    ret['desktop'] = filestore.store_file(file_id, pngname, f"{Tasks.BARS.value}-desktop.png", private)
+    ret['desktop'] = tg.put_file(pngname, f"{Tasks.BARS.value}-desktop.png")
 
     # Run it again for the mobile version
     cmdline = []
@@ -70,8 +62,5 @@ def execute(file_id, force=False):
                                universal_newlines=True)
     stdout, _ = process.communicate()
     # Save the mobile version
-    ret['mobile'] = filestore.store_file(file_id, pngname, f"{Tasks.BARS.value}-mobile.png", private)
-
-    filestore.copy_keys(file_id, public_keys, private, public)
-    helpers.destroy_scratch_dir(scratch)
+    ret['mobile'] = tg.put_file(pngname, f"{Tasks.BARS.value}-mobile.png")
     return True, ret

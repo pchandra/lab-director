@@ -2,27 +2,19 @@ import json
 import subprocess
 from taskdef import *
 from . import helpers
-from . import filestore
 from config import CONFIG as conf
 
 GENRE_BIN = conf['GENRE_BIN']
 
-def execute(file_id, force=False):
-    private, public = helpers.get_bucketnames(file_id)
-    scratch = helpers.create_scratch_dir()
+def execute(tg, force=False):
     # Short-circuit if the filestore already has assets we would produce
-    public_keys = [ f"{Tasks.GENR.value}.json" ]
-    output_keys = [ ] + public_keys
-    if not force and filestore.check_keys(file_id, output_keys, private):
-        if not filestore.check_keys(file_id, public_keys, public):
-            filestore.copy_keys(file_id, public_keys, private, public)
-        helpers.destroy_scratch_dir(scratch)
+    tg.add_public([ f"{Tasks.GENR.value}.json" ])
+    if not force and tg.check_keys():
         return True, helpers.msg('Already done')
 
     # Use the WAV of the original for analysis
-    filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.mp3", scratch, private)
+    filename = tg.get_file(f"{Tasks.ORIG.value}.mp3")
     if filename is None:
-        helpers.destroy_scratch_dir(scratch)
         return False, helpers.msg(f'Input file not found: {Tasks.ORIG.value}.mp3')
     genres = [ 'core', 'mood', 'blues', 'classical', 'country', 'electronic', 'hiphop', 'jazz', 'metal', 'reggae', 'rock']
     output = {}
@@ -40,14 +32,12 @@ def execute(file_id, force=False):
         # Load JSON object
         output[g] = json.loads(stdout)
 
-    tempfile = f"{scratch}/{Tasks.GENR.value}.json"
+    tempfile = f"{tg.scratch}/{Tasks.GENR.value}.json"
     with open(tempfile, 'w') as f:
         f.write(json.dumps(output, indent=2))
-    stored_location = filestore.store_file(file_id, tempfile, f"{Tasks.GENR.value}.json", private)
+    stored_location = tg.put_file(tempfile, f"{Tasks.GENR.value}.json")
     # The tool outputs JSON so return it as a dict
     ret = {}
     ret['data'] = output
     ret['output'] = stored_location
-    filestore.copy_keys(file_id, public_keys, private, public)
-    helpers.destroy_scratch_dir(scratch)
     return True, ret

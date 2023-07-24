@@ -1,30 +1,20 @@
 from taskdef import *
 from . import helpers
-from . import filestore
 from config import CONFIG as conf
 
-def execute(file_id, force=False):
-    private, public = helpers.get_bucketnames(file_id)
-    scratch = helpers.create_scratch_dir()
+def execute(tg, force=False):
     # Short-circuit if the filestore already has assets we would produce
-    public_keys = [ f"{Tasks.WTRM.value}.png" ]
-    output_keys = [ ] + public_keys
-    if not force and filestore.check_keys(file_id, output_keys, private):
-        if not filestore.check_keys(file_id, public_keys, public):
-            filestore.copy_keys(file_id, public_keys, private, public)
-        helpers.destroy_scratch_dir(scratch)
+    tg.add_public([ f"{Tasks.WTRM.value}.png",
+                    f"{Tasks.WTRM.value}.mp3" ])
+    if not force and tg.check_keys():
         return True, helpers.msg('Already done')
 
     # Use the preview, aka 'watermark' to make the graphics
-    preview = filestore.retrieve_file(file_id, f"{Tasks.WTRM.value}.mp3", scratch, public)
+    preview = tg.get_file(f"{Tasks.WTRM.value}.mp3")
     if preview is None:
-        helpers.destroy_scratch_dir(scratch)
         return False, helpers.msg(f'Input file not found: {Tasks.WTRM.value}.mp3')
 
     helpers.make_wave_png(preview)
     ret = {}
-    ret['output'] = filestore.store_file(file_id, preview + ".png", f"{Tasks.WTRM.value}.png", private)
-
-    filestore.copy_keys(file_id, public_keys, private, public)
-    helpers.destroy_scratch_dir(scratch)
+    ret['output'] = tg.put_file(preview + ".png", f"{Tasks.WTRM.value}.png")
     return True, ret

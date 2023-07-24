@@ -1,2 +1,2 @@
-def execute(file_id, force=False):
+def execute(tg, force=False):
     return False, {}

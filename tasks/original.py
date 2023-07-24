@@ -3,45 +3,36 @@ import json
 import subprocess
 from taskdef import *
 from . import helpers
-from . import filestore
 from config import CONFIG as conf
 
 FFMPEG_BIN = conf['FFMPEG_BIN']
 FILESTORE_BACKEND = conf['FILESTORE_BACKEND']
 
-def execute(file_id, force=False):
-    private, public = helpers.get_bucketnames(file_id)
-    scratch = helpers.create_scratch_dir()
+def execute(tg, force=False):
     # Short-circuit if the filestore already has assets we would produce
-    public_keys = [ f"{Tasks.ORIG.value}.json" ]
-    output_keys = [ f"{Tasks.ORIG.value}.wav",
-                    f"{Tasks.ORIG.value}.mp3" ] + public_keys
-    if not force and filestore.check_keys(file_id, output_keys, private):
-        if not filestore.check_keys(file_id, public_keys, public):
-            filestore.copy_keys(file_id, public_keys, private, public)
-        helpers.destroy_scratch_dir(scratch)
+    tg.add_public([ f"{Tasks.ORIG.value}.json" ])
+    tg.add_private([ f"{Tasks.ORIG.value}.wav",
+                     f"{Tasks.ORIG.value}.mp3" ])
+    if not force and tg.check_keys():
         return True, helpers.msg('Already done')
 
     # Get the external file and grab it's metadata
-    local_file = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}", scratch, private)
+    local_file = tg.get_file(f"{Tasks.ORIG.value}")
     if local_file is None:
-        helpers.destroy_scratch_dir(scratch)
         return False, helpers.msg(f'Input file not found: {Tasks.ORIG.value}')
     metadata = helpers.get_media_info(local_file)
     if not metadata:
-        helpers.destroy_scratch_dir(scratch)
         return False, helpers.msg('File format not recognized')
     fmt = metadata['format'].get('format_name')
     if fmt != 'wav' and fmt != 'aiff':
-        helpers.destroy_scratch_dir(scratch)
         return False, helpers.msg(f'Not accepting this file format: {fmt}')
 
     # Save the file info along side it
     ret = {}
-    tempfile = f"{scratch}/{Tasks.ORIG.value}.json"
+    tempfile = f"{tg.scratch}/{Tasks.ORIG.value}.json"
     with open(tempfile, 'w') as f:
         f.write(json.dumps(metadata, indent=2))
-    ret['info'] = filestore.store_file(file_id, tempfile, f"{Tasks.ORIG.value}.json", private)
+    ret['info'] = tg.put_file(tempfile, f"{Tasks.ORIG.value}.json")
 
     # Screen to ensure we have an AIFF or WAV file
     channels = metadata['streams'][0]['channels']
@@ -60,7 +51,7 @@ def execute(file_id, force=False):
         codec = 'pcm_s32le'
 
     # Now run this through ffmpeg to translate as clean WAV file
-    outfile = f"{scratch}/{Tasks.ORIG.value}.wav"
+    outfile = f"{tg.scratch}/{Tasks.ORIG.value}.wav"
     cmdline = []
     cmdline.append(FFMPEG_BIN)
     cmdline.extend([ "-i", local_file,
@@ -80,16 +71,14 @@ def execute(file_id, force=False):
     stdout, stderr = process.communicate(input="\n\n\n\n\n")
 
     # Save it as the wav version of original to the filestore
-    ret['output'] = filestore.store_file(file_id, outfile, f"{Tasks.ORIG.value}.wav", private)
+    ret['output'] = tg.put_file(outfile, f"{Tasks.ORIG.value}.wav")
 
     # Make an MP3 website version
-    mp3file = f"{scratch}/{Tasks.ORIG.value}.mp3"
+    mp3file = f"{tg.scratch}/{Tasks.ORIG.value}.mp3"
     helpers.make_website_mp3(outfile, mp3file)
     # Store the resulting file
-    ret['mp3'] = filestore.store_file(file_id, mp3file, f"{Tasks.ORIG.value}.mp3", private)
+    ret['mp3'] = tg.put_file(mp3file, f"{Tasks.ORIG.value}.mp3")
 
     # Build the dict to return to caller
     ret["command"] = { "stdout": stdout, "stderr": stderr }
-    filestore.copy_keys(file_id, public_keys, private, public)
-    helpers.destroy_scratch_dir(scratch)
     return True, ret
