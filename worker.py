@@ -50,6 +50,8 @@ def _log_waiting(file_id, task, dep):
 
 def _run(file_id, task_type, force=False):
     api.mark_inprogress(file_id, task_type.value)
+    success = False
+    ret = {}
     with tasks.helpers.TaskGuard(file_id) as tg:
         success, ret = tasks.execute[task_type](tg, force=force)
     # Add the performance data and encode
