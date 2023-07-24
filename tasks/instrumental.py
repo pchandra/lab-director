@@ -26,7 +26,7 @@ def execute(tg, force=False):
 
     # Return quickly if this is already tagged instrumental from stemming
     if metadata['instrumental']:
-        return True, helpers.msg('Track is an intrumental already')
+        return False, helpers.msg('Track is an intrumental already')
 
     # Get the info for the original file to get the bit depth
     infofile = tg.get_file(f"{Tasks.ORIG.value}.json")

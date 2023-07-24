@@ -31,7 +31,7 @@ def execute(tg, force=False):
 
     # Return quickly if stemmer says this is an instrumental
     if metadata['instrumental']:
-        return True, helpers.msg('Track is an intrumental already')
+        return False, helpers.msg('Track is an intrumental already')
 
     # Grab the vocal track to analyze
     vocalsfile = tg.get_file(f"{Tasks.STEM.value}-vocals.mp3")
