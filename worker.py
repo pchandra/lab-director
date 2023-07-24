@@ -274,7 +274,8 @@ def main():
             elif not _check_ready(file_id, status, Tasks.MAST):
                 _log_waiting(file_id, task, Tasks.MAST)
                 _requeue(file_id, task.upper() if force else task)
-            elif not _check_ready(file_id, status, Tasks.INST):
+            elif (not _check_ready(file_id, status, Tasks.INST) or
+                  _check_failed(file_id, status, Tasks.INST)):
                 _log_waiting(file_id, task, Tasks.INST)
                 _requeue(file_id, task.upper() if force else task)
             else:
