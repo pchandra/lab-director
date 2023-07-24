@@ -145,8 +145,11 @@ def execute(tg, force=False):
         # Make an MP3 website version
         mp3file = f"{tg.scratch}/{Tasks.STEM.value}-{stem}.mp3"
         helpers.make_website_mp3(stems[stem], mp3file)
-        # Store the mp3 stem
+        # Make a temp PNG for it
+        helpers.make_wave_png(mp3file)
+        # Store the mp3 stem & png
         mp3_location = tg.put_file(mp3file, f"{Tasks.STEM.value}-{stem}.mp3")
+        png_location = tg.put_file(mp3file + ".png", f"{Tasks.STEM.value}-{stem}.png")
         # Store the wav stem
         stored_location = tg.put_file(stems[stem], f'{Tasks.STEM.value}-{stem}.wav')
         stems[stem] = stored_location

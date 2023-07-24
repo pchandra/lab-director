@@ -10,7 +10,8 @@ FILESTORE_BACKEND = conf['FILESTORE_BACKEND']
 
 def execute(tg, force=False):
     # Short-circuit if the filestore already has assets we would produce
-    tg.add_public([ f"{Tasks.ORIG.value}.json" ])
+    tg.add_public([ f"{Tasks.ORIG.value}.json",
+                    f"{Tasks.ORIG.value}.png" ])
     tg.add_private([ f"{Tasks.ORIG.value}.wav",
                      f"{Tasks.ORIG.value}.mp3" ])
     if not force and tg.check_keys():
@@ -76,8 +77,11 @@ def execute(tg, force=False):
     # Make an MP3 website version
     mp3file = f"{tg.scratch}/{Tasks.ORIG.value}.mp3"
     helpers.make_website_mp3(outfile, mp3file)
-    # Store the resulting file
+    # Make a temp PNG for it
+    helpers.make_wave_png(mp3file)
+    # Store the resulting files
     ret['mp3'] = tg.put_file(mp3file, f"{Tasks.ORIG.value}.mp3")
+    ret['png'] = tg.put_file(mp3file + ".png", f"{Tasks.ORIG.value}.png")
 
     # Build the dict to return to caller
     ret["command"] = { "stdout": stdout, "stderr": stderr }
