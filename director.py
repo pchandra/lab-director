@@ -88,12 +88,17 @@ def export(file_id, key, fmt):
     sender.send_string(f"{Tasks.EXPT.value} {job_id}")
     return _msg(f"Sent {Tasks.EXPT.value} for: {file_id} with {job_id}")
 
+@app.route('/coverart/<file_id>/<prompt>')
 @app.route('/coverart/<file_id>', methods=['POST'])
-def coverart(file_id):
+def coverart(file_id, prompt):
     STATUS = flask_shelve.get_shelve()
     if not file_id in STATUS:
         return _err_no_file(file_id)
-    job_id, params = _create_ondemand(file_id, request.get_json(force=True))
+    if request.method == 'GET':
+        params = {'prompt': prompt}
+    else:
+        params = request.get_json(force=True)
+    job_id, params = _create_ondemand(file_id, params)
     STATUS[job_id] = params
     sender.send_string(f"{Tasks.COVR.value} {job_id}")
     return _msg(f"Sent {Tasks.COVR.value} for: {file_id} with {job_id}")

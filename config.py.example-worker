@@ -129,5 +129,8 @@ CONFIG['WHISPER_BIN'] = '/home/ubuntu/.local/bin/whisper_timestamped'
 # Model for vocals to text, common choices are 'tiny', 'small', 'medium', 'large'
 CONFIG['WHISPER_MODEL'] = "medium"
 
+# Directory for stable-diffusion install
+CONFIG['STABLE_DIFFUSION_DIR'] = "/home/ubuntu/stable-diffusion"
+
 # Device to use for ML tools, either "cpu" or "cuda"
 CONFIG['ML_DEVICE'] = "cuda"
