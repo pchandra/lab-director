@@ -10,4 +10,4 @@
 
 ./setup-common.sh
 
-python3 -m pip install -U Flask Flask-shelve
+python3 -m pip install -U Flask Flask-shelve waitress Paste

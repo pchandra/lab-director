@@ -1,4 +1,6 @@
 import zmq
+from waitress import serve
+from paste.translogger import TransLogger
 from random import randrange
 from flask import request
 from flask import Flask
@@ -202,4 +204,4 @@ def update_notavailable(file_id, task):
     return _msg("ok")
 
 if __name__ == '__main__':
-    app.run(host=conf['DIRECTOR_BIND'], port = conf['DIRECTOR_PORT'])
+    serve(TransLogger(app, setup_console_handler=False), host=conf['DIRECTOR_BIND'], port=conf['DIRECTOR_PORT'])
