@@ -165,6 +165,7 @@ class TaskGuard:
         self.file_id = file_id
         self.pub_keys = []
         self.priv_keys = []
+        self.success = False
 
     def __enter__(self):
         self.start = time.time()
@@ -173,7 +174,7 @@ class TaskGuard:
         return self
 
     def __exit__(self, exc_type, exc_value, exc_tb):
-        if not exc_type:
+        if self.success:
             self.copy_keys()
         self._destroy_scratch_dir()
         self.stop = time.time()

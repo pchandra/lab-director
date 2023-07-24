@@ -52,11 +52,11 @@ def _run(file_id, task_type, force=False):
     api.mark_inprogress(file_id, task_type.value)
     success, ret = False, {}
     with tasks.helpers.TaskGuard(file_id) as tg:
-        success, ret = tasks.execute[task_type](tg, force=force)
+        tg.success, ret = tasks.execute[task_type](tg, force=force)
     # Add the performance data and encode
     ret['perf'] = tg.get_perf()
     data = json.dumps(ret).encode('ascii')
-    if not success:
+    if not tg.success:
         log.warn(f"Task \"{task_type.value}\" FAILED for {file_id}")
         api.mark_failed(file_id, task_type.value, data)
     else:
@@ -139,10 +139,10 @@ def main():
             fid = status['file_id']
             success, ret = False, {}
             with tasks.helpers.TaskGuard(fid) as tg:
-                success, ret = tasks.ondemand[task](tg, status, force=force)
+                tg.success, ret = tasks.ondemand[task](tg, status, force=force)
             ret['perf'] = tg.get_perf()
             data = json.dumps(ret).encode('ascii')
-            if not success:
+            if not tg.success:
                 log.warn(f"Task \"{task}\" FAILED for {jid} on {fid}")
                 api.mark_failed(file_id, task, data)
             else:
