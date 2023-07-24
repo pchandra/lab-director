@@ -62,6 +62,12 @@ def _create_status(file_id, audio_type):
         ret[task]['status'] = TaskState.INIT.value
     return ret
 
+def _create_ondemand(file_id, params):
+    job_id = str(uuid.uuid4())
+    params['file_id'] = file_id
+    params['job_id'] = job_id
+    return job_id, params
+
 @app.route('/')
 def index():
     return _msg('AudioLab HTTP API Service')
@@ -73,29 +79,24 @@ def export(file_id, key, fmt):
     STATUS = flask_shelve.get_shelve()
     if not file_id in STATUS:
         return _err_no_file(file_id)
-    job_id = str(uuid.uuid4())
     if request.method == 'GET':
         params = {'key': key, 'format':fmt}
     else:
         params = request.get_json(force=True)
-    params['file_id'] = file_id
-    params['job_id'] = job_id
+    job_id, params = _create_ondemand(file_id, params)
     STATUS[job_id] = params
     sender.send_string(f"{Tasks.EXPT.value} {job_id}")
-    return _msg(f"Sent export task for: {file_id} with {job_id}")
+    return _msg(f"Sent {Tasks.EXPT.value} for: {file_id} with {job_id}")
 
 @app.route('/coverart/<file_id>', methods=['POST'])
 def coverart(file_id):
     STATUS = flask_shelve.get_shelve()
     if not file_id in STATUS:
         return _err_no_file(file_id)
-    job_id = str(uuid.uuid4())
-    params = request.get_json(force=True)
-    params['file_id'] = file_id
-    params['job_id'] = job_id
+    job_id, params = _create_ondemand(file_id, request.get_json(force=True))
     STATUS[job_id] = params
     sender.send_string(f"{Tasks.COVR.value} {job_id}")
-    return _msg(f"Sent coverart task for: {file_id} with {job_id}")
+    return _msg(f"Sent {Tasks.COVR.value} for: {file_id} with {job_id}")
 
 @app.route('/stub_beat/<file_id>')
 def stub_beat(file_id):
