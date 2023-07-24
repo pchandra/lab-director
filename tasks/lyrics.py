@@ -47,7 +47,7 @@ def execute(tg, force=False):
                      "--accurate",
                      "--vad", "True",
                      "--detect_disfluencies", "True",
-                     "--punctuations_with_words", "False"
+                     "--punctuations_with_words", "False",
                      "--output_dir", outdir
                    ])
     cmdline.append(vocalsfile)
@@ -82,7 +82,7 @@ def execute(tg, force=False):
     # Build the dict to return to caller
     ret = { "command": { "stdout": stdout, "stderr": stderr } }
     output = {}
-    filebase = os.path.splitext(os.path.basename(vocalsfile))[0]
+    filebase = os.path.basename(vocalsfile)
     for fmt in output_fmts:
         ext = 'words.json' if fmt == 'json' else fmt
         output[fmt] = tg.put_file(outdir + f"/{filebase}.{ext}", f"{Tasks.LYRC.value}.{fmt}")
