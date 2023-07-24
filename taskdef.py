@@ -18,6 +18,7 @@ class Tasks(Enum):
     KGFX = 'soundkit-gfx' # Create graphics for a soundkit preview file
     GENR = 'genre' # Run models to detect music genre
     EXPT = 'export' # Run an export task
+    COVR = 'coverart' # Generate cover art from user prompt
 
 class TaskState(Enum):
     INIT = "initial"
@@ -48,3 +49,7 @@ TASKS_SOUNDKIT = [ Tasks.OGSK,
                    Tasks.ZINV,
                    Tasks.KGFX,
                    Tasks.STAT ]
+
+# These are the on-demand only tasks
+TASKS_ONDEMAND = [ Tasks.EXPT,
+                   Tasks.COVR ]

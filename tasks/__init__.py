@@ -15,8 +15,10 @@ from . import kitgfx
 from . import bars
 from . import graphics
 from . import genre
+from . import export
+from . import coverart
 
-__all__ = ["execute"]
+__all__ = ["execute", "ondemand"]
 
 execute = {}
 execute[Tasks.KBPM] = keybpm.execute
@@ -35,3 +37,7 @@ execute[Tasks.KGFX] = kitgfx.execute
 execute[Tasks.BARS] = bars.execute
 execute[Tasks.WGFX] = graphics.execute
 execute[Tasks.GENR] = genre.execute
+
+ondemand = {}
+ondemand[Tasks.EXPT.value] = export.ondemand
+ondemand[Tasks.COVR.value] = coverart.ondemand

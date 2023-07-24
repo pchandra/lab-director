@@ -58,7 +58,7 @@ def main():
                 tokens = message[0].split()
                 task = tokens[0]
                 log.info("Frontend got task: %s" % message[0])
-                if task == b'convert':
+                if task == f"{Tasks.EXPT.value}".encode('ascii'):
                     queue.insert(0, message[0])
                 elif message[0] not in queue:
                     queue.append(message[0])

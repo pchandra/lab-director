@@ -53,7 +53,9 @@ def _get_assets(file_id, directory, key, private, public):
     except:
         return False
 
-def export(tg, key, fmt):
+def ondemand(tg, params, force=False):
+    key = params['key']
+    fmt = params['format']
     if tg.status['type'] in [ 'beat', 'song' ]:
         # Lots of sanity and error checking first
         special = [ 'all', 'purchase-mp3', 'purchase-wav', 'purchase-stems' ]

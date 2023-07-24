@@ -131,14 +131,14 @@ def main():
             log.warn("COMMAND NOT RECOGNIZED")
             continue
 
-        # Process any export requests since they fail gracefully
-        if task == Tasks.EXPT.value:
-            from tasks import export
-            key = tokens[2]
-            fmt = tokens[3]
-            success, msg = False, f"Task \"{Tasks.EXPT.value}\" FAILED for {file_id} {key} {fmt}"
-            with tasks.helpers.TaskGuard(file_id) as tg:
-                success, msg = export.export(tg, key, fmt)
+        # Process any on-demand tasks since they fail gracefully
+        if task in [ x.value for x in TASKS_ONDEMAND ]:
+            # Get the params from status for on-demand tasks
+            jid = status['job_id']
+            fid = status['file_id']
+            success, ret = False, f"On-demand task \"{task}\" FAILED for {file_id}"
+            with tasks.helpers.TaskGuard(fid) as tg:
+                success, ret = tasks.ondemand[task](tg, status, force=force)
             l = log.info if success else log.warn
             l(msg)
             continue
