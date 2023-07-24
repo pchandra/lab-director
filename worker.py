@@ -50,17 +50,10 @@ def _log_waiting(file_id, task, dep):
 
 def _run(file_id, task_type, force=False):
     api.mark_inprogress(file_id, task_type.value)
-    # Collect performance counters
-    start = time.time()
-    success, ret = tasks.execute[task_type](file_id, force=force)
-    stop = time.time()
+    with tasks.helpers.TaskGuard(file_id) as tg:
+        success, ret = tasks.execute[task_type](tg, force=force)
     # Add the performance data and encode
-    ret['perf'] = {}
-    ret['perf']['start'] = datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S')
-    ret['perf']['stop'] = datetime.fromtimestamp(stop).strftime('%Y-%m-%d %H:%M:%S')
-    ret['perf']['time_start'] = start
-    ret['perf']['time_stop'] = stop
-    ret['perf']['time_elapsed'] = stop - start
+    ret['perf'] = tg.get_perf()
     data = json.dumps(ret).encode('ascii')
     if not success:
         log.warn(f"Task \"{task_type.value}\" FAILED for {file_id}")
@@ -142,7 +135,8 @@ def main():
             from tasks import export
             key = tokens[2]
             fmt = tokens[3]
-            success, msg = export.export(file_id, key, fmt)
+            with tasks.helpers.TaskGuard(file_id) as tg:
+                success, msg = export.export(tg, key, fmt)
             l = log.info if success else log.warn
             l(msg)
             continue

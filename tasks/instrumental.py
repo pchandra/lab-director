@@ -2,30 +2,22 @@ import json
 import subprocess
 from taskdef import *
 from . import helpers
-from . import filestore
 from config import CONFIG as conf
 
 WAVMIXER_BIN = conf['WAVMIXER_BIN']
 
-def execute(file_id, force=False):
-    private, public = helpers.get_bucketnames(file_id)
-    scratch = helpers.create_scratch_dir()
+def execute(tg, force=False):
     # Short-circuit if the filestore already has assets we would produce
-    public_keys = [ ]
-    output_keys = [ f"{Tasks.INST.value}.wav",
-                    f"{Tasks.INST.value}.mp3" ] + public_keys
-    if not force and filestore.check_keys(file_id, output_keys, private):
-        if not filestore.check_keys(file_id, public_keys, public):
-            filestore.copy_keys(file_id, public_keys, private, public)
-        helpers.destroy_scratch_dir(scratch)
+    tg.add_private([ f"{Tasks.INST.value}.wav",
+                     f"{Tasks.INST.value}.mp3" ])
+    if not force and tg.check_keys():
         return True, helpers.msg('Already done')
 
-    outfile = f"{scratch}/{Tasks.INST.value}.wav"
+    outfile = f"{tg.scratch}/{Tasks.INST.value}.wav"
 
     # Get the stem metadata from the filestore
-    stem_json = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}.json", scratch, private)
+    stem_json = tg.get_file(f"{Tasks.STEM.value}.json")
     if stem_json is None:
-        helpers.destroy_scratch_dir(scratch)
         return False, helpers.msg(f'Input file not found: {Tasks.STEM.value}.json')
     metadata = None
     with open(stem_json, 'r') as f:
@@ -33,13 +25,11 @@ def execute(file_id, force=False):
 
     # Return quickly if this is already tagged instrumental from stemming
     if metadata['instrumental']:
-        helpers.destroy_scratch_dir(scratch)
         return True, helpers.msg('Track is an intrumental already')
 
     # Get the info for the original file to get the bit depth
-    infofile = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.json", scratch, private)
+    infofile = tg.get_file(f"{Tasks.ORIG.value}.json")
     if infofile is None:
-        helpers.destroy_scratch_dir(scratch)
         return False, helpers.msg(f'Input file not found: {Tasks.ORIG.value}.json')
     with open(infofile, 'r') as f:
         info = json.load(f)
@@ -57,9 +47,8 @@ def execute(file_id, force=False):
     for stem in metadata['stems-core']:
         if stem == f'{Tasks.STEM.value}-vocals.wav':
             continue
-        filename = filestore.retrieve_file(file_id, stem, scratch, private)
+        filename = tg.get_file(stem)
         if filename is None:
-            helpers.destroy_scratch_dir(scratch)
             return False, helpers.msg(f'Input file not found: {stem}')
         filenames.append(filename)
     cmdline.extend(filenames)
@@ -75,18 +64,16 @@ def execute(file_id, force=False):
     stdout, stderr = process.communicate(input="\n\n\n\n\n")
 
     # Store the resulting file
-    stored_location = filestore.store_file(file_id, outfile, f"{Tasks.INST.value}.wav", private)
+    stored_location = tg.put_file(outfile, f"{Tasks.INST.value}.wav")
 
     # Make an MP3 website version
-    mp3file = f"{scratch}/{Tasks.INST.value}.mp3"
+    mp3file = f"{tg.scratch}/{Tasks.INST.value}.mp3"
     helpers.make_website_mp3(outfile, mp3file)
     # Store the resulting file
-    mp3_location = filestore.store_file(file_id, mp3file, f"{Tasks.INST.value}.mp3", private)
+    mp3_location = tg.put_file(mp3file, f"{Tasks.INST.value}.mp3")
 
     # Build the dict to return to caller
     ret = { "command": { "stdout": stdout, "stderr": stderr } }
     ret["output"] = stored_location
     ret['mp3'] = mp3_location
-    filestore.copy_keys(file_id, public_keys, private, public)
-    helpers.destroy_scratch_dir(scratch)
     return True, ret

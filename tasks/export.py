@@ -53,11 +53,8 @@ def _get_assets(file_id, directory, key, private, public):
     except:
         return False
 
-def export(file_id, key, fmt):
-    private, public = helpers.get_bucketnames(file_id)
-    status = api.get_status(file_id)
-
-    if status['type'] in [ 'beat', 'song' ]:
+def export(tg, key, fmt):
+    if tg.status['type'] in [ 'beat', 'song' ]:
         # Lots of sanity and error checking first
         special = [ 'all', 'purchase-mp3', 'purchase-wav', 'purchase-stems' ]
         if key in special:
@@ -71,37 +68,32 @@ def export(file_id, key, fmt):
 
         # Short-circuit on format conversion if the filestore already has it
         output_keys = [ f"{key}.{fmt}" ]
-        if key not in special and filestore.check_keys(file_id, output_keys, FILESTORE_SCRATCH):
-            return True, _tag(f"{key}.{fmt} already exists for {file_id}")
-
-        # Ok, we're going to have to do some work
-        scratch = helpers.create_scratch_dir()
+        if key not in special and filestore.check_keys(tg.file_id, output_keys, FILESTORE_SCRATCH):
+            return True, _tag(f"{key}.{fmt} already exists for {tg.file_id}")
 
         # Do special cases
         if key in special:
-            arch_dir = f"{scratch}/{key}"
+            arch_dir = f"{tg.scratch}/{key}"
             os.makedirs(arch_dir, exist_ok=True)
-            arch_file = f"{scratch}/{key}.{fmt}"
-            if _get_assets(file_id, arch_dir, key, private, public):
+            arch_file = f"{tg.scratch}/{key}.{fmt}"
+            if _get_assets(tg.file_id, arch_dir, key, tg.private, tg.public):
                 _make_archive(arch_file, fmt, arch_dir)
                 bucket = FILESTORE_SCRATCH if key == 'all' else FILESTORE_PURCHASES
-                filestore.store_file(file_id, arch_file, f"{key}.{fmt}", bucket)
-                ret = True, _tag(f"{key}.{fmt} successfully created for {file_id}")
+                filestore.store_file(tg.file_id, arch_file, f"{key}.{fmt}", bucket)
+                ret = True, _tag(f"{key}.{fmt} successfully created for {tg.file_id}")
             else:
-                ret = False, _tag(f"request {key} didn't find assets for {file_id}")
-            helpers.destroy_scratch_dir(scratch)
+                ret = False, _tag(f"request {key} didn't find assets for {tg.file_id}")
             return ret
 
-        infile = filestore.retrieve_file(file_id, f"{key}.wav", scratch, private)
+        infile = tg.get_file(f"{key}.wav")
         if infile is None:
-            helpers.destroy_scratch_dir(scratch)
-            return False, _tag(f"file {key}.wav isn't found for {file_id}")
+            return False, _tag(f"file {key}.wav isn't found for {tg.file_id}")
 
         # Special case for WAV requests
         if fmt == 'wav':
             outfile = infile
         else:
-            outfile = f"{scratch}/{key}.{fmt}"
+            outfile = f"{tg.scratch}/{key}.{fmt}"
 
             # #execute the command
             cmdline = []
@@ -120,24 +112,20 @@ def export(file_id, key, fmt):
                                        universal_newlines=True)
             stdout, stderr = process.communicate(input="\n\n\n\n\n")
 
-        filestore.store_file(file_id, outfile, f"{key}.{fmt}", FILESTORE_SCRATCH)
-        helpers.destroy_scratch_dir(scratch)
-        return True, _tag(f"{key}.{fmt} successfully created for {file_id}")
+        filestore.store_file(tg.file_id, outfile, f"{key}.{fmt}", FILESTORE_SCRATCH)
+        return True, _tag(f"{key}.{fmt} successfully created for {tg.file_id}")
     elif status['type'] == 'soundkit':
         special = [ 'all', 'purchase', Tasks.OGSK.value ]
         formats = [ 'zip' ]
         if not key in special:
-            return False, _tag(f"key {key} isn't accepted for {file_id}")
+            return False, _tag(f"key {key} isn't accepted for {tg.file_id}")
         if not fmt in formats:
             return False, _tag(f"format {fmt} isn't accepted for {key}")
-        scratch = helpers.create_scratch_dir()
-        skfile = filestore.retrieve_file(file_id, f"{Tasks.OGSK.value}.zip", scratch, private)
+        skfile = tg.get_file(f"{Tasks.OGSK.value}.zip")
         if skfile is None:
-            helpers.destroy_scratch_dir(scratch)
-            return False, _tag(f"file {Tasks.OGSK.value}.zip isn't found for {file_id}")
+            return False, _tag(f"file {Tasks.OGSK.value}.zip isn't found for {tg.file_id}")
         bucket = FILESTORE_PURCHASES if key == 'purchase' else FILESTORE_SCRATCH
-        filestore.store_file(file_id, skfile, f"{key}.{fmt}", bucket)
-        helpers.destroy_scratch_dir(scratch)
-        return True, _tag(f"{key}.{fmt} successfully created for {file_id}")
+        filestore.store_file(tg.file_id, skfile, f"{key}.{fmt}", bucket)
+        return True, _tag(f"{key}.{fmt} successfully created for {tg.file_id}")
 
     return False, _tag(f"request {fmt} isn't accepted for {key}")

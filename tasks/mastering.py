@@ -3,35 +3,26 @@ import json
 import subprocess
 from taskdef import *
 from . import helpers
-from . import filestore
 from config import CONFIG as conf
 
 FFMPEG_BIN = conf['FFMPEG_BIN']
 PHASELIMITER_BIN = conf['PHASELIMITER_BIN']
 
-def execute(file_id, force=False):
-    private, public = helpers.get_bucketnames(file_id)
-    scratch = helpers.create_scratch_dir()
+def execute(tg, force=False):
     # Short-circuit if the filestore already has assets we would produce
-    public_keys = [ ]
-    output_keys = [ f"{Tasks.MAST.value}.wav",
-                    f"{Tasks.MAST.value}.mp3" ] + public_keys
-    if not force and filestore.check_keys(file_id, output_keys, private):
-        if not filestore.check_keys(file_id, public_keys, public):
-            filestore.copy_keys(file_id, public_keys, private, public)
-        helpers.destroy_scratch_dir(scratch)
+    tg.add_private([ f"{Tasks.MAST.value}.wav",
+                     f"{Tasks.MAST.value}.mp3" ])
+    if not force and tg.check_keys():
         return True, helpers.msg('Already done')
 
-    filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.wav", scratch, private)
+    filename = tg.get_file(f"{Tasks.ORIG.value}.wav")
     if filename is None:
-        helpers.destroy_scratch_dir(scratch)
         return False, helpers.msg(f'Input file not found: {Tasks.ORIG.value}.wav')
-    outfile = f"{scratch}/{Tasks.MAST.value}.wav"
+    outfile = f"{tg.scratch}/{Tasks.MAST.value}.wav"
 
     # Get the info for the original file to get the bit depth
-    infofile = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.json", scratch, private)
+    infofile = tg.get_file(f"{Tasks.ORIG.value}.json")
     if infofile is None:
-        helpers.destroy_scratch_dir(scratch)
         return False, helpers.msg(f'Input file not found: {Tasks.ORIG.value}.json')
     with open(infofile, 'r') as f:
         info = json.load(f)
@@ -64,7 +55,7 @@ def execute(file_id, force=False):
     process.stdin.write("\n\n\n\n\n")
 
     percent = 0
-    helpers.setprogress(file_id, Tasks.MAST, 0)
+    helpers.setprogress(tg.file_id, Tasks.MAST, 0)
     while True:
         line = process.stdout.readline()
         stdout += line
@@ -72,28 +63,26 @@ def execute(file_id, force=False):
         m = p.match(line)
         if m is not None:
             percent = float(m.group(1)) * 100
-            helpers.setprogress(file_id, Tasks.MAST, percent)
+            helpers.setprogress(tg.file_id, Tasks.MAST, percent)
         if process.poll() is not None:
             for line in process.stdout.readlines():
                 stdout += line
             for line in process.stderr.readlines():
                 stderr += line
-            helpers.setprogress(file_id, Tasks.MAST, 100)
+            helpers.setprogress(tg.file_id, Tasks.MAST, 100)
             break
 
     # Store the resulting file
-    stored_location = filestore.store_file(file_id, outfile, f"{Tasks.MAST.value}.wav", private)
+    stored_location = tg.put_file(outfile, f"{Tasks.MAST.value}.wav")
 
     # Make an MP3 website version
-    mp3file = f"{scratch}/{Tasks.MAST.value}.mp3"
+    mp3file = f"{tg.scratch}/{Tasks.MAST.value}.mp3"
     helpers.make_website_mp3(outfile, mp3file)
     # Store the resulting file
-    mp3_location = filestore.store_file(file_id, mp3file, f"{Tasks.MAST.value}.mp3", private)
+    mp3_location = tg.put_file(mp3file, f"{Tasks.MAST.value}.mp3")
 
     # Build the dict to return to caller
     ret = { "command": { "stdout": stdout, "stderr": stderr } }
     ret['output'] = stored_location
     ret['mp3'] = mp3_location
-    filestore.copy_keys(file_id, public_keys, private, public)
-    helpers.destroy_scratch_dir(scratch)
     return True, ret

@@ -2,26 +2,18 @@ import json
 import subprocess
 from taskdef import *
 from . import helpers
-from . import filestore
 from config import CONFIG as conf
 
 KEYMASTER_BIN = conf['KEYMASTER_BIN']
 
-def execute(file_id, force=False):
-    private, public = helpers.get_bucketnames(file_id)
-    scratch = helpers.create_scratch_dir()
+def execute(tg, force=False):
     # Short-circuit if the filestore already has assets we would produce
-    public_keys = [ f"{Tasks.KBPM.value}.json" ]
-    output_keys = [ ] + public_keys
-    if not force and filestore.check_keys(file_id, output_keys, private):
-        if not filestore.check_keys(file_id, public_keys, public):
-            filestore.copy_keys(file_id, public_keys, private, public)
-        helpers.destroy_scratch_dir(scratch)
+    tg.add_public([ f"{Tasks.KBPM.value}.json" ])
+    if not force and tg.check_keys():
         return True, helpers.msg('Already done')
 
-    filename = filestore.retrieve_file(file_id, f"{Tasks.ORIG.value}.mp3", scratch, private)
+    filename = tg.get_file(f"{Tasks.ORIG.value}.mp3")
     if filename is None:
-        helpers.destroy_scratch_dir(scratch)
         return False, helpers.msg(f'Input file not found: {Tasks.ORIG.value}.mp3')
     # Build the command line to run
     cmdline = []
@@ -34,14 +26,12 @@ def execute(file_id, force=False):
     stdout, _ = process.communicate()
     # Validate and write JSON output to tempfile
     json_obj = json.loads(stdout)
-    tempfile = f"{scratch}/{Tasks.KBPM.value}.json"
+    tempfile = f"{tg.scratch}/{Tasks.KBPM.value}.json"
     with open(tempfile, 'w') as f:
         f.write(json.dumps(json_obj, indent=2))
-    stored_location = filestore.store_file(file_id, tempfile, f"{Tasks.KBPM.value}.json", private)
+    stored_location = tg.put_file(tempfile, f"{Tasks.KBPM.value}.json")
     # The tool outputs JSON so return it as a dict
     ret = {}
-    ret['data'] = json.loads(stdout)
+    ret['data'] = json_obj
     ret['output'] = stored_location
-    filestore.copy_keys(file_id, public_keys, private, public)
-    helpers.destroy_scratch_dir(scratch)
     return True, ret

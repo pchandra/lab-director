@@ -1,10 +1,13 @@
 import os
 import re
 import uuid
+import time
+from datetime import datetime
 import shutil
 import subprocess
 import json
 import soundfile as sf
+from . import filestore
 from config import CONFIG as conf
 import taskapi as api
 
@@ -138,17 +141,6 @@ def make_nonsilent_wave(wavfile):
     process.wait()
     return wavfile + '.wav'
 
-def get_bucketnames(file_id):
-    status = api.get_status(file_id)
-    private = None
-    if status['type'] == 'beat':
-        private = FILESTORE_BEATS
-    elif status['type'] == 'song':
-        private = FILESTORE_SONGS
-    elif status['type'] == 'soundkit':
-        private = FILESTORE_SOUNDKITS
-    return private, FILESTORE_PUBLIC
-
 def make_website_mp3(infile, mp3file, high_quality=False):
     quality = [ "-b:a", "320k" ] if high_quality else [ "-q:a", "2" ]
     # Run an FFMPEG cmd to compress to mp3
@@ -167,14 +159,71 @@ def make_website_mp3(infile, mp3file, high_quality=False):
                                universal_newlines=True)
     stdout, stderr = process.communicate(input="\n\n\n\n\n")
 
-scratch_dirs = []
-def create_scratch_dir():
-    path = WORK_DIR + f"/{str(uuid.uuid4())}"
-    os.makedirs(path, exist_ok=True)
-    scratch_dirs.append(path)
-    return path
 
-def destroy_scratch_dir(path):
-    if path in scratch_dirs:
-        shutil.rmtree(path)
-        scratch_dirs.remove(path)
+class TaskGuard:
+    def __init__(self, file_id):
+        self.file_id = file_id
+        self.pub_keys = []
+        self.priv_keys = []
+
+    def __enter__(self):
+        self.start = time.time()
+        self.private, self.public = self._get_bucketnames()
+        self._create_scratch_dir()
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        if not exc_type:
+            self.copy_keys()
+        self._destroy_scratch_dir()
+        self.stop = time.time()
+        return True
+
+    def _create_scratch_dir(self):
+        self.scratch = WORK_DIR + f"/{str(uuid.uuid4())}"
+        os.makedirs(self.scratch, exist_ok=True)
+
+    def _destroy_scratch_dir(self):
+        shutil.rmtree(self.scratch)
+
+    def _get_bucketnames(self):
+        self.status = api.get_status(self.file_id)
+        private = None
+        if self.status['type'] == 'beat':
+            private = FILESTORE_BEATS
+        elif self.status['type'] == 'song':
+            private = FILESTORE_SONGS
+        elif self.status['type'] == 'soundkit':
+            private = FILESTORE_SOUNDKITS
+        return private, FILESTORE_PUBLIC
+
+    def get_file(self, key):
+        return filestore.retrieve_file(self.file_id, key, self.scratch, self.private)
+
+    def put_file(self, file, key):
+        return filestore.store_file(self.file_id, file, key, self.private)
+
+    def add_public(self, keys):
+        self.priv_keys += keys
+        self.pub_keys += keys
+
+    def add_private(self, keys):
+        self.priv_keys += keys
+
+    def check_keys(self):
+        if filestore.check_keys(self.file_id, self.priv_keys, self.private):
+            self.copy_keys()
+            return True
+        return False
+
+    def copy_keys(self):
+        if not filestore.check_keys(self.file_id, self.pub_keys, self.public):
+            filestore.copy_keys(self.file_id, self.pub_keys, self.private, self.public)
+
+    def get_perf(self):
+        ret = {}
+        ret['start'] = datetime.fromtimestamp(self.start).strftime('%Y-%m-%d %H:%M:%S')
+        ret['stop'] = datetime.fromtimestamp(self.stop).strftime('%Y-%m-%d %H:%M:%S')
+        ret['time_start'] = self.start
+        ret['time_stop'] = self.stop
+        ret['time_elapsed'] = self.stop - self.start

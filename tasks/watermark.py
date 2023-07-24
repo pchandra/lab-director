@@ -13,23 +13,16 @@ WATERMARK_STRENGTH = conf['WATERMARK_STRENGTH']
 WATERMARK_DELAY =  conf['WATERMARK_DELAY']
 WATERMARK_GAP = conf['WATERMARK_GAP']
 
-def execute(file_id, force=False):
-    private, public = helpers.get_bucketnames(file_id)
-    scratch = helpers.create_scratch_dir()
+def execute(tg, force=False):
     # Short-circuit if the filestore already has assets we would produce
-    public_keys = [ f"{Tasks.WTRM.value}.mp3" ]
-    output_keys = [ ] + public_keys
-    if not force and filestore.check_keys(file_id, output_keys, private):
-        if not filestore.check_keys(file_id, public_keys, public):
-            filestore.copy_keys(file_id, public_keys, private, public)
-        helpers.destroy_scratch_dir(scratch)
+    tg.add_public([ f"{Tasks.WTRM.value}.mp3" ])
+    if not force and tg.check_keys():
         return True, helpers.msg('Already done')
 
-    filename = filestore.retrieve_file(file_id, f"{Tasks.MAST.value}.wav", scratch, private)
+    filename = tg.get_file(f"{Tasks.MAST.value}.wav")
     if filename is None:
-        helpers.destroy_scratch_dir(scratch)
         return False, helpers.msg(f'Input file not found: {Tasks.MAST.value}.wav')
-    outfile = f"{scratch}/{Tasks.WTRM.value}.wav"
+    outfile = f"{tg.scratch}/{Tasks.WTRM.value}.wav"
     # Run the tool to make the watermarked version
     cmdline = []
     cmdline.append(MARKMAKER_BIN)
@@ -55,11 +48,9 @@ def execute(file_id, force=False):
     ret["phase1"] = { "stdout": stdout, "stderr": stderr }
 
     # Make an MP3 website version
-    mp3file = f"{scratch}/{Tasks.WTRM.value}.mp3"
+    mp3file = f"{tg.scratch}/{Tasks.WTRM.value}.mp3"
     helpers.make_website_mp3(outfile, mp3file)
     # Store the resulting file
-    ret['output'] = filestore.store_file(file_id, mp3file, f"{Tasks.WTRM.value}.mp3", private)
+    ret['output'] = tg.put_file(mp3file, f"{Tasks.WTRM.value}.mp3")
     ret["phase2"] = { "stdout": stdout, "stderr": stderr }
-    filestore.copy_keys(file_id, public_keys, private, public)
-    helpers.destroy_scratch_dir(scratch)
     return True, ret

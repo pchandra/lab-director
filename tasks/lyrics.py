@@ -5,34 +5,25 @@ import wave
 import subprocess
 from taskdef import *
 from . import helpers
-from . import filestore
 from config import CONFIG as conf
 
 WHISPER_BIN = conf['WHISPER_BIN']
 WHISPER_MODEL = conf['WHISPER_MODEL']
 ML_DEVICE = conf['ML_DEVICE']
 
-def execute(file_id, force=False):
-    private, public = helpers.get_bucketnames(file_id)
-    scratch = helpers.create_scratch_dir()
+def execute(tg, force=False):
     # Short-circuit if the filestore already has assets we would produce
-    public_keys = [ ]
-    output_keys = [ ] + public_keys
     output_fmts = [ 'json', 'srt', 'txt']
     for fmt in output_fmts:
-        output_keys.append(f"{Tasks.LYRC.value}.{fmt}")
-    if not force and filestore.check_keys(file_id, output_keys, private):
-        if not filestore.check_keys(file_id, public_keys, public):
-            filestore.copy_keys(file_id, public_keys, private, public)
-        helpers.destroy_scratch_dir(scratch)
+        tg.add_private([ f"{Tasks.LYRC.value}.{fmt}" ])
+    if not force and tg.check_keys():
         return True, helpers.msg('Already done')
 
-    outdir = f"{scratch}/{Tasks.LYRC.value}"
+    outdir = f"{tg.scratch}/{Tasks.LYRC.value}"
 
     # Get the stem metadata from the filestore
-    stem_json = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}.json", scratch, private)
+    stem_json = tg.get_file(f"{Tasks.STEM.value}.json")
     if stem_json is None:
-        helpers.destroy_scratch_dir(scratch)
         return False, helpers.msg(f'Input file not found: {Tasks.STEM.value}.json')
     metadata = None
     with open(stem_json, 'r') as f:
@@ -40,13 +31,11 @@ def execute(file_id, force=False):
 
     # Return quickly if stemmer says this is an instrumental
     if metadata['instrumental']:
-        helpers.destroy_scratch_dir(scratch)
         return True, helpers.msg('Track is an intrumental already')
 
     # Grab the vocal track to analyze
-    vocalsfile = filestore.retrieve_file(file_id, f"{Tasks.STEM.value}-vocals.mp3", scratch, private)
+    vocalsfile = tg.get_file(f"{Tasks.STEM.value}-vocals.mp3")
     if vocalsfile is None:
-        helpers.destroy_scratch_dir(scratch)
         return False, helpers.msg(f'Input file not found: {Tasks.STEM.value}-vocals.mp3')
 
     # Build the command line to run
@@ -75,7 +64,7 @@ def execute(file_id, force=False):
     # Get duration of audio file to mark progress
     duration = helpers.get_duration(vocalsfile)
     percent = 0
-    helpers.setprogress(file_id, Tasks.LYRC, 0)
+    helpers.setprogress(tg.file_id, Tasks.LYRC, 0)
     while True:
         line = process.stdout.readline()
         stdout += line
@@ -84,13 +73,13 @@ def execute(file_id, force=False):
         if m is not None:
             timecode = int(m.group(1)) * 60 + int(m.group(2)) + float('0' + m.group(3))
             percent = timecode / duration * 100
-            helpers.setprogress(file_id, Tasks.LYRC, percent)
+            helpers.setprogress(tg.file_id, Tasks.LYRC, percent)
         if process.poll() is not None:
             for line in process.stdout.readlines():
                 stdout += line
             for line in process.stderr.readlines():
                 stderr += line
-            helpers.setprogress(file_id, Tasks.LYRC, 100)
+            helpers.setprogress(tg.file_id, Tasks.LYRC, 100)
             break
 
     # Build the dict to return to caller
@@ -98,8 +87,6 @@ def execute(file_id, force=False):
     output = {}
     filebase = os.path.splitext(os.path.basename(vocalsfile))[0]
     for fmt in output_fmts:
-        output[fmt] = filestore.store_file(file_id, outdir + f"/{filebase}.{fmt}", f"{Tasks.LYRC.value}.{fmt}", private)
+        output[fmt] = tg.put_file(outdir + f"/{filebase}.{fmt}", f"{Tasks.LYRC.value}.{fmt}")
     ret['output'] = [ {'type':x,'file':output[x]} for x in output.keys()]
-    filestore.copy_keys(file_id, public_keys, private, public)
-    helpers.destroy_scratch_dir(scratch)
     return True, ret
