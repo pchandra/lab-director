@@ -227,3 +227,4 @@ class TaskGuard:
         ret['time_start'] = self.start
         ret['time_stop'] = self.stop
         ret['time_elapsed'] = self.stop - self.start
+        return ret
