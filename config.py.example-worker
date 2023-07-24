@@ -124,7 +124,7 @@ CONFIG['BARTENDER_BIN'] = '/home/ubuntu/wav-mixer/bar-tender.py'
 CONFIG['ZIPLINER_BIN'] = '/home/ubuntu/wav-mixer/zip-liner.py'
 
 # Command to run for 'whisper' tool
-CONFIG['WHISPER_BIN'] = '/home/ubuntu/.local/bin/whisper'
+CONFIG['WHISPER_BIN'] = '/home/ubuntu/.local/bin/whisper_timestamped'
 
 # Model for vocals to text, common choices are 'tiny', 'small', 'medium', 'large'
 CONFIG['WHISPER_MODEL'] = "medium"

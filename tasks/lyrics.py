@@ -44,9 +44,10 @@ def execute(tg, force=False):
     cmdline.extend([ "--model", WHISPER_MODEL,
                      "--language", "en",
                      "--device", ML_DEVICE,
-                     "--word_timestamps", "True",
-                     "--prepend_punctuations", "",
-                     "--append_punctuations", "",
+                     "--accurate",
+                     "--vad", "True",
+                     "--detect_disfluencies", "True",
+                     "--punctuations_with_words", "False"
                      "--output_dir", outdir
                    ])
     cmdline.append(vocalsfile)
@@ -61,18 +62,14 @@ def execute(tg, force=False):
                                universal_newlines=True)
     process.stdin.write("\n\n\n\n\n")
 
-    # Get duration of audio file to mark progress
-    duration = helpers.get_duration(vocalsfile)
-    percent = 0
     helpers.setprogress(tg.file_id, Tasks.LYRC, 0)
     while True:
-        line = process.stdout.readline()
-        stdout += line
-        p = re.compile('.*--> ([\d]+):([\d]+)(\.[\d]+)\]')
+        line = process.stderr.readline()
+        stderr += line
+        p = re.compile('[\s]*([\d]+)%')
         m = p.match(line)
         if m is not None:
-            timecode = int(m.group(1)) * 60 + int(m.group(2)) + float('0' + m.group(3))
-            percent = timecode / duration * 100
+            percent = int(m.group(1))
             helpers.setprogress(tg.file_id, Tasks.LYRC, percent)
         if process.poll() is not None:
             for line in process.stdout.readlines():
@@ -87,6 +84,7 @@ def execute(tg, force=False):
     output = {}
     filebase = os.path.splitext(os.path.basename(vocalsfile))[0]
     for fmt in output_fmts:
-        output[fmt] = tg.put_file(outdir + f"/{filebase}.{fmt}", f"{Tasks.LYRC.value}.{fmt}")
+        ext = 'words.json' if fmt == 'json' else fmt
+        output[fmt] = tg.put_file(outdir + f"/{filebase}.{ext}", f"{Tasks.LYRC.value}.{fmt}")
     ret['output'] = [ {'type':x,'file':output[x]} for x in output.keys()]
     return True, ret
