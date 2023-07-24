@@ -3,6 +3,7 @@ import time
 import zmq
 import shelve
 from log import Logger
+from taskdef import *
 from config import CONFIG as conf
 
 SHELVE_FILENAME = conf['ROUTER_SHELVE']

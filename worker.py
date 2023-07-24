@@ -140,7 +140,7 @@ def main():
             with tasks.helpers.TaskGuard(fid) as tg:
                 success, ret = tasks.ondemand[task](tg, status, force=force)
             l = log.info if success else log.warn
-            l(msg)
+            l(ret)
             continue
 
         # Short-circuit tasks whose main dependency has failed
