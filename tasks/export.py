@@ -60,7 +60,7 @@ def export(tg, key, fmt):
         if key in special:
             formats = [ 'zip', 'tgz' ]
         else:
-            formats = [ 'mp3', 'aiff', 'flac', 'ogg', 'wav' ]
+            formats = [ 'mp3', 'aiff', 'flac', 'ogg', 'wav', 'm4a' ]
 
         # Screen acceptable input we support
         if not fmt in formats:
@@ -102,8 +102,10 @@ def export(tg, key, fmt):
                              "-v", "quiet",
                              "-y"
                            ])
-            if key == 'mp3' or key == 'ogg':
-                cmdline.append("-b:a", "320k")
+            if fmt == 'm4a':
+                cmdline.extend([ "-c:a", "libfdk_aac" ])
+            if fmt in [ 'mp3', 'ogg', 'm4a' ]:
+                cmdline.extend([ "-b:a", "320k" ])
             cmdline.append(outfile)
             process = subprocess.Popen(cmdline,
                                        stdin=subprocess.PIPE,
