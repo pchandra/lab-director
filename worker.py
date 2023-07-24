@@ -137,6 +137,8 @@ def main():
             from tasks import export
             key = tokens[2]
             fmt = tokens[3]
+            success = False
+            msg = {}
             with tasks.helpers.TaskGuard(file_id) as tg:
                 success, msg = export.export(tg, key, fmt)
             l = log.info if success else log.warn

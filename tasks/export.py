@@ -102,8 +102,6 @@ def export(tg, key, fmt):
                              "-v", "quiet",
                              "-y"
                            ])
-            if fmt == 'm4a':
-                cmdline.extend([ "-c:a", "libfdk_aac" ])
             if fmt in [ 'mp3', 'ogg', 'm4a' ]:
                 cmdline.extend([ "-b:a", "320k" ])
             cmdline.append(outfile)
