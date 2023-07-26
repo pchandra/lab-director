@@ -50,7 +50,7 @@ def main():
             now = time.time()
             if now - last_msg > 1:
                 log.info("Router is polling for new messages, queue depth: %d" % len(queue))
-                last = now
+                last_msg = now
 
             socks = dict(poller.poll())
 
