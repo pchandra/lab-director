@@ -14,6 +14,7 @@ ROUTER_ADDR = conf['ROUTER_ADDR']
 ROUTER_PORT = conf['ROUTER_BACKEND_PORT']
 ACCEPTABLE_WORK = conf['ACCEPTABLE_WORK']
 HEARTBEAT_TIME = conf['HEARTBEAT_TIME']
+NOOP_TIME = conf['NOOP_TIME']
 
 # Setup ZeroMQ connection to receive tasks from the director
 context = zmq.Context()
@@ -26,8 +27,6 @@ log = Logger('worker')
 # Check if a different task is finished
 def _check_ready(file_id, status, dep):
     if status[dep.value]['status'] != TaskState.COMP.value:
-        # Throttle this since we might be waiting a while
-        time.sleep(1)
         return False
     else:
         return True
@@ -44,6 +43,8 @@ def _requeue(file_id, task, mark_waiting=True):
     log.info(f"Requeuing, task \"{task}\" for {file_id}")
     if mark_waiting:
         api.mark_waiting(file_id, task.lower())
+    # Throttle this requeue to prevent tight loops
+    time.sleep(NOOP_TIME)
     api.requeue(file_id, task)
 
 def _log_waiting(file_id, task, dep):
@@ -106,8 +107,6 @@ def main():
         tokens = message.split()
         task = tokens[0]
         file_id = tokens[1]
-        autolog = log.debug if task == "noop" else log.info
-        autolog("Worker got task: %s" % message)
 
         # Detect if we're supposed to stop
         if task == "stop":
@@ -116,15 +115,15 @@ def main():
 
         # Detect if we got a no-op
         if task == "noop":
-            noop = 1
-            log.debug(f"No-op received, sleeping {noop} second(s)")
-            time.sleep(noop)
+            log.debug(f"No-op received, sleeping {NOOP_TIME} second(s)")
+            time.sleep(NOOP_TIME)
             continue
+        else:
+            log.info("Worker got task: %s" % message)
 
         # If this node shouldn't do the task, sleep for a second and requeue it
         if not _acceptable_work(task):
             log.warn(f"Not processing tasks of type \"{task}\" on this worker")
-            time.sleep(1)
             _requeue(file_id, task, mark_waiting=False)
             continue
 

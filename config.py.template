@@ -48,6 +48,9 @@ CONFIG['ACCEPTABLE_WORK'] = [ %%ACCEPTABLE_WORK%% ]
 #                               Tasks.COVR.value, Tasks.STAT.value
 #                             ]
 
+# Interval for workers to sleep on no-op's or equivalents
+CONFIG['NOOP_TIME'] = 1
+
 # Directory Workers should use for scratch space when running tasks
 CONFIG['WORK_DIR'] = '/tmp/SCRATCH'
 
