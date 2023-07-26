@@ -102,11 +102,11 @@ def main():
         log.debug("Ready to accept new tasks")
         receiver.send(f"ready {proto_ver} {instance_id} ".encode('ascii') + ' '.join(ACCEPTABLE_WORK).encode('ascii'))
         message = receiver.recv_string()
-        autolog = log.debug if message == b"noop noop" else log.info
-        autolog("Worker got task: %s" % message)
         tokens = message.split()
         task = tokens[0]
         file_id = tokens[1]
+        autolog = log.debug if task == "noop" else log.info
+        autolog("Worker got task: %s" % message)
 
         # Detect if we're supposed to stop
         if task == "stop":
