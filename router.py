@@ -67,23 +67,22 @@ def main():
 
             if socks.get(backend) == zmq.POLLIN:
                 address, empty, ready = backend.recv_multipart()
-                job = b"noop noop"
+                job, logf = b"noop noop", log.debug
                 tokens = ready.split()
                 proto = tokens[1]
                 instance_id = tokens[2]
                 # Check protocol version
                 if proto != PROTO:
-                    job = b"stop stop"
-                    log.info(f"Worker version mismatch from {instance_id} - Expected: {PROTO}, got: {proto}")
+                    job, logf = b"stop stop", log.warn
+                    log.warn(f"Worker version mismatch from {instance_id} - Expected: {PROTO}, got: {proto}")
                 else:
                     acceptable = tokens[3:]
                     for j in queue:
                         if j.split()[0].lower() in acceptable:
-                            job = j
+                            job, logf = j, log.info
                             queue.remove(job)
                             break
-                    autolog = log.debug if job == b"noop noop" else log.info
-                    autolog(f"Worker {instance_id}-{address.hex()} reports ready, sending: {job}")
+                logf(f"Worker {instance_id}-{address.hex()} reports ready, sending: {job}")
                 workers[address] = (job, instance_id, time.time())
                 backend.send_multipart([address, b'', job])
             # Put the queue back into the shelf for persistence
