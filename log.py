@@ -16,4 +16,5 @@ class Logger:
         self.info("WARN: " + msg)
 
     def debug(self, msg):
-        self.info("DEBUG: " + msg)
+        #self.info("DEBUG: " + msg)
+        pass
