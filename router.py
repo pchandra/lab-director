@@ -11,6 +11,7 @@ FRONT_BIND = conf['ROUTER_FRONTEND_BIND']
 FRONT_PORT = conf['ROUTER_FRONTEND_PORT']
 BACK_BIND = conf['ROUTER_BACKEND_BIND']
 BACK_PORT = conf['ROUTER_BACKEND_PORT']
+HEARTBEAT_TIME = conf['HEARTBEAT_TIME']
 
 def main():
     log = Logger('router')
@@ -48,7 +49,7 @@ def main():
 
             # Do time sensitive checks first
             now = time.time()
-            if now - last_msg > 1:
+            if now - last_msg > HEARTBEAT_TIME:
                 log.info("Router is polling for new messages, queue depth: %d" % len(queue))
                 last_msg = now
 

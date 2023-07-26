@@ -3,6 +3,9 @@ from taskdef import *
 # Some commononly tweaked, system-dependent variables
 CONFIG = {}
 
+# Interval for tools to emit a hearbeat log message
+CONFIG['HEARTBEAT_TIME'] = 5
+
 
 ###### Config section for Router
 

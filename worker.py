@@ -13,6 +13,7 @@ from config import CONFIG as conf
 ROUTER_ADDR = conf['ROUTER_ADDR']
 ROUTER_PORT = conf['ROUTER_BACKEND_PORT']
 ACCEPTABLE_WORK = conf['ACCEPTABLE_WORK']
+HEARTBEAT_TIME = conf['HEARTBEAT_TIME']
 
 # Setup ZeroMQ connection to receive tasks from the director
 context = zmq.Context()
@@ -94,7 +95,7 @@ def main():
     while True:
         # Do time sensitive checks first
         now = time.time()
-        if now - last_msg > 1:
+        if now - last_msg > HEARTBEAT_TIME:
             log.info("Worker is ready and accepting new tasks")
             last_msg = now
 
