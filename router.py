@@ -81,7 +81,8 @@ def main():
                             job = j
                             queue.remove(job)
                             break
-                    log.info(f"Worker {instance_id}-{address.hex()} reports ready, sending: {job}")
+                    autolog = log.debug if job == b"noop noop" else log.info
+                    autolog(f"Worker {instance_id}-{address.hex()} reports ready, sending: {job}")
                 workers[address] = (job, instance_id, time.time())
                 backend.send_multipart([address, b'', job])
             # Put the queue back into the shelf for persistence

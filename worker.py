@@ -88,12 +88,22 @@ def main():
     with open('version-token') as f:
         proto_ver = f.read().strip()
 
+    # Keep a counter for heartbeat messages
+    last_msg = time.time()
+
     while True:
+        # Do time sensitive checks first
+        now = time.time()
+        if now - last_msg > 1:
+            log.info("Worker is ready and accepting new tasks")
+            last_msg = now
+
         # Send 'ready' and ACCEPTABLE_WORK then await a task assignment
-        log.info("Ready to accept new tasks")
+        log.debug("Ready to accept new tasks")
         receiver.send(f"ready {proto_ver} {instance_id} ".encode('ascii') + ' '.join(ACCEPTABLE_WORK).encode('ascii'))
         message = receiver.recv_string()
-        log.info("Got task: %s" % message)
+        autolog = log.debug if message == b"noop noop" else log.info
+        autolog("Worker got task: %s" % message)
         tokens = message.split()
         task = tokens[0]
         file_id = tokens[1]
@@ -105,8 +115,9 @@ def main():
 
         # Detect if we got a no-op
         if task == "noop":
-            log.warn("No-op received, sleeping 5 seconds")
-            time.sleep(5)
+            noop = 1
+            log.debug(f"No-op received, sleeping {noop} second(s)")
+            time.sleep(noop)
             continue
 
         # If this node shouldn't do the task, sleep for a second and requeue it
