@@ -55,7 +55,7 @@ def main():
             # Do time sensitive checks first
             now = time.time()
             if now - last_msg > HEARTBEAT_TIME:
-                log.info("Queue depth: %d" % len(queue))
+                log.info("Queue: %d" % len(queue))
                 last_msg = now
 
             socks = dict(poller.poll())

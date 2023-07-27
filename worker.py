@@ -102,7 +102,7 @@ def main():
         if now - last_msg > HEARTBEAT_TIME:
             logf = log.info
             last_msg = now
-        logf("Worker ready")
+        logf("Ready")
         # Send 'ready' and ACCEPTABLE_WORK then await a task assignment
         receiver.send(f"ready {proto_ver} {instance_id} ".encode('ascii') + ' '.join(ACCEPTABLE_WORK).encode('ascii'))
         message = receiver.recv_string()
