@@ -55,7 +55,7 @@ def main():
             # Do time sensitive checks first
             now = time.time()
             if now - last_msg > HEARTBEAT_TIME:
-                log.info("Router is polling for new messages, queue depth: %d" % len(queue))
+                log.info("Queue depth: %d" % len(queue))
                 last_msg = now
 
             socks = dict(poller.poll())
@@ -64,7 +64,7 @@ def main():
                 message = frontend.recv_multipart()
                 tokens = message[0].split()
                 task = tokens[0]
-                log.info("Frontend got task: %s" % message[0])
+                log.info("Received: %s" % message[0])
                 if task == f"{Tasks.EXPT.value}".encode('ascii'):
                     queue.insert(0, message[0])
                 elif message[0] not in queue:

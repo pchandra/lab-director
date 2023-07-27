@@ -43,16 +43,14 @@ def _check_failed(file_id, status, dep):
         return False
 
 # Put a waiting task back in the queue
-def _requeue(file_id, task, mark_waiting=True):
-    log.info(f"Requeuing, task \"{task}\" for {file_id}")
-    if mark_waiting:
+def _requeue(file_id, task, waiting=None):
+    log.info(f"Requeuing \"{task}\" for {file_id}")
+    if waiting is not None:
+        log.info(f"Task \"{task}\" for {file_id} is waiting on \"{waiting.value}\"")
         api.mark_waiting(file_id, task.lower())
     # Throttle this requeue to prevent tight loops
     time.sleep(NOOP_TIME)
     api.requeue(file_id, task)
-
-def _log_waiting(file_id, task, dep):
-    log.info(f"Task \"{task}\" for {file_id} is waiting on \"{dep.value}\"")
 
 def _run(file_id, task_type, force=False):
     api.mark_inprogress(file_id, task_type.value)
@@ -128,7 +126,7 @@ def main():
         # If this node shouldn't do the task, sleep for a second and requeue it
         if not _acceptable_work(task):
             log.warning(f"Not processing tasks of type \"{task}\" on this worker")
-            _requeue(file_id, task, mark_waiting=False)
+            _requeue(file_id, task)
             continue
 
         # If the task is in ALL CAPS, force the task to run
@@ -199,8 +197,7 @@ def main():
             if _check_ready(file_id, status, Tasks.OGSK):
                 _run(file_id, Tasks.ZINV, force)
             else:
-                _log_waiting(file_id, task, Tasks.OGSK)
-                _requeue(file_id, task.upper() if force else task)
+                _requeue(file_id, task.upper() if force else task, Tasks.OGSK)
 
         # Create soundkit graphics if there's a preview
         elif task == Tasks.KGFX.value:
@@ -211,88 +208,75 @@ def main():
             if _check_ready(file_id, status, Tasks.ORIG):
                 _run(file_id, Tasks.BARS, force)
             else:
-                _log_waiting(file_id, task, Tasks.ORIG)
-                _requeue(file_id, task.upper() if force else task)
+                _requeue(file_id, task.upper() if force else task, Tasks.ORIG)
 
         # Genre autodetection
         elif task == Tasks.GENR.value:
             if _check_ready(file_id, status, Tasks.ORIG):
                 _run(file_id, Tasks.GENR, force)
             else:
-                _log_waiting(file_id, task, Tasks.ORIG)
-                _requeue(file_id, task.upper() if force else task)
+                _requeue(file_id, task.upper() if force else task, Tasks.ORIG)
 
         # Watermarking original file
         elif task == Tasks.WTRM.value:
             if _check_ready(file_id, status, Tasks.MAST):
                 _run(file_id, Tasks.WTRM, force)
             else:
-                _log_waiting(file_id, task, Tasks.MAST)
-                _requeue(file_id, task.upper() if force else task)
+                _requeue(file_id, task.upper() if force else task, Tasks.MAST)
 
         # Key and BPM detection
         elif task == Tasks.KBPM.value:
             if _check_ready(file_id, status, Tasks.ORIG):
                 _run(file_id, Tasks.KBPM, force)
             else:
-                _log_waiting(file_id, task, Tasks.ORIG)
-                _requeue(file_id, task.upper() if force else task)
+                _requeue(file_id, task.upper() if force else task, Tasks.ORIG)
 
         # Stem separation
         elif task == Tasks.STEM.value:
             if _check_ready(file_id, status, Tasks.ORIG):
                 _run(file_id, Tasks.STEM, force)
             else:
-                _log_waiting(file_id, task, Tasks.ORIG)
-                _requeue(file_id, task.upper() if force else task)
+                _requeue(file_id, task.upper() if force else task, Tasks.ORIG)
 
         # Track mastering
         elif task == Tasks.MAST.value:
             if _check_ready(file_id, status, Tasks.ORIG):
                 _run(file_id, Tasks.MAST, force)
             else:
-                _log_waiting(file_id, task, Tasks.ORIG)
-                _requeue(file_id, task.upper() if force else task)
+                _requeue(file_id, task.upper() if force else task, Tasks.ORIG)
 
         # Instrumental track from stems
         elif task == Tasks.INST.value:
             if _check_ready(file_id, status, Tasks.STEM):
                 _run(file_id, Tasks.INST, force)
             else:
-                _log_waiting(file_id, task, Tasks.STEM)
-                _requeue(file_id, task.upper() if force else task)
+                _requeue(file_id, task.upper() if force else task, Tasks.STEM)
 
         # Vocal analysis from stems
         elif task == Tasks.VOCL.value:
             if _check_ready(file_id, status, Tasks.STEM):
                 _run(file_id, Tasks.VOCL, force)
             else:
-                _log_waiting(file_id, task, Tasks.STEM)
-                _requeue(file_id, task.upper() if force else task)
+                _requeue(file_id, task.upper() if force else task, Tasks.STEM)
 
         # Lyrics from vocals
         elif task == Tasks.LYRC.value:
             if _check_ready(file_id, status, Tasks.STEM):
                 _run(file_id, Tasks.LYRC, force)
             else:
-                _log_waiting(file_id, task, Tasks.STEM)
-                _requeue(file_id, task.upper() if force else task)
+                _requeue(file_id, task.upper() if force else task, Tasks.STEM)
 
         # Waveform generation
         elif task == Tasks.WGFX.value:
             if not _check_ready(file_id, status, Tasks.ORIG):
-                _log_waiting(file_id, task, Tasks.ORIG)
-                _requeue(file_id, task.upper() if force else task)
+                _requeue(file_id, task.upper() if force else task, Tasks.ORIG)
             elif not _check_ready(file_id, status, Tasks.STEM):
-                _log_waiting(file_id, task, Tasks.STEM)
-                _requeue(file_id, task.upper() if force else task)
+                _requeue(file_id, task.upper() if force else task, Tasks.STEM)
             elif not _check_ready(file_id, status, Tasks.MAST):
-                _log_waiting(file_id, task, Tasks.MAST)
-                _requeue(file_id, task.upper() if force else task)
+                _requeue(file_id, task.upper() if force else task, Tasks.MAST)
             elif (not _check_ready(file_id, status, Tasks.INST) and
                   not _check_failed(file_id, status, Tasks.INST)):
-                _log_waiting(file_id, task, Tasks.INST)
-                _requeue(file_id, task.upper() if force else task)
+                _requeue(file_id, task.upper() if force else task, Tasks.INST)
             else:
                 _run(file_id, Tasks.WGFX, force)
 
@@ -315,8 +299,7 @@ def main():
                     continue
                 if not _is_finished(file_id, status, t):
                     all_done = False
-                    _log_waiting(file_id, task, t)
-                    _requeue(file_id, task.upper() if force else task)
+                    _requeue(file_id, task.upper() if force else task, t)
                     break
             if all_done:
                 _run(file_id, Tasks.STAT, force)
