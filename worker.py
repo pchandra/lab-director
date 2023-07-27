@@ -123,7 +123,7 @@ def main():
             time.sleep(NOOP_TIME)
             continue
         else:
-            log.info("Received: %s" % message)
+            log.info(f"Received: \"{task}\" for {file_id}")
 
         # If this node shouldn't do the task, sleep for a second and requeue it
         if not _acceptable_work(task):
