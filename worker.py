@@ -110,7 +110,7 @@ def main():
 
         # Detect if we're supposed to stop
         if task == Tasks.STOP.value:
-            log.warn("Stopping worker...")
+            log.warn("Stop message received")
             break
 
         # Detect if we got a no-op
@@ -274,7 +274,7 @@ def main():
                 _log_waiting(file_id, task, Tasks.STEM)
                 _requeue(file_id, task.upper() if force else task)
 
-        # Waveform png generation
+        # Waveform generation
         elif task == Tasks.WGFX.value:
             if not _check_ready(file_id, status, Tasks.ORIG):
                 _log_waiting(file_id, task, Tasks.ORIG)

@@ -2,7 +2,7 @@ import sys
 import time
 import zmq
 import shelve
-from log import Logger
+import logging
 from taskdef import *
 from config import CONFIG as conf
 
@@ -14,7 +14,7 @@ BACK_PORT = conf['ROUTER_BACKEND_PORT']
 HEARTBEAT_TIME = conf['HEARTBEAT_TIME']
 
 def main():
-    log = Logger('router')
+    log = logging.getLogger('router')
     # Frontend socket to collect messages from API
     context = zmq.Context()
     frontend = context.socket(zmq.PULL)
@@ -73,8 +73,8 @@ def main():
                 instance_id = tokens[2]
                 # Check protocol version
                 if proto != PROTO:
-                    job, logf = f"{Tasks.STOP.value} nonce".encode('ascii'), log.warn
-                    log.warn(f"Worker version mismatch from {instance_id} - Expected: {PROTO}, got: {proto}")
+                    job, logf = f"{Tasks.STOP.value} nonce".encode('ascii'), log.warning
+                    log.warning(f"Worker version mismatch from {instance_id} - Expected: {PROTO}, got: {proto}")
                 else:
                     acceptable = tokens[3:]
                     for j in queue:
