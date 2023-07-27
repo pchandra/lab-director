@@ -4,7 +4,7 @@ from datetime import datetime
 import zmq
 from urllib.request import urlopen
 import json
-from log import Logger
+import logging
 from taskdef import *
 import taskapi as api
 import tasks
@@ -22,7 +22,7 @@ receiver = context.socket(zmq.REQ)
 receiver.connect(f"tcp://{ROUTER_ADDR}:{ROUTER_PORT}")
 
 # Get Logger instance
-log = Logger('worker')
+log = logging.getLogger('worker')
 
 # Check if a different task is finished
 def _check_ready(file_id, status, dep):
@@ -59,7 +59,7 @@ def _run(file_id, task_type, force=False):
     ret['perf'] = tg.get_perf()
     data = json.dumps(ret).encode('ascii')
     if not tg.success:
-        log.warn(f"Task \"{task_type.value}\" FAILED for {file_id}")
+        log.warning(f"Task \"{task_type.value}\" FAILED for {file_id}")
         api.mark_failed(file_id, task_type.value, data)
     else:
         log.info(f"Task \"{task_type.value}\" succeeded for {file_id}")
@@ -110,7 +110,7 @@ def main():
 
         # Detect if we're supposed to stop
         if task == Tasks.STOP.value:
-            log.warn("Stop message received")
+            log.warning("Stop message received")
             break
 
         # Detect if we got a no-op
@@ -123,7 +123,7 @@ def main():
 
         # If this node shouldn't do the task, sleep for a second and requeue it
         if not _acceptable_work(task):
-            log.warn(f"Not processing tasks of type \"{task}\" on this worker")
+            log.warning(f"Not processing tasks of type \"{task}\" on this worker")
             _requeue(file_id, task, mark_waiting=False)
             continue
 
@@ -131,7 +131,7 @@ def main():
         force = False
         if any(x for x in Tasks if x.value.upper() == task):
             force = True
-            log.warn("Forced command: %s" % task)
+            log.warning("Forced command: %s" % task)
             task = task.lower()
 
         # Get the status for this file
@@ -139,7 +139,7 @@ def main():
 
         # Check that the task is legit before proceeding
         if not any(x for x in Tasks if x.value == task):
-            log.warn("COMMAND NOT RECOGNIZED")
+            log.warning("COMMAND NOT RECOGNIZED")
             continue
 
         # Process any on-demand tasks since they fail gracefully
@@ -154,7 +154,7 @@ def main():
             ret['perf'] = tg.get_perf()
             data = json.dumps(ret).encode('ascii')
             if not tg.success:
-                log.warn(f"Task \"{task}\" FAILED for {jid} on {fid}")
+                log.warning(f"Task \"{task}\" FAILED for {jid} on {fid}")
                 api.mark_failed(file_id, task, data)
             else:
                 log.info(f"Task \"{task}\" succeeded for {jid} on {fid}")
