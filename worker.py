@@ -62,10 +62,10 @@ def _run(file_id, task_type, force=False):
     ret['perf'] = tg.get_perf()
     data = json.dumps(ret).encode('ascii')
     if not tg.success:
-        log.warning(f"Task \"{task_type.value}\" FAILED for {file_id}")
+        log.warning(f"Failed \"{task_type.value}\" for {file_id}")
         api.mark_failed(file_id, task_type.value, data)
     else:
-        log.info(f"Task \"{task_type.value}\" succeeded for {file_id}")
+        log.info(f"Success \"{task_type.value}\" for {file_id}")
         api.mark_complete(file_id, task_type.value, data)
 
 def _is_finished(file_id, status, task_type):
@@ -142,7 +142,7 @@ def main():
 
         # Check that the task is legit before proceeding
         if not any(x for x in Tasks if x.value == task):
-            log.warning("COMMAND NOT RECOGNIZED")
+            log.error("COMMAND NOT RECOGNIZED")
             continue
 
         # Process any on-demand tasks since they fail gracefully
@@ -157,28 +157,28 @@ def main():
             ret['perf'] = tg.get_perf()
             data = json.dumps(ret).encode('ascii')
             if not tg.success:
-                log.warning(f"Task \"{task}\" FAILED for {jid} on {fid}")
+                log.warning(f"Failed \"{task}\" for {jid} on {fid}")
                 api.mark_failed(file_id, task, data)
             else:
-                log.info(f"Task \"{task}\" succeeded for {jid} on {fid}")
+                log.info(f"Success \"{task}\" for {jid} on {fid}")
                 api.mark_complete(file_id, task, data)
             continue
 
         # Short-circuit tasks whose main dependency has failed
         if status['type'] == 'beat' and _check_failed(file_id, status, Tasks.ORIG) and task != Tasks.ORIG.value:
-            log.info(f"Task \"{task}\" FAILED executing for {file_id}")
+            log.warning(f"Failed \"{task}\" for {file_id}")
             error = { 'message': f"Task {Tasks.ORIG.value} failed", 'failed': True }
             data = json.dumps(error).encode('ascii')
             api.mark_failed(file_id, task, data)
             continue
         if status['type'] == 'song' and _check_failed(file_id, status, Tasks.ORIG) and task != Tasks.ORIG.value:
-            log.info(f"Task \"{task}\" FAILED executing for {file_id}")
+            log.warning(f"Failed \"{task}\" for {file_id}")
             error = { 'message': f"Task {Tasks.ORIG.value} failed", 'failed': True }
             data = json.dumps(error).encode('ascii')
             api.mark_failed(file_id, task, data)
             continue
         if status['type'] == 'soundkit' and _check_failed(file_id, status, Tasks.OGSK) and task != Tasks.OGSK.value:
-            log.info(f"Task \"{task}\" FAILED executing for {file_id}")
+            log.warning(f"Failed \"{task}\" for {file_id}")
             error = { 'message': f"Task {Tasks.OGSK.value} failed", 'failed': True }
             data = json.dumps(error).encode('ascii')
             api.mark_failed(file_id, task, data)
