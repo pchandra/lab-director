@@ -79,7 +79,7 @@ def main():
                 # Check protocol version
                 if proto != PROTO:
                     job, logf = f"{Tasks.STOP.value} nonce".encode('ascii'), log.warning
-                    log.warning(f"Worker version mismatch from {instance_id} - Expected: {PROTO}, got: {proto}")
+                    log.warning(f"Bad worker version: {proto} (expected: {PROTO}) from {instance_id}")
                 else:
                     acceptable = tokens[3:]
                     for j in queue:
@@ -87,7 +87,7 @@ def main():
                             job, logf = j, log.info
                             queue.remove(job)
                             break
-                logf(f"Worker {instance_id}-{address.hex()} reports ready, sending: {job}")
+                logf(f"Ready: {instance_id}-{address.hex()} sending: {job}")
                 workers[address] = (job, instance_id, time.time())
                 backend.send_multipart([address, b'', job])
             # Put the queue back into the shelf for persistence

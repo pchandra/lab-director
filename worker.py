@@ -98,12 +98,12 @@ def main():
     while True:
         # Do time sensitive checks first
         now = time.time()
+        logf = log.debug
         if now - last_msg > HEARTBEAT_TIME:
-            log.info("Worker is ready and accepting new tasks")
+            logf = log.info
             last_msg = now
-
+        logf("Worker ready")
         # Send 'ready' and ACCEPTABLE_WORK then await a task assignment
-        log.debug("Ready to accept new tasks")
         receiver.send(f"ready {proto_ver} {instance_id} ".encode('ascii') + ' '.join(ACCEPTABLE_WORK).encode('ascii'))
         message = receiver.recv_string()
         tokens = message.split()
@@ -112,7 +112,7 @@ def main():
 
         # Detect if we're supposed to stop
         if task == Tasks.STOP.value:
-            log.warning("Stop message received")
+            log.warning("Stop message received from router")
             break
 
         # Detect if we got a no-op
