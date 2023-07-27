@@ -22,7 +22,7 @@ receiver = context.socket(zmq.REQ)
 receiver.connect(f"tcp://{ROUTER_ADDR}:{ROUTER_PORT}")
 
 # Get Logger instance
-logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', datefmt='%Y-%m-%d:%H:%M:%S', level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', datefmt='%Y-%m-%d:%H:%M:%S', level=logging.INFO)
 log = logging.getLogger('worker')
 
 # Check if a different task is finished
