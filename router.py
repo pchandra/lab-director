@@ -67,13 +67,13 @@ def main():
 
             if socks.get(backend) == zmq.POLLIN:
                 address, empty, ready = backend.recv_multipart()
-                job, logf = b"noop noop", log.debug
+                job, logf = f"{Tasks.NOOP.value} nonce".encode('ascii'), log.debug
                 tokens = ready.split()
                 proto = tokens[1]
                 instance_id = tokens[2]
                 # Check protocol version
                 if proto != PROTO:
-                    job, logf = b"stop stop", log.warn
+                    job, logf = f"{Tasks.STOP.value} nonce".encode('ascii'), log.warn
                     log.warn(f"Worker version mismatch from {instance_id} - Expected: {PROTO}, got: {proto}")
                 else:
                     acceptable = tokens[3:]

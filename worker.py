@@ -109,12 +109,12 @@ def main():
         file_id = tokens[1]
 
         # Detect if we're supposed to stop
-        if task == "stop":
+        if task == Tasks.STOP.value:
             log.warn("Stopping worker...")
             break
 
         # Detect if we got a no-op
-        if task == "noop":
+        if task == Tasks.NOOP.value:
             log.debug(f"No-op received, sleeping {NOOP_TIME} second(s)")
             time.sleep(NOOP_TIME)
             continue

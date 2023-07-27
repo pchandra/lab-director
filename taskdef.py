@@ -1,6 +1,8 @@
 from enum import Enum
 
 class Tasks(Enum):
+    STOP = 'stop' # Instruct the worker to shutdown
+    NOOP = 'noop' # A no-op task to sleep
     ORIG = 'original' # Initialize the file store with the original
     WTRM = 'watermark' # Generate a watermarked version of the original
     KBPM = 'key-bpm' # Calculate key and BPM of original
