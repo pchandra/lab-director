@@ -44,10 +44,11 @@ def _check_failed(file_id, status, dep):
 
 # Put a waiting task back in the queue
 def _requeue(file_id, task, waiting=None):
-    log.info(f"Requeuing \"{task}\" for {file_id}")
+    add = ""
     if waiting is not None:
-        log.info(f"Task \"{task}\" for {file_id} is waiting on \"{waiting.value}\"")
+        add = f"waiting on \"{waiting.value}\""
         api.mark_waiting(file_id, task.lower())
+    log.info(f"Requeue \"{task}\" for {file_id} {add}")
     # Throttle this requeue to prevent tight loops
     time.sleep(NOOP_TIME)
     api.requeue(file_id, task)
@@ -121,7 +122,7 @@ def main():
             time.sleep(NOOP_TIME)
             continue
         else:
-            log.info("Worker got task: %s" % message)
+            log.info("Received: %s" % message)
 
         # If this node shouldn't do the task, sleep for a second and requeue it
         if not _acceptable_work(task):
