@@ -55,6 +55,7 @@ def _requeue(file_id, task, waiting=None):
 
 def _run(file_id, task_type, force=False):
     api.mark_inprogress(file_id, task_type.value)
+    log.info(f"Running \"{task_type.value}\" for {file_id}")
     success, ret = False, {}
     with tasks.helpers.TaskGuard(file_id) as tg:
         tg.success, ret = tasks.execute[task_type](tg, force=force)
