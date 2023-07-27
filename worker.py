@@ -15,6 +15,9 @@ ROUTER_PORT = conf['ROUTER_BACKEND_PORT']
 ACCEPTABLE_WORK = conf['ACCEPTABLE_WORK']
 HEARTBEAT_TIME = conf['HEARTBEAT_TIME']
 NOOP_TIME = conf['NOOP_TIME']
+LOG_PREFIX = conf['LOG_PREFIX']
+LOG_DATEFMT = conf['LOG_DATEFMT']
+LOG_LEVEL = conf['LOG_LEVEL']
 
 # Setup ZeroMQ connection to receive tasks from the director
 context = zmq.Context()
@@ -22,7 +25,7 @@ receiver = context.socket(zmq.REQ)
 receiver.connect(f"tcp://{ROUTER_ADDR}:{ROUTER_PORT}")
 
 # Get Logger instance
-logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', datefmt='%Y-%m-%d:%H:%M:%S', level=logging.INFO)
+logging.basicConfig(format=LOG_PREFIX, datefmt=LOG_DATEFMT, level=LOG_LEVEL)
 log = logging.getLogger('worker')
 
 # Check if a different task is finished

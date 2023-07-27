@@ -6,6 +6,11 @@ CONFIG = {}
 # Interval for tools to emit a hearbeat log message
 CONFIG['HEARTBEAT_TIME'] = 5
 
+# Configs for output logs
+CONFIG['LOG_PREFIX'] = '%(asctime)s %(levelname)s [%(filename)s:%(lineno)d] %(message)s'
+CONFIG['LOG_DATEFMT'] = '[%Y-%m-%d:%H:%M:%S]'
+CONFIG['LOG_LEVEL'] = logging.INFO
+
 
 ###### Config section for Router
 

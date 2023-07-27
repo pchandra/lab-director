@@ -12,9 +12,13 @@ FRONT_PORT = conf['ROUTER_FRONTEND_PORT']
 BACK_BIND = conf['ROUTER_BACKEND_BIND']
 BACK_PORT = conf['ROUTER_BACKEND_PORT']
 HEARTBEAT_TIME = conf['HEARTBEAT_TIME']
+LOG_PREFIX = conf['LOG_PREFIX']
+LOG_DATEFMT = conf['LOG_DATEFMT']
+LOG_LEVEL = conf['LOG_LEVEL']
+
 
 def main():
-    logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', datefmt='%Y-%m-%d:%H:%M:%S', level=logging.INFO)
+    logging.basicConfig(format=LOG_PREFIX, datefmt=LOG_DATEFMT, level=LOG_LEVEL)
     log = logging.getLogger('router')
     # Frontend socket to collect messages from API
     context = zmq.Context()
