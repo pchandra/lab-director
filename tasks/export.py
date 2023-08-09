@@ -116,7 +116,7 @@ def ondemand(tg, params, force=False):
 
         filestore.store_file(tg.file_id, outfile, f"{key}.{fmt}", FILESTORE_SCRATCH)
         return True, _tag(f"{key}.{fmt} successfully created for {tg.file_id}")
-    elif status['type'] == 'soundkit':
+    elif tg.status['type'] == 'soundkit':
         special = [ 'all', 'purchase', Tasks.OGSK.value ]
         formats = [ 'zip' ]
         if not key in special:
