@@ -11,7 +11,9 @@ WAVMIXER_BIN = conf['WAVMIXER_BIN']
 
 def ondemand(tg, params, force=False):
     # Short-circuit if the filestore already has assets we would produce
-    tg.add_private([ f"{Tasks.RDIO.value}.wav" ])
+    tg.add_public([ f"{Tasks.RDIO.value}.png" ])
+    tg.add_private([ f"{Tasks.RDIO.value}.wav",
+                     f"{Tasks.RDIO.value}.mp3" ])
     if not force and tg.check_keys():
         return True, helpers.msg('Already done')
 
@@ -102,4 +104,13 @@ def ondemand(tg, params, force=False):
     # Build the dict to return to caller
     ret['mixer'] = { "stdout": stdout, "stderr": stderr }
     ret['output'] = tg.put_file(outfile, f"{Tasks.RDIO.value}.wav")
+
+    # Make an MP3 website version
+    mp3file = f"{tg.scratch}/{Tasks.RDIO.value}.mp3"
+    helpers.make_website_mp3(outfile, mp3file)
+    # Make a temp PNG for it
+    helpers.make_wave_png(mp3file)
+    # Store the resulting files
+    ret['mp3'] = tg.put_file(mp3file, f"{Tasks.RDIO.value}.mp3")
+    ret['png'] = tg.put_file(mp3file + ".png", f"{Tasks.RDIO.value}.png")
     return True, ret
