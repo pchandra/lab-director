@@ -94,7 +94,7 @@ def export(file_id, key, fmt):
 @app.route('/coverart/<file_id>')
 @app.route('/coverart/<file_id>/<prompt>')
 @app.route('/coverart/<file_id>', methods=['POST'])
-def coverart(file_id, prompt="a cool album art cover in any artistic style"):
+def coverart(file_id, prompt="a cool album cover in any artistic style"):
     STATUS = flask_shelve.get_shelve()
     if not file_id in STATUS:
         return _err_no_file(file_id)
