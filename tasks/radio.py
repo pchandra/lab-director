@@ -9,6 +9,11 @@ BLEEP_WORD_LIST = conf['BLEEP_WORD_LIST']
 WAVMIXER_BIN = conf['WAVMIXER_BIN']
 
 def ondemand(tg, params, force=False):
+    # Short-circuit if the filestore already has assets we would produce
+    tg.add_private([ f"{Tasks.RDIO.value}.wav" ])
+    if not force and tg.check_keys():
+        return True, helpers.msg('Already done')
+
     bleep = params['bleep']
     job_id = params['job_id']
 
