@@ -2,6 +2,7 @@ import os
 import json
 import subprocess
 from taskdef import *
+from . import helpers
 from config import CONFIG as conf
 
 STABLE_DIFFUSION_DIR = conf['STABLE_DIFFUSION_DIR']
