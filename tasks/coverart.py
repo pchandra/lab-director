@@ -36,6 +36,6 @@ def ondemand(tg, params, force=False):
     ret['files'] = []
     outfiles = os.listdir(tg.scratch)
     for i, file in enumerate([ f"{tg.scratch}/{x}" for x in outfiles ]):
-        f = tg.put_file(file, f"{job_id}/pic{i}.png")
+        f = tg.put_file(file, f"{Tasks.COVR.value}/pic{i}.png")
         ret['files'].append(f)
     return True, ret
