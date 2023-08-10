@@ -134,6 +134,12 @@ CONFIG['BARTENDER_BIN'] = '/Users/chandra/ll/co/wav-mixer/bar-tender.py'
 # Command to run for 'zip-liner' tool
 CONFIG['ZIPLINER_BIN'] = '/Users/chandra/ll/co/wav-mixer/zip-liner.py'
 
+# Command to run for 'bleep-blaster' tool
+CONFIG['BLEEP_BLASTER_BIN'] = '/Users/chandra/ll/co/wav-mixer/bleep-blaster.py'
+
+# Default word list file for bleep-blaster
+CONFIG['BLEEP_WORD_LIST'] = '/Users/chandra/ll/co/wav-mixer/wordlist.json'
+
 # Command to run for 'whisper' tool
 CONFIG['WHISPER_BIN'] = '/usr/local/bin/whisper_timestamped'
 

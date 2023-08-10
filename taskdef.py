@@ -21,6 +21,7 @@ class Tasks(Enum):
     GENR = 'genre' # Run models to detect music genre
     EXPT = 'export' # Run an export task
     COVR = 'coverart' # Generate cover art from user prompt
+    RDIO = 'radio' # Generate a radio edit for the song
 
 class TaskState(Enum):
     INIT = "initial"
@@ -54,4 +55,5 @@ TASKS_SOUNDKIT = [ Tasks.OGSK,
 
 # These are the on-demand only tasks
 TASKS_ONDEMAND = [ Tasks.EXPT,
-                   Tasks.COVR ]
+                   Tasks.COVR,
+                   Tasks.RDIO ]

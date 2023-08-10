@@ -106,6 +106,22 @@ def coverart(file_id, prompt):
     sender.send_string(f"{Tasks.COVR.value} {job_id}")
     return _msg(f"Sent {Tasks.COVR.value} for: {file_id} with {job_id}", params)
 
+@app.route('/radio/<file_id>')
+@app.route('/radio/<file_id>', methods=['POST'])
+def radio_edit(file_id):
+    STATUS = flask_shelve.get_shelve()
+    if not file_id in STATUS:
+        return _err_no_file(file_id)
+    if request.method == 'GET':
+        params = { 'bleep': 'reverse',
+                   'words': 'default' }
+    else:
+        params = request.get_json(force=True)
+    job_id, params = _create_ondemand(file_id, Tasks.RDIO.value, params)
+    STATUS[job_id] = params
+    sender.send_string(f"{Tasks.RDIO.value} {job_id}")
+    return _msg(f"Sent {Tasks.RDIO.value} for: {file_id} with {job_id}", params)
+
 @app.route('/stub_beat/<file_id>')
 def stub_beat(file_id):
     STATUS = flask_shelve.get_shelve()
