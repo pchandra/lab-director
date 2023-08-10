@@ -2,6 +2,7 @@ import os
 import json
 import subprocess
 from taskdef import *
+from . import helpers
 from config import CONFIG as conf
 
 BLEEP_BLASTER_BIN = conf['BLEEP_BLASTER_BIN']
