@@ -22,6 +22,7 @@ def ondemand(tg, params, force=False):
         return True, helpers.msg('Already done')
 
     filename = tg.get_file(f"{Tasks.COVR.value}.jpg")
+        return False, helpers.msg(f'Input file not found: {Tasks.COVR.value}.jpg')
     outdir = f"{tg.scratch}/output"
     os.makedirs(outdir, exist_ok=True)
     # Execute the command
