@@ -56,5 +56,5 @@ def ondemand(tg, params, force=False):
     ret = { "command": { "stdout": stdout, "stderr": stderr } }
     ret['input'] = f"{Tasks.COVR.value}.jpg"
     outfiles = os.listdir(outdir)
-    ret['output'] = tg.put_file(f"{tg.scratch}/{outfiles[0]}", f"{key}-{Tasks.UPSZ.value}.{fmt}")
+    ret['output'] = tg.put_file(f"{outdir}/{outfiles[0]}", f"{key}-{Tasks.UPSZ.value}.{fmt}")
     return True, ret
