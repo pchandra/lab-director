@@ -6,6 +6,8 @@ from taskdef import *
 from . import helpers
 
 def execute(tg, force=False):
+    if tg.status['type'] not in [ 'soundkit' ]:
+        return False, helpers.msg('Track is not a soundkit')
     # Short-circuit if the filestore already has assets we would produce
     tg.add_private([ f"{Tasks.OGSK.value}.json" ])
     if not force and tg.check_keys():

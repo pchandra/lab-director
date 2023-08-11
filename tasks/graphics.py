@@ -5,6 +5,8 @@ from . import helpers
 from config import CONFIG as conf
 
 def execute(tg, force=False):
+    if tg.status['type'] not in [ 'beat', 'song' ]:
+        return False, helpers.msg('Track is not a beat or song')
     # Short-circuit if the filestore already has assets we would produce
     tg.add_public([ f"{Tasks.WGFX.value}.json",
                     f"{Tasks.ORIG.value}.png",

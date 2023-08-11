@@ -7,6 +7,8 @@ from config import CONFIG as conf
 WAVMIXER_BIN = conf['WAVMIXER_BIN']
 
 def execute(tg, force=False):
+    if tg.status['type'] not in [ 'beat', 'song' ]:
+        return False, helpers.msg('Track is not a beat or song')
     # Short-circuit if the filestore already has assets we would produce
     tg.add_public([ f"{Tasks.INST.value}.png" ])
     tg.add_private([ f"{Tasks.INST.value}.wav",

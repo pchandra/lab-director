@@ -7,6 +7,8 @@ from config import CONFIG as conf
 BARTENDER_BIN = conf['BARTENDER_BIN']
 
 def execute(tg, force=False):
+    if tg.status['type'] not in [ 'beat', 'song' ]:
+        return False, helpers.msg('Track is not a beat or song')
     # Short-circuit if the filestore already has assets we would produce
     tg.add_public([ f"{Tasks.BARS.value}-desktop.png",
                     f"{Tasks.BARS.value}-mobile.png" ])

@@ -14,6 +14,8 @@ WATERMARK_DELAY =  conf['WATERMARK_DELAY']
 WATERMARK_GAP = conf['WATERMARK_GAP']
 
 def execute(tg, force=False):
+    if tg.status['type'] not in [ 'beat', 'song' ]:
+        return False, helpers.msg('Track is not a beat or song')
     # Short-circuit if the filestore already has assets we would produce
     tg.add_public([ f"{Tasks.WTRM.value}.mp3" ])
     if not force and tg.check_keys():

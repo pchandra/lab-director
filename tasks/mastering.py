@@ -9,6 +9,8 @@ FFMPEG_BIN = conf['FFMPEG_BIN']
 PHASELIMITER_BIN = conf['PHASELIMITER_BIN']
 
 def execute(tg, force=False):
+    if tg.status['type'] not in [ 'beat', 'song' ]:
+        return False, helpers.msg('Track is not a beat or song')
     # Short-circuit if the filestore already has assets we would produce
     tg.add_public([ f"{Tasks.MAST.value}.png" ])
     tg.add_private([ f"{Tasks.MAST.value}.wav",

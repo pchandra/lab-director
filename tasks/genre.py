@@ -7,6 +7,8 @@ from config import CONFIG as conf
 GENRE_BIN = conf['GENRE_BIN']
 
 def execute(tg, force=False):
+    if tg.status['type'] not in [ 'beat', 'song' ]:
+        return False, helpers.msg('Track is not a beat or song')
     # Short-circuit if the filestore already has assets we would produce
     tg.add_public([ f"{Tasks.GENR.value}.json" ])
     if not force and tg.check_keys():
