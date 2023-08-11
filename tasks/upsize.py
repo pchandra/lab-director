@@ -35,11 +35,11 @@ def ondemand(tg, params, force=False):
                      "--n_samples", "1",
                      "--n_iter", "1",
                      "--strength", "0.1",
-                     "--init-img", filename
+                     "--init-img", filename,
                      "--H", "1500",
                      "--W", "1500",
                      "--turbo",
-                     "--format", fmt
+                     "--format", fmt,
                      "--outdir", outdir
                    ])
     process = subprocess.Popen(cmdline,
@@ -54,5 +54,5 @@ def ondemand(tg, params, force=False):
     ret = { "command": { "stdout": stdout, "stderr": stderr } }
     ret['input'] = f"{Tasks.COVR.value}.jpg"
     outfiles = os.listdir(outdir)
-	ret['output'] = tg.put_file(f"{tg.scratch}/{outfiles[0]}", f"{key}-{Tasks.UPSZ.value}.{fmt}")
+    ret['output'] = tg.put_file(f"{tg.scratch}/{outfiles[0]}", f"{key}-{Tasks.UPSZ.value}.{fmt}")
     return True, ret
