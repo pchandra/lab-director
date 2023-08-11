@@ -22,6 +22,7 @@ class Tasks(Enum):
     EXPT = 'export' # Run an export task
     COVR = 'coverart' # Generate cover art from user prompt
     RDIO = 'radio' # Generate a radio edit for the song
+    UPSZ = 'hires' # Generate a hires version of a pic
 
 class TaskState(Enum):
     INIT = "initial"
@@ -56,4 +57,5 @@ TASKS_SOUNDKIT = [ Tasks.OGSK,
 # These are the on-demand only tasks
 TASKS_ONDEMAND = [ Tasks.EXPT,
                    Tasks.COVR,
-                   Tasks.RDIO ]
+                   Tasks.RDIO,
+                   Tasks.UPSZ ]

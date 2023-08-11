@@ -18,6 +18,7 @@ from . import genre
 from . import export
 from . import coverart
 from . import radio
+from . import upsize
 
 __all__ = ["execute", "ondemand"]
 
@@ -43,3 +44,4 @@ ondemand = {}
 ondemand[Tasks.EXPT.value] = export.ondemand
 ondemand[Tasks.COVR.value] = coverart.ondemand
 ondemand[Tasks.RDIO.value] = radio.ondemand
+ondemand[Tasks.UPSZ.value] = upsize.ondemand
