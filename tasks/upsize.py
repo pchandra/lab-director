@@ -17,7 +17,7 @@ def ondemand(tg, params, force=False):
     if fmt not in [ 'jpg', 'png' ]:
         return False, helpers.msg(f"Format \"{fmt}\" not recognized")
     # Short-circuit if the filestore already has assets we would produce
-    tg.add_private([ f"{key}-{Tasks.UPSZ.value}.{fmt}" ])
+    tg.add_private([ f"{key}-{Tasks.UPSZ.value}.png" ])
     if not force and tg.check_keys():
         return True, helpers.msg('Already done')
 
