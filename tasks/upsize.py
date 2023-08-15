@@ -21,9 +21,9 @@ def ondemand(tg, params, force=False):
     if not force and tg.check_keys():
         return True, helpers.msg('Already done')
 
-    filename = tg.get_file(f"{Tasks.COVR.value}.jpg")
+    filename = tg.get_file(f"{Tasks.COVR.value}.{fmt}")
     if filename is None:
-        return False, helpers.msg(f'Input file not found: {Tasks.COVR.value}.jpg')
+        return False, helpers.msg(f'Input file not found: {Tasks.COVR.value}.{fmt}')
     outdir = f"{tg.scratch}/output"
     os.makedirs(outdir, exist_ok=True)
     # Execute the command
@@ -54,7 +54,7 @@ def ondemand(tg, params, force=False):
 
     # Build the dict to return to caller
     ret = { "command": { "stdout": stdout, "stderr": stderr } }
-    ret['input'] = f"{Tasks.COVR.value}.jpg"
+    ret['input'] = f"{Tasks.COVR.value}.{fmt}"
     outfiles = os.listdir(outdir)
     ret['output'] = tg.put_file(f"{outdir}/{outfiles[0]}", f"{key}-{Tasks.UPSZ.value}.{fmt}")
     return True, ret
