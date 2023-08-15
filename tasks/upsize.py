@@ -41,7 +41,7 @@ def ondemand(tg, params, force=False):
                      "--H", "1500",
                      "--W", "1500",
                      "--turbo",
-                     "--format", fmt,
+                     "--format", "png",
                      "--outdir", outdir
                    ])
     process = subprocess.Popen(cmdline,
@@ -56,5 +56,5 @@ def ondemand(tg, params, force=False):
     ret = { "command": { "stdout": stdout, "stderr": stderr } }
     ret['input'] = f"{Tasks.COVR.value}.{fmt}"
     outfiles = os.listdir(outdir)
-    ret['output'] = tg.put_file(f"{outdir}/{outfiles[0]}", f"{key}-{Tasks.UPSZ.value}.{fmt}")
+    ret['output'] = tg.put_file(f"{outdir}/{outfiles[0]}", f"{key}-{Tasks.UPSZ.value}.png")
     return True, ret
