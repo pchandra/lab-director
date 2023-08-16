@@ -114,7 +114,7 @@ def radio_edit(file_id):
     if not file_id in STATUS:
         return _err_no_file(file_id)
     if request.method == 'GET':
-        params = { 'bleep': 'reverse',
+        params = { 'bleep': 'silence',
                    'words': 'default' }
     else:
         params = request.get_json(force=True)
