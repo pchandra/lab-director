@@ -32,7 +32,7 @@ def ondemand(tg, params, force=False):
                      "-n", "ldm",
                      "python3", "optimizedSD/optimized_img2img.py",
                      "--device", ML_DEVICE,
-                     "--prompt", "increase resolution",
+                     "--prompt", "a high quality image",
                      "--skip_grid",
                      "--n_samples", "1",
                      "--n_iter", "1",
