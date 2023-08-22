@@ -49,8 +49,6 @@ def _requeue(file_id, task, waiting=None):
         add = f"waiting on \"{waiting.value}\""
         api.mark_waiting(file_id, task.lower())
     log.info(f"Requeue \"{task}\" for {file_id} {add}")
-    # Throttle this requeue to prevent tight loops
-    time.sleep(NOOP_TIME)
     api.requeue(file_id, task)
 
 def _run(file_id, task_type, force=False):
