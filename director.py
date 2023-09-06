@@ -86,7 +86,6 @@ def export(file_id, key, fmt):
         params = {'key': key, 'format':fmt}
     else:
         params = request.get_json(force=True)
-    params['key'] = 'mastering' if params['key'] == 'mastered' else params['key']
     job_id, params = _create_ondemand(file_id, Tasks.EXPT.value, params)
     STATUS[job_id] = params
     sender.send_string(f"{Tasks.EXPT.value} {job_id}")
