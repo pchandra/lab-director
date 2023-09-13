@@ -175,9 +175,9 @@ def make_sample_rate(infile, sampfile, sample_rate, bit_depth=16, channels=2):
     cmdline.append(FFMPEG_BIN)
     cmdline.extend([ "-i", infile,
                      "-v", "quiet",
-                     "-ac", channels,
+                     "-ac", str(channels),
                      "-acodec", codec,
-                     "-ar", sample_rate,
+                     "-ar", str(sample_rate),
                      "-y"
                    ])
     cmdline.append(sampfile)
