@@ -78,7 +78,7 @@ def execute(tg, force=False):
 
     # Fix sampling rate
     sampfile = f"{tg.scratch}/{Tasks.MAST.value}.samp.wav"
-    helpers.make_sample_rate(outfile, sampfile, sample_rate)
+    helpers.make_sample_rate(outfile, sampfile, sample_rate, bitdepth)
     outfile = sampfile
 
     # Store the resulting file

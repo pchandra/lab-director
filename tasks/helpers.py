@@ -159,12 +159,23 @@ def make_website_mp3(infile, mp3file, high_quality=False):
                                universal_newlines=True)
     stdout, stderr = process.communicate(input="\n\n\n\n\n")
 
-def make_sample_rate(infile, sampfile, sample_rate):
+def make_sample_rate(infile, sampfile, sample_rate, bit_depth=16):
+    if bit_depth == 8:
+        codec = 'pcm_u8'
+    elif bit_depth == 16:
+        codec = 'pcm_s16le'
+    elif bit_depth == 24:
+        codec = 'pcm_s24le'
+    elif bit_depth == 32:
+        codec = 'pcm_s32le'
+    else:
+        raise
     # Run an FFMPEG cmd to compress to mp3
     cmdline = []
     cmdline.append(FFMPEG_BIN)
     cmdline.extend([ "-i", infile,
                      "-v", "quiet",
+                     "-acodec", codec,
                      "-ar", sample_rate,
                      "-y"
                    ])
