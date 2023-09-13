@@ -116,6 +116,15 @@ def execute(tg, force=False):
     if filename is None:
         return False, helpers.msg(f'Input file not found: {Tasks.ORIG.value}.wav')
 
+    # Get the info for the original file
+    infofile = tg.get_file(f"{Tasks.ORIG.value}.json")
+    if infofile is None:
+        return False, helpers.msg(f'Input file not found: {Tasks.ORIG.value}.json')
+    with open(infofile, 'r') as f:
+        info = json.load(f)
+    bitdepth = info['streams'][0]['bits_per_sample']
+    sample_rate = info['streams'][0]['sample_rate']
+
     ret = {}
     try:
         # Run the high quality 4 source model and filter for non-silent
@@ -144,6 +153,9 @@ def execute(tg, force=False):
     # Save each stem back to filestore
     stems = stems_core | stems_extra
     for stem in stems.keys():
+        # Fix sampling rate
+        sampfile = f"{tg.scratch}/{Tasks.STEM.value}-{stem}.samp.wav"
+        helpers.make_sample_rate(stems[stem], sampfile, sample_rate, bitdepth)
         # Make an MP3 website version
         mp3file = f"{tg.scratch}/{Tasks.STEM.value}-{stem}.mp3"
         helpers.make_website_mp3(stems[stem], mp3file)
@@ -153,7 +165,7 @@ def execute(tg, force=False):
         mp3_location = tg.put_file(mp3file, f"{Tasks.STEM.value}-{stem}.mp3")
         png_location = tg.put_file(mp3file + ".png", f"{Tasks.STEM.value}-{stem}.png")
         # Store the wav stem
-        stored_location = tg.put_file(stems[stem], f'{Tasks.STEM.value}-{stem}.wav')
+        stored_location = tg.put_file(stems[stem], f'{Tasks.STEM.value}-{stem}.samp.wav')
         stems[stem] = stored_location
 
     # Unpack stored locations for stem object
