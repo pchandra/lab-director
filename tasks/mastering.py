@@ -30,6 +30,7 @@ def execute(tg, force=False):
     with open(infofile, 'r') as f:
         info = json.load(f)
     bitdepth = info['streams'][0]['bits_per_sample']
+    sample_rate = info['streams'][0]['sample_rate']
     # 16 bit-depth minimum since phase_limiter doesn't like 8
     bitdepth = 16 if bitdepth == 8 else bitdepth
 
@@ -74,6 +75,11 @@ def execute(tg, force=False):
                 stderr += line
             helpers.setprogress(tg.file_id, Tasks.MAST, 100)
             break
+
+    # Fix sampling rate
+    sampfile = f"{tg.scratch}/{Tasks.MAST.value}.samp.wav"
+    helpers.make_sample_rate(outfile, sampfile, sample_rate)
+    outfile = sampfile
 
     # Store the resulting file
     stored_location = tg.put_file(outfile, f"{Tasks.MAST.value}.wav")

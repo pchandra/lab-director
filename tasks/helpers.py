@@ -159,6 +159,23 @@ def make_website_mp3(infile, mp3file, high_quality=False):
                                universal_newlines=True)
     stdout, stderr = process.communicate(input="\n\n\n\n\n")
 
+def make_sample_rate(infile, sampfile, sample_rate):
+    # Run an FFMPEG cmd to compress to mp3
+    cmdline = []
+    cmdline.append(FFMPEG_BIN)
+    cmdline.extend([ "-i", infile,
+                     "-v", "quiet",
+                     "-ar", sample_rate,
+                     "-y"
+                   ])
+    cmdline.append(sampfile)
+    process = subprocess.Popen(cmdline,
+                               stdin=subprocess.PIPE,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE,
+                               universal_newlines=True)
+    stdout, stderr = process.communicate(input="\n\n\n\n\n")
+
 
 class TaskGuard:
     def __init__(self, file_id):
