@@ -165,7 +165,7 @@ def execute(tg, force=False):
         mp3_location = tg.put_file(mp3file, f"{Tasks.STEM.value}-{stem}.mp3")
         png_location = tg.put_file(mp3file + ".png", f"{Tasks.STEM.value}-{stem}.png")
         # Store the wav stem
-        stored_location = tg.put_file(stems[stem], f'{Tasks.STEM.value}-{stem}.samp.wav')
+        stored_location = tg.put_file(sampfile, f'{Tasks.STEM.value}-{stem}.wav')
         stems[stem] = stored_location
 
     # Unpack stored locations for stem object
