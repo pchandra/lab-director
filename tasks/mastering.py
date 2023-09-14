@@ -33,7 +33,7 @@ def execute(tg, force=False):
     sample_rate = info['streams'][0]['sample_rate']
     # Set some minimum standards for mastering output
     bitdepth = 16 if bitdepth == 8 else bitdepth
-    sample_rate = 44100 if sample_rate < 44100 else sample_rate
+    sample_rate = 44100 if int(sample_rate) < 44100 else int(sample_rate)
 
     # Build the command line to run
     cmdline = []
