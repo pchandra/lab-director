@@ -31,8 +31,9 @@ def execute(tg, force=False):
         info = json.load(f)
     bitdepth = info['streams'][0]['bits_per_sample']
     sample_rate = info['streams'][0]['sample_rate']
-    # 16 bit-depth minimum since phase_limiter doesn't like 8
+    # Set some minimum standards for mastering output
     bitdepth = 16 if bitdepth == 8 else bitdepth
+    sample_rate = 44100 if sample_rate < 44100 else sample_rate
 
     # Build the command line to run
     cmdline = []
