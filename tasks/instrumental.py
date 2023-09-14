@@ -37,12 +37,14 @@ def execute(tg, force=False):
     with open(infofile, 'r') as f:
         info = json.load(f)
     bitdepth = info['streams'][0]['bits_per_sample']
+    sample_rate = info['streams'][0]['sample_rate']
 
     # Build the command line to run
     cmdline = []
     cmdline.append(WAVMIXER_BIN)
     cmdline.extend([ "-o", outfile,
-                     "-b", str(bitdepth)
+                     "-b", str(bitdepth),
+                     "-r", str(sample_rate)
                    ])
 
     # Grab all the stems
