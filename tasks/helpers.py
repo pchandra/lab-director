@@ -227,6 +227,9 @@ class TaskGuard:
             private = FILESTORE_SOUNDKITS
         return private, FILESTORE_PUBLIC
 
+    def remove_file(self, key):
+        return filestore.remove_file(self.file_id, key, self.private)
+
     def get_file(self, key):
         return filestore.retrieve_file(self.file_id, key, self.scratch, self.private)
 

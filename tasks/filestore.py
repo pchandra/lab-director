@@ -77,6 +77,34 @@ def _s3_retrieve_file(file_id, key, directory, section, handle_exceptions):
     return filename
 
 
+# Remove the file under 'key' in the filestore to the local filesystem
+def remove_file(file_id, key, section, handle_exceptions=True):
+    return _backend['remove_file'](file_id, key, section, handle_exceptions)
+
+def _local_remove_file(file_id, key, section, handle_exceptions):
+    src = FILESTORE_DIR + f"/{section}/{file_id}" + f"/{key}"
+    try:
+        shutil.rmtree(src)
+    except Exception:
+        if handle_exceptions:
+            return None
+        else:
+            raise
+    return True
+
+# Remove the file under 'key' from the new S3 bucket hierarchy
+def _s3_remove_file(file_id, key, section, handle_exceptions):
+    s3path = f"{file_id}/{key}"
+    try:
+        s3.Object(section, s3path).delete()
+    except Exception:
+        if handle_exceptions:
+            return None
+        else:
+            raise
+    return True
+
+
 # Check if a key exists in the filestore
 def key_exists(file_id, key, section):
     return _backend['key_exists'](file_id, key, section)
@@ -116,12 +144,14 @@ def _s3_copy_keys(file_id, keylist, src, dst):
         target_bucket.copy(source, f"{file_id}/{key}")
 
 _backend_local = {}
+_backend_local['remove_file'] = _local_remove_file
 _backend_local['store_file'] = _local_store_file
 _backend_local['retrieve_file'] = _local_retrieve_file
 _backend_local['key_exists'] = _local_key_exists
 _backend_local['copy_keys'] = _local_copy_keys
 
 _backend_s3 = {}
+_backend_s3['remove_file'] = _s3_remove_file
 _backend_s3['store_file'] = _s3_store_file
 _backend_s3['retrieve_file'] = _s3_retrieve_file
 _backend_s3['key_exists'] = _s3_key_exists
