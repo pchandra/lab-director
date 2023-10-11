@@ -8,10 +8,12 @@ from config import CONFIG as conf
 STABLE_DIFFUSION_DIR = conf['STABLE_DIFFUSION_DIR']
 
 def ondemand(tg, params, force=False):
-    # Short-circuit if the filestore already has assets we would produce
+    # Hack to check if a run is in progress already
     tg.add_private([ f"{Tasks.COVR.value}.temp" ])
     if not force and tg.check_keys():
         return True, helpers.msg('In progress already')
+    tg.priv_keys.remove(f"{Tasks.COVR.value}.temp")
+    # Short-circuit if the filestore already has assets we would produce
     tg.add_private([ f"{Tasks.COVR.value}.json" ])
     if not force and tg.check_keys():
         return True, helpers.msg('Already done')
