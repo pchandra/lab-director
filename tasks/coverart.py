@@ -9,10 +9,10 @@ STABLE_DIFFUSION_DIR = conf['STABLE_DIFFUSION_DIR']
 
 def ondemand(tg, params, force=False):
     # Hack to check if a run is in progress already
-    tg.add_private([ f"{Tasks.COVR.value}.temp" ])
+    tg.add_private([ f"{Tasks.COVR.value}.altemp" ])
     if not force and tg.check_keys():
         return True, helpers.msg('In progress already')
-    tg.priv_keys.remove(f"{Tasks.COVR.value}.temp")
+    tg.priv_keys.remove(f"{Tasks.COVR.value}.altemp")
 
     # Short-circuit if the filestore already has assets we would produce
     tg.add_private([ f"{Tasks.COVR.value}.json" ])
@@ -20,10 +20,10 @@ def ondemand(tg, params, force=False):
         return True, helpers.msg('Already done')
 
     # Write the inprogress temp file, upload it, and delete it
-    tempfile = f"{tg.scratch}/{Tasks.COVR.value}.temp"
+    tempfile = f"{tg.scratch}/{Tasks.COVR.value}.altemp"
     with open(tempfile, 'w') as f:
         f.write("inprogress")
-    tg.put_file(tempfile, f"{Tasks.COVR.value}.temp")
+    tg.put_file(tempfile, f"{Tasks.COVR.value}.altemp")
     os.remove(tempfile)
 
     prompt = params['prompt']
@@ -62,5 +62,7 @@ def ondemand(tg, params, force=False):
     with open(tempfile, 'w') as f:
         f.write(json.dumps(params, indent=2))
     ret['output'] = tg.put_file(tempfile, f"{Tasks.COVR.value}.json")
+    # Remove inprogress marker files
     tg.remove_file(f"{Tasks.COVR.value}.temp")
+    tg.remove_file(f"{Tasks.COVR.value}.altemp")
     return True, ret
