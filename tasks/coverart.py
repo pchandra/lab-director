@@ -13,15 +13,18 @@ def ondemand(tg, params, force=False):
     if not force and tg.check_keys():
         return True, helpers.msg('In progress already')
     tg.priv_keys.remove(f"{Tasks.COVR.value}.temp")
+
     # Short-circuit if the filestore already has assets we would produce
     tg.add_private([ f"{Tasks.COVR.value}.json" ])
     if not force and tg.check_keys():
         return True, helpers.msg('Already done')
 
+    # Write the inprogress temp file, upload it, and delete it
     tempfile = f"{tg.scratch}/{Tasks.COVR.value}.temp"
     with open(tempfile, 'w') as f:
         f.write("inprogress")
     tg.put_file(tempfile, f"{Tasks.COVR.value}.temp")
+    os.remove(tempfile)
 
     prompt = params['prompt']
     job_id = params['job_id']
