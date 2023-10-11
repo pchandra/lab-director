@@ -9,9 +9,17 @@ STABLE_DIFFUSION_DIR = conf['STABLE_DIFFUSION_DIR']
 
 def ondemand(tg, params, force=False):
     # Short-circuit if the filestore already has assets we would produce
+    tg.add_private([ f"{Tasks.COVR.value}.temp" ])
+    if not force and tg.check_keys():
+        return True, helpers.msg('In progress already')
     tg.add_private([ f"{Tasks.COVR.value}.json" ])
     if not force and tg.check_keys():
         return True, helpers.msg('Already done')
+
+    tempfile = f"{tg.scratch}/{Tasks.COVR.value}.temp"
+    with open(tempfile, 'w') as f:
+        f.write("inprogress")
+    tg.put_file(tempfile, f"{Tasks.COVR.value}.temp")
 
     prompt = params['prompt']
     job_id = params['job_id']
@@ -49,4 +57,5 @@ def ondemand(tg, params, force=False):
     with open(tempfile, 'w') as f:
         f.write(json.dumps(params, indent=2))
     ret['output'] = tg.put_file(tempfile, f"{Tasks.COVR.value}.json")
+    tg.remove_file(f"{Tasks.COVR.value}.temp")
     return True, ret
