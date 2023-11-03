@@ -27,7 +27,7 @@ def execute(tg, force=False):
     if not metadata:
         return False, helpers.msg('File format not recognized')
     fmt = metadata['format'].get('format_name')
-    if fmt != 'wav' and fmt != 'aiff':
+    if fmt != 'wav' and fmt != 'aiff' and fmt != 'mp3':
         return False, helpers.msg(f'Not accepting this file format: {fmt}')
 
     # Save the file info along side it
