@@ -29,6 +29,9 @@ def execute(tg, force=False):
     fmt = metadata['format'].get('format_name')
     if fmt != 'wav' and fmt != 'aiff' and fmt != 'mp3':
         return False, helpers.msg(f'Not accepting this file format: {fmt}')
+    # Fix a sample size if mp3 since it will be 0
+    if fmt == 'mp3':
+        metadata['streams'][0]['bits_per_sample'] = 16
 
     # Save the file info along side it
     ret = {}
@@ -37,7 +40,7 @@ def execute(tg, force=False):
         f.write(json.dumps(metadata, indent=2))
     ret['info'] = tg.put_file(tempfile, f"{Tasks.ORIG.value}.json")
 
-    # Screen to ensure we have an AIFF or WAV file
+    # Grab details about the audio
     channels = metadata['streams'][0]['channels']
     srate = metadata['streams'][0]['sample_rate']
     ssize = metadata['streams'][0]['bits_per_sample']
