@@ -57,6 +57,7 @@ def ondemand(tg, params, force=False):
 
     cmdline.extend([ "-l", lyric_file,
                      "-b", bleep,
+                     "-B", "5",
                      "-w", BLEEP_WORD_LIST,
                      "-m", "3",
                      "-o", vocalout
