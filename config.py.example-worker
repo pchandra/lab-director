@@ -87,13 +87,13 @@ CONFIG['FILESTORE_PURCHASES'] = 'licenselounge-purchases-test'
 CONFIG['MULTIPART_THRESHOLD'] = 64 * 1024 * 1024
 
 # Wav file to use for watermarking process
-CONFIG['WATERMARK_WAV'] = '/home/ubuntu/wav-mixer/stamps/ll-stamp.wav'
+CONFIG['WATERMARK_WAV'] = '/home/ubuntu/wav-mixer/stamps/lutely.wav'
 
 # Relative strength to apply to the watermark mixing (mark-maker tool)
 CONFIG['WATERMARK_STRENGTH'] = "1"
 
 # Relative strength to apply to the watermark mixing (mark-maker tool)
-CONFIG['WATERMARK_DELAY'] = "2"
+CONFIG['WATERMARK_DELAY'] = "0"
 
 # Relative strength to apply to the watermark mixing (mark-maker tool)
 CONFIG['WATERMARK_GAP'] = "0"
