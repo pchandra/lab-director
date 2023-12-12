@@ -6,7 +6,7 @@ from config import CONFIG as conf
 
 IMAGEMAGICK_BIN = conf['IMAGEMAGICK_BIN']
 
-def execute(tg, force=False):
+def ondemand(tg, params, force=False):
     # Short-circuit if the filestore already has assets we would produce
     tg.add_public([ f"{Tasks.OGAW.value}.jpg" ])
     if not force and tg.check_keys():

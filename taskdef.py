@@ -58,5 +58,6 @@ TASKS_SOUNDKIT = [ Tasks.OGSK,
 # These are the on-demand only tasks
 TASKS_ONDEMAND = [ Tasks.EXPT,
                    Tasks.COVR,
+                   Tasks.OGAW,
                    Tasks.RDIO,
                    Tasks.UPSZ ]

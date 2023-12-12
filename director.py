@@ -97,9 +97,12 @@ def artwork(file_id, force=None):
     STATUS = flask_shelve.get_shelve()
     if not file_id in STATUS:
         return _err_no_file(file_id)
+    params = {}
     cmd = Tasks.OGAW.value if force is None else Tasks.OGAW.value.upper()
+    job_id, params = _create_ondemand(file_id, Tasks.OGAW.value, params)
+    STATUS[job_id] = params
     sender.send_string(f"{cmd} {file_id}")
-    return _msg(f"Sent {cmd} for: {file_id}")
+    return _msg(f"Sent {cmd} for: {file_id} with {job_id}", params)
 
 @app.route('/coverart/<file_id>')
 @app.route('/coverart/<file_id>/<prompt>')

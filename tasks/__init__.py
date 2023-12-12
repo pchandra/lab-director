@@ -40,10 +40,10 @@ execute[Tasks.KGFX] = kitgfx.execute
 execute[Tasks.BARS] = bars.execute
 execute[Tasks.WGFX] = graphics.execute
 execute[Tasks.GENR] = genre.execute
-execute[Tasks.OGAW] = artwork.execute
 
 ondemand = {}
 ondemand[Tasks.EXPT.value] = export.ondemand
 ondemand[Tasks.COVR.value] = coverart.ondemand
+ondemand[Tasks.OGAW.value] = artwork.ondemand
 ondemand[Tasks.RDIO.value] = radio.ondemand
 ondemand[Tasks.UPSZ.value] = upsize.ondemand
