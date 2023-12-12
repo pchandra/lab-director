@@ -110,6 +110,9 @@ CONFIG['FFMPEG_BIN'] = '/usr/local/bin/ffmpeg'
 # Binary to run 'ffprobe' tool
 CONFIG['FFPROBE_BIN'] = '/usr/local/bin/ffprobe'
 
+# Binary to run ImageMagick conversion
+CONFIG['IMAGEMAGICK_BIN'] = '/usr/local/bin/convert'
+
 # Command to run 'keymaster' tool
 CONFIG['KEYMASTER_BIN'] = '/Users/chandra/ll/co/key-bpm-finder/keymaster.py'
 

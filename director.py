@@ -91,6 +91,16 @@ def export(file_id, key, fmt):
     sender.send_string(f"{Tasks.EXPT.value} {job_id}")
     return _msg(f"Sent {Tasks.EXPT.value} for: {file_id} with {job_id}", params)
 
+@app.route('/artwork/<file_id>')
+@app.route('/artwork/<file_id>/<force>')
+def artwork(file_id, force=None):
+    STATUS = flask_shelve.get_shelve()
+    if not file_id in STATUS:
+        return _err_no_file(file_id)
+    cmd = Tasks.OGAW.value if force is None else Tasks.OGAW.value.upper()
+    sender.send_string(f"{cmd} {file_id}")
+    return _msg(f"Sent {cmd} for: {file_id}")
+
 @app.route('/coverart/<file_id>')
 @app.route('/coverart/<file_id>/<prompt>')
 @app.route('/coverart/<file_id>', methods=['POST'])

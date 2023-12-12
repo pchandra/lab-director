@@ -19,6 +19,7 @@ from . import export
 from . import coverart
 from . import radio
 from . import upsize
+from . import artwork
 
 __all__ = ["execute", "ondemand"]
 
@@ -39,6 +40,7 @@ execute[Tasks.KGFX] = kitgfx.execute
 execute[Tasks.BARS] = bars.execute
 execute[Tasks.WGFX] = graphics.execute
 execute[Tasks.GENR] = genre.execute
+execute[Tasks.OGAW] = artwork.execute
 
 ondemand = {}
 ondemand[Tasks.EXPT.value] = export.ondemand

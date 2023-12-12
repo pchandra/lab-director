@@ -23,6 +23,7 @@ class Tasks(Enum):
     COVR = 'coverart' # Generate cover art from user prompt
     RDIO = 'radio' # Generate a radio edit for the song
     UPSZ = 'hires' # Generate a hires version of a pic
+    OGAW = 'artwork' # Generate a web friendly version of cover art
 
 class TaskState(Enum):
     INIT = "initial"
