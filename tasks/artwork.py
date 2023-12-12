@@ -11,6 +11,7 @@ def ondemand(tg, params, force=False):
     tg.add_public([ f"{Tasks.OGAW.value}.jpg" ])
     #if not force and tg.check_keys():
     #    return True, helpers.msg('Already done')
+    tg.force = True
 
     # Grab the originally set artwork file
     artwork = tg.get_file(f"original-art")
