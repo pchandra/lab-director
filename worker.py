@@ -55,7 +55,7 @@ def _run(file_id, task_type, force=False):
     api.mark_inprogress(file_id, task_type.value)
     log.info(f"Running \"{task_type.value}\" for {file_id}")
     success, ret = False, {}
-    with tasks.helpers.TaskGuard(file_id) as tg:
+    with tasks.helpers.TaskGuard(file_id, force) as tg:
         tg.success, ret = tasks.execute[task_type](tg, force=force)
     # Add the performance data and encode
     ret['perf'] = tg.get_perf()

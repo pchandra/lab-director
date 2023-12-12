@@ -190,8 +190,9 @@ def make_sample_rate(infile, sampfile, sample_rate, bit_depth=16, channels=2):
 
 
 class TaskGuard:
-    def __init__(self, file_id):
+    def __init__(self, file_id, force=False):
         self.file_id = file_id
+        self.force = force
         self.pub_keys = []
         self.priv_keys = []
         self.success = False
@@ -250,7 +251,7 @@ class TaskGuard:
         return False
 
     def copy_keys(self):
-        if not filestore.check_keys(self.file_id, self.pub_keys, self.public):
+        if self.force or not filestore.check_keys(self.file_id, self.pub_keys, self.public):
             filestore.copy_keys(self.file_id, self.pub_keys, self.private, self.public)
 
     def get_perf(self):
