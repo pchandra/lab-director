@@ -192,10 +192,6 @@ def main():
         elif task == Tasks.OGSK.value:
             _run(file_id, Tasks.OGSK, force)
 
-        # Convert uploaded artwork to to web version
-        elif task == Tasks.OGAW.value:
-            _run(file_id, Tasks.OGAW, force)
-
         # Gather Zip inventory and metadata
         elif task == Tasks.ZINV.value:
             if _check_ready(file_id, status, Tasks.OGSK):
