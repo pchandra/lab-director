@@ -92,17 +92,15 @@ def export(file_id, key, fmt):
     return _msg(f"Sent {Tasks.EXPT.value} for: {file_id} with {job_id}", params)
 
 @app.route('/artwork/<file_id>')
-@app.route('/artwork/<file_id>/<force>')
-def artwork(file_id, force=None):
+def artwork(file_id):
     STATUS = flask_shelve.get_shelve()
     if not file_id in STATUS:
         return _err_no_file(file_id)
     params = {}
-    cmd = Tasks.OGAW.value if force is None else Tasks.OGAW.value.upper()
     job_id, params = _create_ondemand(file_id, Tasks.OGAW.value, params)
     STATUS[job_id] = params
-    sender.send_string(f"{cmd} {job_id}")
-    return _msg(f"Sent {cmd} for: {file_id} with {job_id}", params)
+    sender.send_string(f"{Tasks.OGAW.value} {job_id}")
+    return _msg(f"Sent {Tasks.OGAW.value} for: {file_id} with {job_id}", params)
 
 @app.route('/coverart/<file_id>')
 @app.route('/coverart/<file_id>/<prompt>')

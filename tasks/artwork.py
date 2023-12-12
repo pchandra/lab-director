@@ -9,8 +9,8 @@ IMAGEMAGICK_BIN = conf['IMAGEMAGICK_BIN']
 def ondemand(tg, params, force=False):
     # Short-circuit if the filestore already has assets we would produce
     tg.add_public([ f"{Tasks.OGAW.value}.jpg" ])
-    if not force and tg.check_keys():
-        return True, helpers.msg('Already done')
+    #if not force and tg.check_keys():
+    #    return True, helpers.msg('Already done')
 
     # Grab the originally set artwork file
     artwork = tg.get_file(f"original-art")
