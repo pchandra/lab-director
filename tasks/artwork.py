@@ -23,9 +23,9 @@ def ondemand(tg, params, force=False):
     # Build the command line to run
     cmdline = []
     cmdline.append(IMAGEMAGICK_BIN)
-    cmdline.extend([ "-size", "512x512",
+    cmdline.extend([ "-resize", "512x512",
                      "-strip",
-                     "-quality", "75",
+                     "-quality", "90",
                      artwork,
                      outfile
                    ])
