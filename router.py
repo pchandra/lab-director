@@ -65,7 +65,7 @@ def main():
                 tokens = message[0].split()
                 task = tokens[0]
                 log.info("Received: %s" % message[0])
-                if task == f"{Tasks.EXPT.value}".encode('ascii'):
+                if task in [ x.value.encode('ascii') for x in TASKS_PRIORITY ]:
                     queue.insert(0, message[0])
                 elif message[0] not in queue:
                     queue.append(message[0])

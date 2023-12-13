@@ -61,3 +61,9 @@ TASKS_ONDEMAND = [ Tasks.EXPT,
                    Tasks.OGAW,
                    Tasks.RDIO,
                    Tasks.UPSZ ]
+
+# These tasks jump to the front of the queue
+TASKS_PRIORITY = [ Tasks.ORIG,
+                   Tasks.OGSK,
+                   Tasks.OGAW,
+                   Tasks.EXPT ]
