@@ -102,6 +102,17 @@ def artwork(file_id):
     sender.send_string(f"{Tasks.OGAW.value} {job_id}")
     return _msg(f"Sent {Tasks.OGAW.value} for: {file_id} with {job_id}", params)
 
+@app.route('/kitgfx/<file_id>')
+def kitgfx(file_id):
+    STATUS = flask_shelve.get_shelve()
+    if not file_id in STATUS:
+        return _err_no_file(file_id)
+    params = {}
+    job_id, params = _create_ondemand(file_id, Tasks.KGFX.value, params)
+    STATUS[job_id] = params
+    sender.send_string(f"{Tasks.KGFX.value} {job_id}")
+    return _msg(f"Sent {Tasks.KGFX.value} for: {file_id} with {job_id}", params)
+
 @app.route('/coverart/<file_id>')
 @app.route('/coverart/<file_id>/<prompt>')
 @app.route('/coverart/<file_id>', methods=['POST'])

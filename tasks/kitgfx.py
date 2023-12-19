@@ -5,7 +5,7 @@ from config import CONFIG as conf
 
 BARTENDER_BIN = conf['BARTENDER_BIN']
 
-def execute(tg, force=False):
+def ondemand(tg, params, force=False):
     if tg.status['type'] not in [ 'soundkit' ]:
         return False, helpers.msg('Track is not a soundkit')
     # Short-circuit if the filestore already has assets we would produce

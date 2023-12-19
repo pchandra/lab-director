@@ -52,13 +52,13 @@ TASKS_SONG = TASKS_BEAT
 # The tasks that are automatically run for each soundkit
 TASKS_SOUNDKIT = [ Tasks.OGSK,
                    Tasks.ZINV,
-                   Tasks.KGFX,
                    Tasks.STAT ]
 
 # These are the on-demand only tasks
 TASKS_ONDEMAND = [ Tasks.EXPT,
                    Tasks.COVR,
                    Tasks.OGAW,
+                   Tasks.KGFX,
                    Tasks.RDIO,
                    Tasks.UPSZ ]
 
@@ -66,4 +66,5 @@ TASKS_ONDEMAND = [ Tasks.EXPT,
 TASKS_PRIORITY = [ Tasks.ORIG,
                    Tasks.OGSK,
                    Tasks.OGAW,
+                   Tasks.KGFX,
                    Tasks.EXPT ]
