@@ -8,8 +8,9 @@ def execute(tg, force=False):
     # Short-circuit if the filestore already has assets we would produce
     tg.add_public([ f"{Tasks.WTRM.value}.png",
                     f"{Tasks.WTRM.value}.mp3" ])
-    if not force and tg.check_keys():
-        return True, helpers.msg('Already done')
+    #if not force and tg.check_keys():
+    #    return True, helpers.msg('Already done')
+    tg.force = True
 
     # Use the preview, aka 'watermark' to make the graphics
     preview = tg.get_file(f"{Tasks.WTRM.value}.mp3")
