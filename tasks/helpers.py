@@ -204,11 +204,17 @@ class TaskGuard:
         return self
 
     def __exit__(self, exc_type, exc_value, exc_tb):
-        if self.success:
-            self.copy_keys()
-        self._destroy_scratch_dir()
-        self.stop = time.time()
-        return True
+        try:
+            if self.success:
+                self.copy_keys()
+            self._destroy_scratch_dir()
+            self.stop = time.time()
+            return True
+        except:
+            pass
+        else:
+            return False
+
 
     def _create_scratch_dir(self):
         self.scratch = WORK_DIR + f"/{str(uuid.uuid4())}"
