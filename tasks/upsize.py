@@ -12,16 +12,16 @@ def ondemand(tg, params, force=False):
     key = params['key']
     fmt = params['format']
     job_id = params['job_id']
-    if key not in [ f'{Tasks.COVR.value}' ]:
+    if key not in [ f'{Tasks.COVR.value}', f'{Tasks.OGAW.value}' ]:
         return False, helpers.msg(f"Key \"{key}\" not recognized")
     if fmt not in [ 'jpg', 'png' ]:
         return False, helpers.msg(f"Format \"{fmt}\" not recognized")
     # Short-circuit if the filestore already has assets we would produce
-    tg.add_private([ f"{key}-{Tasks.UPSZ.value}.png" ])
+    tg.add_private([ f"{Tasks.OGAW.value}-{Tasks.UPSZ.value}.png" ])
     if not force and tg.check_keys():
         return True, helpers.msg('Already done')
 
-    filename = tg.get_file(f"{Tasks.COVR.value}.{fmt}")
+    filename = tg.get_file(f"{key}.{fmt}")
     if filename is None:
         return False, helpers.msg(f'Input file not found: {Tasks.COVR.value}.{fmt}')
     outdir = f"{tg.scratch}/output"
@@ -54,7 +54,7 @@ def ondemand(tg, params, force=False):
 
     # Build the dict to return to caller
     ret = { "command": { "stdout": stdout, "stderr": stderr } }
-    ret['input'] = f"{Tasks.COVR.value}.{fmt}"
+    ret['input'] = f"{key} + {fmt}"
     outfiles = os.listdir(outdir)
-    ret['output'] = tg.put_file(f"{outdir}/{outfiles[0]}", f"{key}-{Tasks.UPSZ.value}.png")
+    ret['output'] = tg.put_file(f"{outdir}/{outfiles[0]}", f"{Tasks.OGAW.value}-{Tasks.UPSZ.value}.png")
     return True, ret
