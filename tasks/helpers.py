@@ -213,6 +213,7 @@ class TaskGuard:
         except:
             pass
         else:
+            self.stop = time.time()
             return False
 
 
