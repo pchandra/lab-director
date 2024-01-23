@@ -71,7 +71,12 @@ def main():
                     queue.append(message[0])
 
             if socks.get(backend) == zmq.POLLIN:
-                address, empty, ready = backend.recv_multipart()
+                buff = backend.recv_multipart()
+                try:
+                    address, empty, ready = buff
+                except:
+                    address, ready = buff
+                    log.warning(f"ZMQ SENT: address {address} ready {ready} raw {buff}")
                 job, logf = f"{Tasks.NOOP.value} nonce".encode('ascii'), log.debug
                 tokens = ready.split()
                 proto = tokens[1]
