@@ -196,6 +196,8 @@ class TaskGuard:
         self.pub_keys = []
         self.priv_keys = []
         self.success = False
+        self.start = 0
+        self.stop = 0
 
     def __enter__(self):
         self.start = time.time()
