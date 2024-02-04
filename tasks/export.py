@@ -104,6 +104,8 @@ def ondemand(tg, params, force=False):
                              "-v", "quiet",
                              "-y"
                            ])
+            if fmt == 'm4a':
+                cmdline.extend([ "-c:a", "aac" ])
             if fmt in [ 'mp3', 'ogg', 'm4a' ]:
                 cmdline.extend([ "-b:a", "320k" ])
             cmdline.append(outfile)
