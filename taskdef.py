@@ -54,6 +54,9 @@ TASKS_SOUNDKIT = [ Tasks.OGSK,
                    Tasks.ZINV,
                    Tasks.STAT ]
 
+# The tasks that are automatically run for each artist
+TASKS_ARTIST = [ ]
+
 # These are the on-demand only tasks
 TASKS_ONDEMAND = [ Tasks.EXPT,
                    Tasks.COVR,

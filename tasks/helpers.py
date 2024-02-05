@@ -21,6 +21,7 @@ FILESTORE_PUBLIC = conf['FILESTORE_PUBLIC']
 FILESTORE_BEATS = conf['FILESTORE_BEATS']
 FILESTORE_SONGS = conf['FILESTORE_SONGS']
 FILESTORE_SOUNDKITS = conf['FILESTORE_SOUNDKITS']
+FILESTORE_ARTISTS = conf['FILESTORE_ARTISTS']
 
 
 def msg(msg, base={}):
@@ -235,6 +236,8 @@ class TaskGuard:
             private = FILESTORE_SONGS
         elif self.status['type'] == 'soundkit':
             private = FILESTORE_SOUNDKITS
+        elif self.status['type'] == 'artist':
+            private = FILESTORE_ARTISTS
         return private, FILESTORE_PUBLIC
 
     def remove_file(self, key):

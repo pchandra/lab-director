@@ -57,6 +57,8 @@ def _create_status(file_id, audio_type):
         target = TASKS_SONG
     elif audio_type == 'soundkit':
         target = TASKS_SOUNDKIT
+    elif audio_type == 'artist':
+        target = TASKS_ARTIST
     for task in [x.value for x in target]:
         ret[task] = {}
         ret[task]['status'] = TaskState.INIT.value
@@ -177,6 +179,25 @@ def stub_soundkit(file_id):
     STATUS = flask_shelve.get_shelve()
     STATUS[file_id] = _create_status(file_id, 'soundkit')
     return _msg(f"Status entry created for soundkit: {file_id}")
+
+@app.route('/force_load_artist/<file_id>')
+def force_load_artist(file_id):
+    STATUS = flask_shelve.get_shelve()
+    STATUS[file_id] = _create_status(file_id, 'artist')
+    for task in [x.value for x in TASKS_ARTIST]:
+        sender.send_string(f"{task} {file_id}")
+    return _msg(f"Forced all tasks for artist: {file_id}")
+
+@app.route('/load_artist/<file_id>')
+def load_artist(file_id):
+    STATUS = flask_shelve.get_shelve()
+    if not file_id in STATUS:
+        STATUS[file_id] = _create_status(file_id, 'artist')
+        for task in [x.value for x in TASKS_ARTIST]:
+            sender.send_string(f"{task} {file_id}")
+        return _msg(f"Queued all tasks for artist: {file_id}")
+    else:
+        return _msg(f"Already loaded artist: {file_id}")
 
 @app.route('/force_load_beat/<file_id>')
 def force_load_beat(file_id):

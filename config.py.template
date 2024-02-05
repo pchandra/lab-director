@@ -77,6 +77,9 @@ CONFIG['FILESTORE_SONGS'] = '%%FILESTORE_SONGS%%'
 # Section name for soundkit files, local: subdirectory, s3: bucket name
 CONFIG['FILESTORE_SOUNDKITS'] = '%%FILESTORE_SOUNDKITS%%'
 
+# Section name for artists, local: subdirectory, s3: bucket name
+CONFIG['FILESTORE_ARTISTS'] = '%%FILESTORE_ARTISTS%%'
+
 # Section name for scratch output
 CONFIG['FILESTORE_SCRATCH'] = '%%FILESTORE_SCRATCH%%'
 

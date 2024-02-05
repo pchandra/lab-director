@@ -77,6 +77,9 @@ CONFIG['FILESTORE_SONGS'] = 'licenselounge-songs-test'
 # Section name for soundkit files, local: subdirectory, s3: bucket name
 CONFIG['FILESTORE_SOUNDKITS'] = 'licenselounge-soundkits-test'
 
+# Section name for artists, local: subdirectory, s3: bucket name
+CONFIG['FILESTORE_ARTISTS'] = 'licenselounge-creators-test'
+
 # Section name for scratch output
 CONFIG['FILESTORE_SCRATCH'] = 'licenselounge-scratch'
 
