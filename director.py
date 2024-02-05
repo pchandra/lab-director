@@ -180,6 +180,12 @@ def stub_soundkit(file_id):
     STATUS[file_id] = _create_status(file_id, 'soundkit')
     return _msg(f"Status entry created for soundkit: {file_id}")
 
+@app.route('/stub_artist/<file_id>')
+def stub_artist(file_id):
+    STATUS = flask_shelve.get_shelve()
+    STATUS[file_id] = _create_status(file_id, 'artist')
+    return _msg(f"Status entry created for artist: {file_id}")
+
 @app.route('/force_load_artist/<file_id>')
 def force_load_artist(file_id):
     STATUS = flask_shelve.get_shelve()
