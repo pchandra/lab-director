@@ -283,6 +283,11 @@ def file_status(file_id):
         return msg
     return STATUS[file_id]
 
+@app.route('/status_info')
+def status_info():
+    STATUS = flask_shelve.get_shelve()
+    return _msg(f"Total status cache size: {len(STATUS.keys())}")
+
 @app.route('/reset_status')
 def reset_status():
     STATUS = flask_shelve.get_shelve()
