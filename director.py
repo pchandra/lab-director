@@ -283,6 +283,15 @@ def file_status(file_id):
         return msg
     return STATUS[file_id]
 
+@app.route('/reset_status')
+def reset_status():
+    STATUS = flask_shelve.get_shelve()
+    total = 0
+    for k in STATUS.keys():
+        del STATUS[k]
+        total += 1
+    return _msg(f"Reset all item status, cleared: {total}")
+
 @app.route('/update-inprogress/<file_id>/<task>', methods=['GET', 'POST'])
 def update_inprogress(file_id, task):
     STATUS = flask_shelve.get_shelve()
