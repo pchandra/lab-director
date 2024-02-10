@@ -75,26 +75,26 @@ def main():
                 try:
                     address, empty, ready = buff
                 except:
-                    address, ready = buff
-                    log.warning(f"ZMQ SENT: address {address} ready {ready} raw {buff}")
-                job, logf = f"{Tasks.NOOP.value} nonce".encode('ascii'), log.debug
-                tokens = ready.split()
-                proto = tokens[1]
-                instance_id = tokens[2]
-                # Check protocol version
-                if proto != PROTO:
-                    job, logf = f"{Tasks.STOP.value} nonce".encode('ascii'), log.warning
-                    log.warning(f"Bad worker version: {proto} (expected: {PROTO}) from {instance_id}")
+                    log.warning(f"ZMQ SENT: \n--ASCII--\n{buff.decode('ascii')}\n--END--\n\n--HEX--\n{buff.hex()}\n--END--\n\n--RAW--\n{buff}\n--END--\n")
                 else:
-                    acceptable = tokens[3:]
-                    for j in queue:
-                        if j.split()[0].lower() in acceptable:
-                            job, logf = j, log.info
-                            queue.remove(job)
-                            break
-                logf(f"Ready: {instance_id}-{address.hex()} sending: {job}")
-                workers[address] = (job, instance_id, time.time())
-                backend.send_multipart([address, b'', job])
+                    job, logf = f"{Tasks.NOOP.value} nonce".encode('ascii'), log.debug
+                    tokens = ready.split()
+                    proto = tokens[1]
+                    instance_id = tokens[2]
+                    # Check protocol version
+                    if proto != PROTO:
+                        job, logf = f"{Tasks.STOP.value} nonce".encode('ascii'), log.warning
+                        log.warning(f"Bad worker version: {proto} (expected: {PROTO}) from {instance_id}")
+                    else:
+                        acceptable = tokens[3:]
+                        for j in queue:
+                            if j.split()[0].lower() in acceptable:
+                                job, logf = j, log.info
+                                queue.remove(job)
+                                break
+                    logf(f"Ready: {instance_id}-{address.hex()} sending: {job}")
+                    workers[address] = (job, instance_id, time.time())
+                    backend.send_multipart([address, b'', job])
             # Put the queue back into the shelf for persistence
             store['queue'] = queue
             store.sync()
