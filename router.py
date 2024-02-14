@@ -75,7 +75,10 @@ def main():
                 try:
                     address, empty, ready = buff
                 except:
-                    log.warning(f"ZMQ SENT: \n--ASCII--\n{buff.decode('ascii')}\n--END--\n\n--HEX--\n{buff.hex()}\n--END--\n\n--RAW--\n{buff}\n--END--\n")
+                    log.warning(f"ZMQ SENT BAD MESSAGE")
+                    for count, item in enumerate(buff):
+                        log.warning(f"ITEM NUMBER {count}")
+                        log.warning(f"\n--HEX--\n{item.hex()}\n--END--\n--RAW--\n{item}\n--END--\n")
                 else:
                     job, logf = f"{Tasks.NOOP.value} nonce".encode('ascii'), log.debug
                     tokens = ready.split()
