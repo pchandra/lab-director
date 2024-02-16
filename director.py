@@ -1,5 +1,6 @@
 import zmq
 import uuid
+import time
 from waitress import serve
 from paste.translogger import TransLogger
 from random import randrange
@@ -50,6 +51,7 @@ def _create_status(file_id, audio_type):
     ret = {}
     ret['id'] = file_id
     ret['type'] = audio_type
+    ret['watchdog'] = time.time()
     target = None
     if audio_type == 'beat':
         target = TASKS_BEAT
@@ -272,6 +274,15 @@ def requeue_task(file_id, task):
         (STATUS[file_id]['type'] != 'song' or task.lower() not in [x.value for x in TASKS_SONG]) and
         (STATUS[file_id]['type'] != 'soundkit' or task.lower() not in [x.value for x in TASKS_SOUNDKIT])):
         return _err_bad_request(file_id, task)
+    if task == Tasks.STAT.value:
+        current = time.time()
+        if current - STATUS[file_id]['watchdog'] > 1800:
+            if STATUS[file_id]['type'] == 'beat':
+                return force_load_beat(file_id)
+            elif STATUS[file_id]['type'] == 'song':
+                return force_load_song(file_id)
+            elif STATUS[file_id]['type'] == 'soundkit':
+                return force_load_soundkit(file_id)
     sender.send_string(f"{task} {file_id}")
     return _msg(f"Re-queued task: {task} for: {file_id}")
 
