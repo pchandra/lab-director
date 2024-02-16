@@ -75,24 +75,20 @@ def _create_ondemand(file_id, task, params):
     params[task]['status'] = TaskState.INIT.value
     return job_id, params
 
-def _init_artist(file_id, status):
-    status[file_id] = _create_status(file_id, 'artist')
-    for task in [x.value for x in TASKS_ARTIST]:
-        sender.send_string(f"{task} {file_id}")
-
-def _init_beat(file_id, status):
-    status[file_id] = _create_status(file_id, 'beat')
-    for task in [x.value for x in TASKS_BEAT]:
-        sender.send_string(f"{task} {file_id}")
-
-def _init_song(file_id, status):
-    status[file_id] = _create_status(file_id, 'song')
-    for task in [x.value for x in TASKS_SONG]:
-        sender.send_string(f"{task} {file_id}")
-
-def _init_soundkit(file_id, status):
-    status[file_id] = _create_status(file_id, 'soundkit')
-    for task in [x.value for x in TASKS_SOUNDKIT]:
+def _init_object(file_id, category, status):
+    todo = []
+    if category == 'artist':
+        todo = TASKS_ARTIST
+    elif category == 'beat':
+        todo = TASKS_BEAT
+    elif category == 'song':
+        todo = TASKS_SONG
+    elif category == 'soundkit':
+        todo = TASKS_SOUNDKIT
+    else:
+        raise Exception(f"Object type not recognized: {category}")
+    status[file_id] = _create_status(file_id, category)
+    for task in [x.value for x in todo]:
         sender.send_string(f"{task} {file_id}")
 
 @app.route('/')
@@ -211,14 +207,14 @@ def stub_artist(file_id):
 @app.route('/force_load_artist/<file_id>')
 def force_load_artist(file_id):
     STATUS = flask_shelve.get_shelve()
-    _init_artist(file_id, STATUS)
+    _init_object(file_id, 'artist', STATUS)
     return _msg(f"Forced all tasks for artist: {file_id}")
 
 @app.route('/load_artist/<file_id>')
 def load_artist(file_id):
     STATUS = flask_shelve.get_shelve()
     if not file_id in STATUS:
-        _init_artist(file_id, STATUS)
+        _init_object(file_id, 'artist', STATUS)
         return _msg(f"Queued all tasks for artist: {file_id}")
     else:
         return _msg(f"Already loaded artist: {file_id}")
@@ -226,14 +222,14 @@ def load_artist(file_id):
 @app.route('/force_load_beat/<file_id>')
 def force_load_beat(file_id):
     STATUS = flask_shelve.get_shelve()
-    _init_beat(file_id, STATUS)
+    _init_object(file_id, 'beat', STATUS)
     return _msg(f"Forced all tasks for beat: {file_id}")
 
 @app.route('/load_beat/<file_id>')
 def load_beat(file_id):
     STATUS = flask_shelve.get_shelve()
     if not file_id in STATUS:
-        _init_beat(file_id, STATUS)
+        _init_object(file_id, 'beat', STATUS)
         return _msg(f"Queued all tasks for beat: {file_id}")
     else:
         return _msg(f"Already loaded beat: {file_id}")
@@ -241,14 +237,14 @@ def load_beat(file_id):
 @app.route('/force_load_song/<file_id>')
 def force_load_song(file_id):
     STATUS = flask_shelve.get_shelve()
-    _init_song(file_id, STATUS)
+    _init_object(file_id, 'song', STATUS)
     return _msg(f"Forced all tasks for song: {file_id}")
 
 @app.route('/load_song/<file_id>')
 def load_song(file_id):
     STATUS = flask_shelve.get_shelve()
     if not file_id in STATUS:
-        _init_song(file_id, STATUS)
+        _init_object(file_id, 'song', STATUS)
         return _msg(f"Queued all tasks for song: {file_id}")
     else:
         return _msg(f"Already loaded song: {file_id}")
@@ -256,14 +252,14 @@ def load_song(file_id):
 @app.route('/force_load_soundkit/<file_id>')
 def force_load_soundkit(file_id):
     STATUS = flask_shelve.get_shelve()
-    _init_soundkit(file_id, STATUS)
+    _init_object(file_id, 'soundkit', STATUS)
     return _msg(f"Forced all tasks for soundkit: {file_id}")
 
 @app.route('/load_soundkit/<file_id>')
 def load_soundkit(file_id):
     STATUS = flask_shelve.get_shelve()
     if not file_id in STATUS:
-        _init_soundkit(file_id, STATUS)
+        _init_object(file_id, 'soundkit', STATUS)
         return _msg(f"Queued all tasks for soundkit: {file_id}")
     else:
         return _msg(f"Already loaded soundkit: {file_id}")
@@ -281,12 +277,7 @@ def requeue_task(file_id, task):
     if task == Tasks.STAT.value:
         current = time.time()
         if current - STATUS[file_id]['watchdog'] > 1800:
-            if STATUS[file_id]['type'] == 'beat':
-                _init_beat(file_id, STATUS)
-            elif STATUS[file_id]['type'] == 'song':
-                _init_song(file_id, STATUS)
-            elif STATUS[file_id]['type'] == 'soundkit':
-                _init_soundkit(file_id, STATUS)
+            _init_object(file_id, STATUS[file_id]['type'], STATUS)
             return _msg(f"Re-queue triggered reload: {task} for: {file_id}")
     sender.send_string(f"{task} {file_id}")
     return _msg(f"Re-queued task: {task} for: {file_id}")
