@@ -71,15 +71,8 @@ def main():
                     queue.append(message[0])
 
             if socks.get(backend) == zmq.POLLIN:
-                buff = backend.recv_multipart()
                 try:
-                    address, empty, ready = buff
-                except:
-                    log.warning(f"ZMQ SENT BAD MESSAGE")
-                    for count, item in enumerate(buff):
-                        log.warning(f"ITEM NUMBER {count}")
-                        log.warning(f"\n--HEX--\n{item.hex()}\n--END--\n--RAW--\n{item}\n--END--\n")
-                else:
+                    address, empty, ready = backend.recv_multipart()
                     job, logf = f"{Tasks.NOOP.value} nonce".encode('ascii'), log.debug
                     tokens = ready.split()
                     proto = tokens[1]
@@ -98,6 +91,10 @@ def main():
                     logf(f"Ready: {instance_id}-{address.hex()} sending: {job}")
                     workers[address] = (job, instance_id, time.time())
                     backend.send_multipart([address, b'', job])
+                except Exception as e:
+                    log.warning(f"EXCEPTION IN ROUTER LOOP")
+                    log.warning(f"Exception: {e}")
+
             # Put the queue back into the shelf for persistence
             store['queue'] = queue
             store.sync()
