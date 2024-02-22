@@ -112,9 +112,9 @@ def execute(tg, force=False):
     if not force and tg.check_keys():
         return True, helpers.msg('Already done')
 
-    filename = tg.get_file(f"{Tasks.ORIG.value}.wav")
+    filename = tg.get_file(f"{Tasks.MAST.value}.wav")
     if filename is None:
-        return False, helpers.msg(f'Input file not found: {Tasks.ORIG.value}.wav')
+        return False, helpers.msg(f'Input file not found: {Tasks.MAST.value}.wav')
 
     # Get the info for the original file
     infofile = tg.get_file(f"{Tasks.ORIG.value}.json")
