@@ -14,9 +14,9 @@ def execute(tg, force=False):
     if not force and tg.check_keys():
         return True, helpers.msg('Already done')
 
-    filename = tg.get_file(f"{Tasks.ORIG.value}.mp3")
+    filename = tg.get_file(f"{Tasks.MAST.value}.mp3")
     if filename is None:
-        return False, helpers.msg(f'Input file not found: {Tasks.ORIG.value}.mp3')
+        return False, helpers.msg(f'Input file not found: {Tasks.MAST.value}.mp3')
     # Build the command line to run
     cmdline = []
     cmdline.append(KEYMASTER_BIN)

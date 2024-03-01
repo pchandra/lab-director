@@ -205,17 +205,17 @@ def main():
 
         # Bar graphics generation
         elif task == Tasks.BARS.value:
-            if _check_ready(file_id, status, Tasks.ORIG):
+            if _check_ready(file_id, status, Tasks.MAST):
                 _run(file_id, Tasks.BARS, force)
             else:
-                _requeue(file_id, task.upper() if force else task, Tasks.ORIG)
+                _requeue(file_id, task.upper() if force else task, Tasks.MAST)
 
         # Genre autodetection
         elif task == Tasks.GENR.value:
-            if _check_ready(file_id, status, Tasks.ORIG):
+            if _check_ready(file_id, status, Tasks.MAST):
                 _run(file_id, Tasks.GENR, force)
             else:
-                _requeue(file_id, task.upper() if force else task, Tasks.ORIG)
+                _requeue(file_id, task.upper() if force else task, Tasks.MAST)
 
         # Watermarking original file
         elif task == Tasks.WTRM.value:
@@ -226,10 +226,10 @@ def main():
 
         # Key and BPM detection
         elif task == Tasks.KBPM.value:
-            if _check_ready(file_id, status, Tasks.ORIG):
+            if _check_ready(file_id, status, Tasks.MAST):
                 _run(file_id, Tasks.KBPM, force)
             else:
-                _requeue(file_id, task.upper() if force else task, Tasks.ORIG)
+                _requeue(file_id, task.upper() if force else task, Tasks.MAST)
 
         # Stem separation
         elif task == Tasks.STEM.value:

@@ -15,9 +15,9 @@ def execute(tg, force=False):
         return True, helpers.msg('Already done')
 
     # Use the WAV of the original for analysis
-    filename = tg.get_file(f"{Tasks.ORIG.value}.mp3")
+    filename = tg.get_file(f"{Tasks.MAST.value}.mp3")
     if filename is None:
-        return False, helpers.msg(f'Input file not found: {Tasks.ORIG.value}.mp3')
+        return False, helpers.msg(f'Input file not found: {Tasks.MAST.value}.mp3')
     genres = [ 'core', 'mood', 'blues', 'classical', 'country', 'electronic', 'hiphop', 'jazz', 'metal', 'reggae', 'rock']
     output = {}
     for g in genres:

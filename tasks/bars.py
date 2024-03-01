@@ -16,9 +16,9 @@ def execute(tg, force=False):
         return True, helpers.msg('Already done')
 
     # Use the mp3 version of the original to make the graphics
-    filename = tg.get_file(f"{Tasks.ORIG.value}.mp3")
+    filename = tg.get_file(f"{Tasks.MAST.value}.mp3")
     if filename is None:
-        return False, helpers.msg(f'Input file not found: {Tasks.ORIG.value}.mp3')
+        return False, helpers.msg(f'Input file not found: {Tasks.MAST.value}.mp3')
 
     svgname = tg.scratch + f"/{Tasks.BARS.value}.svg"
     pngname = tg.scratch + f"/{Tasks.BARS.value}.png"
