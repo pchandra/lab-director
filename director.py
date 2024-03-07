@@ -304,6 +304,26 @@ def reset_status():
         total += 1
     return _msg(f"Reset all item status, cleared: {total}")
 
+@app.route('/get-queue-length', methods=['GET'])
+def get_queue_length():
+    STATUS = flask_shelve.get_shelve()
+    try:
+        l = STATUS['queue']['length']
+    except:
+        l = 0
+    STATUS['queue'] = { 'length': l }
+    return _msg("ok", base={'length': l})
+
+@app.route('/set-queue-length/<length>', methods=['GET'])
+def set_queue_length(length):
+    STATUS = flask_shelve.get_shelve()
+    try:
+        STATUS['queue'] = { 'length': int(length) }
+    except ValueError:
+        return _msg("bad request parameter"), 400
+    else:
+        return _msg("ok")
+
 @app.route('/update-inprogress/<file_id>/<task>', methods=['GET', 'POST'])
 def update_inprogress(file_id, task):
     STATUS = flask_shelve.get_shelve()
