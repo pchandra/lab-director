@@ -4,6 +4,7 @@ import zmq
 import shelve
 import logging
 from taskdef import *
+import taskapi as api
 from config import CONFIG as conf
 
 SHELVE_FILENAME = conf['ROUTER_SHELVE']
@@ -55,7 +56,9 @@ def main():
             # Do time sensitive checks first
             now = time.time()
             if now - last_msg > HEARTBEAT_TIME:
-                log.info("Queue: %d" % len(queue))
+                l = len(queue)
+                log.info("Queue: %d" % l)
+                api.set_queue(l)
                 last_msg = now
 
             socks = dict(poller.poll())

@@ -7,6 +7,10 @@ from config import CONFIG as conf
 # URL Hosting the director HTTP API (flask)
 BASE_URL = f"http://{conf['DIRECTOR_ADDR']}:{conf['DIRECTOR_PORT']}"
 
+def set_queue(length):
+    response = urlopen(BASE_URL + f"/set-queue-length/{length}")
+    return json.loads(response.read())
+
 def get_status(file_id):
     response = urlopen(BASE_URL + f"/status/{file_id}")
     return json.loads(response.read())
