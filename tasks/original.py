@@ -29,6 +29,9 @@ def execute(tg, force=False):
     fmt = metadata['format'].get('format_name')
     if fmt != 'wav' and fmt != 'aiff' and fmt != 'mp3':
         return False, helpers.msg(f'Not accepting this file format: {fmt}')
+    duration = float(metadata['format'].get('duration'))
+    if duration > 900:
+        return False, helpers.msg(f'Not accepting audio of this duration: {duration}')
     # Fix a sample size if mp3 since it will be 0
     if fmt == 'mp3':
         metadata['streams'][0]['bits_per_sample'] = 16
