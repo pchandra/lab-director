@@ -5,6 +5,7 @@ import time
 from datetime import datetime
 import shutil
 import subprocess
+import traceback
 import json
 import soundfile as sf
 from . import filestore
@@ -205,6 +206,8 @@ class TaskGuard:
         return self
 
     def __exit__(self, exc_type, exc_value, exc_tb):
+        if exc_tb != None:
+            traceback.print_tb(exc_tb)
         try:
             if self.success:
                 self.copy_keys()
