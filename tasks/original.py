@@ -38,10 +38,10 @@ def execute(tg, force=False):
 
     # Save the file info along side it
     ret = {}
-    tempfile = f"{tg.scratch}/{Tasks.ORIG.value}.json"
+    tempfile = f"{tg.scratch}/{Tasks.ORIG.value}-upload.json"
     with open(tempfile, 'w') as f:
         f.write(json.dumps(metadata, indent=2))
-    ret['info'] = tg.put_file(tempfile, f"{Tasks.ORIG.value}.json")
+    ret['info-upload'] = tg.put_file(tempfile, f"{Tasks.ORIG.value}-upload.json")
 
     # Grab details about the audio
     channels = metadata['streams'][0]['channels']
@@ -81,6 +81,13 @@ def execute(tg, force=False):
 
     # Save it as the wav version of original to the filestore
     ret['output'] = tg.put_file(outfile, f"{Tasks.ORIG.value}.wav")
+
+    # Get and save the metadata for the clean wav
+    clean = helpers.get_media_info(outfile)
+    tempfile = f"{tg.scratch}/{Tasks.ORIG.value}.json"
+    with open(tempfile, 'w') as f:
+        f.write(json.dumps(clean, indent=2))
+    ret['info'] = tg.put_file(tempfile, f"{Tasks.ORIG.value}.json")
 
     # Make an MP3 website version
     mp3file = f"{tg.scratch}/{Tasks.ORIG.value}.mp3"
