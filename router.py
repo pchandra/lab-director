@@ -3,6 +3,7 @@ import time
 import zmq
 import shelve
 import logging
+from collections import Counter
 from taskdef import *
 import taskapi as api
 from config import CONFIG as conf
@@ -58,7 +59,11 @@ def main():
             if now - last_msg > HEARTBEAT_TIME:
                 l = len(queue)
                 log.info("Queue: %d" % l)
-                api.set_queue(l)
+                if l > 0:
+                    summary = dict(Counter([x.split()[0].lower().decode('utf-8') for x in queue]))
+                    api.set_queue(l, summary)
+                else:
+                    api.set_queue(l)
                 last_msg = now
 
             socks = dict(poller.poll())

@@ -290,13 +290,13 @@ def file_status(file_id):
         return msg
     return STATUS[file_id]
 
-@app.route('/status_info')
-def status_info():
+@app.route('/get-cache-info')
+def cache_info():
     STATUS = flask_shelve.get_shelve()
     return _msg(f"Total status cache size: {len(STATUS.keys())}")
 
-@app.route('/reset_status')
-def reset_status():
+@app.route('/reset-cache')
+def reset_cache():
     STATUS = flask_shelve.get_shelve()
     total = 0
     for k in STATUS.keys():
@@ -304,21 +304,26 @@ def reset_status():
         total += 1
     return _msg(f"Reset all item status, cleared: {total}")
 
-@app.route('/get-queue-length', methods=['GET'])
-def get_queue_length():
+@app.route('/get-queue-info', methods=['GET'])
+def get_queue_info():
     STATUS = flask_shelve.get_shelve()
+    base = {}
     try:
-        l = STATUS['queue']['length']
+        base = STATUS['queue']
+        base['summary'] = STATUS['summary']
     except:
-        l = 0
-    STATUS['queue'] = { 'length': l }
-    return _msg("ok", base={'length': l})
+        pass
+    return _msg("ok", base=base)
 
-@app.route('/set-queue-length/<length>', methods=['GET'])
-def set_queue_length(length):
+@app.route('/set-queue-info/<length>', methods=['GET', 'POST'])
+def set_queue_info(length):
     STATUS = flask_shelve.get_shelve()
     try:
         STATUS['queue'] = { 'length': int(length) }
+        if request.method == 'POST':
+            STATUS['summary'] = request.get_json(force=True)
+        else:
+            STATUS['summary'] = {}
     except ValueError:
         return _msg("bad request parameter"), 400
     else:
