@@ -155,11 +155,7 @@ def radio_edit(file_id):
     STATUS = flask_shelve.get_shelve()
     if not file_id in STATUS:
         return _err_no_file(file_id)
-    if request.method == 'GET':
-        params = { 'bleep': 'silence',
-                   'words': 'default' }
-    else:
-        params = request.get_json(force=True)
+    params = {} if request.method == 'GET' else request.get_json(force=True)
     job_id, params = _create_ondemand(file_id, Tasks.RDIO.value, params)
     STATUS[job_id] = params
     sender.send_string(f"{Tasks.RDIO.value} {job_id}")
@@ -171,10 +167,7 @@ def lyrics_generation(file_id):
     STATUS = flask_shelve.get_shelve()
     if not file_id in STATUS:
         return _err_no_file(file_id)
-    if request.method == 'GET':
-        params = { 'language': 'en' }
-    else:
-        params = request.get_json(force=True)
+    params = {} if request.method == 'GET' else request.get_json(force=True)
     job_id, params = _create_ondemand(file_id, Tasks.LYRC.value, params)
     STATUS[job_id] = params
     sender.send_string(f"{Tasks.LYRC.value} {job_id}")

@@ -19,8 +19,7 @@ def ondemand(tg, params, force=False):
     if not force and tg.check_keys():
         return True, helpers.msg('Already done')
 
-    bleep = params['bleep']
-    job_id = params['job_id']
+    bleep = params.get('bleep', 'silence')
 
     outfile = f"{tg.scratch}/{Tasks.RDIO.value}.wav"
 

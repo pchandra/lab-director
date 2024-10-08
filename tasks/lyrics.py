@@ -21,7 +21,7 @@ def ondemand(tg, params, force=False):
     if not force and tg.check_keys():
         return True, helpers.msg('Already done')
 
-    language = params['language']
+    language = params.get('language', 'en')
 
     outdir = f"{tg.scratch}/{Tasks.LYRC.value}"
 
