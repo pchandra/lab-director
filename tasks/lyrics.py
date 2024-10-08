@@ -11,7 +11,7 @@ WHISPER_BIN = conf['WHISPER_BIN']
 WHISPER_MODEL = conf['WHISPER_MODEL']
 ML_DEVICE = conf['ML_DEVICE']
 
-def execute(tg, force=False):
+def ondemand(tg, params, force=False):
     if tg.status['type'] not in [ 'beat', 'song' ]:
         return False, helpers.msg('Track is not a beat or song')
     # Short-circuit if the filestore already has assets we would produce
@@ -20,6 +20,8 @@ def execute(tg, force=False):
         tg.add_private([ f"{Tasks.LYRC.value}.{fmt}" ])
     if not force and tg.check_keys():
         return True, helpers.msg('Already done')
+
+    language = params['language']
 
     outdir = f"{tg.scratch}/{Tasks.LYRC.value}"
 
@@ -44,7 +46,7 @@ def execute(tg, force=False):
     cmdline = []
     cmdline.append(WHISPER_BIN)
     cmdline.extend([ "--model", WHISPER_MODEL,
-                     "--language", "en",
+                     "--language", language,
                      "--device", ML_DEVICE,
                      "--accurate",
                      "--vad", "True",

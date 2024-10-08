@@ -43,7 +43,6 @@ TASKS_BEAT = [ Tasks.ORIG,
                Tasks.WTRM,
                Tasks.INST,
                Tasks.VOCL,
-               Tasks.LYRC,
                Tasks.WGFX,
                Tasks.STAT ]
 
@@ -63,6 +62,7 @@ TASKS_ONDEMAND = [ Tasks.EXPT,
                    Tasks.OGAW,
                    Tasks.KGFX,
                    Tasks.RDIO,
+                   Tasks.LYRC,
                    Tasks.UPSZ ]
 
 # These tasks jump to the front of the queue

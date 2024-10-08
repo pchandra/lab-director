@@ -49,6 +49,8 @@ def ondemand(tg, params, force=False):
         filenames.append(filename)
 
     lyric_file = tg.get_file(f"{Tasks.LYRC.value}.json")
+    if lyric_file is None:
+        return False, helpers.msg(f'Input file not found: {Tasks.LYRC.value}.json')
 
     vocalout = f"{tg.scratch}/edit.wav"
     # Execute the command to bleep the vocal track
