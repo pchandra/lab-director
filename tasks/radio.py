@@ -22,6 +22,7 @@ def ondemand(tg, params, force=False):
     bleep = params.get('bleep', 'silence')
 
     outfile = f"{tg.scratch}/{Tasks.RDIO.value}.wav"
+    cutfile = f"{tg.scratch}/{Tasks.RDIO.value}-cutout.json"
 
     # Get the stem metadata from the filestore
     stem_json = tg.get_file(f"{Tasks.STEM.value}.json")
@@ -61,6 +62,7 @@ def ondemand(tg, params, force=False):
                      "-B", "5",
                      "-w", BLEEP_WORD_LIST,
                      "-m", "3",
+                     "-c", cutfile,
                      "-o", vocalout
                    ])
     cmdline.append(vocals)
@@ -110,6 +112,7 @@ def ondemand(tg, params, force=False):
     # Build the dict to return to caller
     ret['mixer'] = { "stdout": stdout, "stderr": stderr }
     ret['output'] = tg.put_file(outfile, f"{Tasks.RDIO.value}.wav")
+    ret['cutout'] = tg.put_file(cutfile, f"{Tasks.RDIO.value}-cutlist-auto.json")
 
     # Make an MP3 website version
     mp3file = f"{tg.scratch}/{Tasks.RDIO.value}.mp3"
