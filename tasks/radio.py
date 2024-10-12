@@ -125,7 +125,8 @@ def ondemand(tg, params, force=False):
     # Build the dict to return to caller
     ret['mixer'] = { "stdout": stdout, "stderr": stderr }
     ret['output'] = tg.put_file(outfile, f"{Tasks.RDIO.value}.wav")
-    ret['cutout'] = tg.put_file(cutfile, f"{Tasks.RDIO.value}-cutlist-auto.json")
+    if user_cutlist is not None:
+        ret['cutout'] = tg.put_file(cutfile, f"{Tasks.RDIO.value}-cutlist-auto.json")
 
     # Make an MP3 website version
     mp3file = f"{tg.scratch}/{Tasks.RDIO.value}.mp3"
