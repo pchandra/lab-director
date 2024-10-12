@@ -19,7 +19,7 @@ def ondemand(tg, params, force=False):
 
     # Force processing if the user cutlist is present
     user_cutlist = tg.get_file(f"{Tasks.RDIO.value}-cutlist-user.json")
-    if user_cutlist is not None:
+    if user_cutlist:
         force = True
 
     if not force and tg.check_keys():
@@ -61,7 +61,7 @@ def ondemand(tg, params, force=False):
     cmdline.append(BLEEP_BLASTER_BIN)
 
     # Handle user cutist
-    if user_cutlist is not None:
+    if user_cutlist:
         cmdline.extend([ "-u", user_cutlist ])
     # Handle normal case
     else:
@@ -125,7 +125,7 @@ def ondemand(tg, params, force=False):
     # Build the dict to return to caller
     ret['mixer'] = { "stdout": stdout, "stderr": stderr }
     ret['output'] = tg.put_file(outfile, f"{Tasks.RDIO.value}.wav")
-    if user_cutlist is not None:
+    if not user_cutlist:
         ret['cutout'] = tg.put_file(cutfile, f"{Tasks.RDIO.value}-cutlist-auto.json")
 
     # Make an MP3 website version
