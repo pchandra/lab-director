@@ -16,6 +16,12 @@ def ondemand(tg, params, force=False):
     tg.add_public([ f"{Tasks.RDIO.value}.png" ])
     tg.add_private([ f"{Tasks.RDIO.value}.wav",
                      f"{Tasks.RDIO.value}.mp3" ])
+
+    # Force processing if the user cutlist is present
+    user_cutlist = tg.get_file(f"{Tasks.RDIO.value}-cutlist-user.json")
+    if user_cutlist is not None:
+        force = True
+
     if not force and tg.check_keys():
         return True, helpers.msg('Already done')
 
@@ -48,21 +54,28 @@ def ondemand(tg, params, force=False):
             continue
         filenames.append(filename)
 
-    lyric_file = tg.get_file(f"{Tasks.LYRC.value}.json")
-    if lyric_file is None:
-        return False, helpers.msg(f'Input file not found: {Tasks.LYRC.value}.json')
-
     vocalout = f"{tg.scratch}/edit.wav"
-    # Execute the command to bleep the vocal track
+
+    # Build the command to bleep the vocal track
     cmdline = []
     cmdline.append(BLEEP_BLASTER_BIN)
 
-    cmdline.extend([ "-l", lyric_file,
-                     "-b", bleep,
+    # Handle user cutist
+    if user_cutlist is not None:
+        cmdline.extend([ "-u", user_cutlist ])
+    # Handle normal case
+    else:
+        lyric_file = tg.get_file(f"{Tasks.LYRC.value}.json")
+        if lyric_file is None:
+            return False, helpers.msg(f'Input file not found: {Tasks.LYRC.value}.json')
+        cmdline.extend([ "-l", lyric_file,
+                         "-w", BLEEP_WORD_LIST,
+                         "-c", cutfile
+                       ])
+
+    cmdline.extend([ "-b", bleep,
                      "-B", "5",
-                     "-w", BLEEP_WORD_LIST,
                      "-m", "3",
-                     "-c", cutfile,
                      "-o", vocalout
                    ])
     cmdline.append(vocals)
