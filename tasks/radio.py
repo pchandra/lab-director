@@ -19,13 +19,11 @@ def ondemand(tg, params, force=False):
 
     # Force processing if the user cutlist is present
     user_cutlist = tg.get_file(f"{Tasks.RDIO.value}-cutlist-user.json")
-    if user_cutlist:
-        force = True
+    bleep = params.get('bleep', 'silence')
+    force = True if user_cutlist else params.get('update', False)
 
     if not force and tg.check_keys():
         return True, helpers.msg('Already done')
-
-    bleep = params.get('bleep', 'silence')
 
     outfile = f"{tg.scratch}/{Tasks.RDIO.value}.wav"
     cutfile = f"{tg.scratch}/{Tasks.RDIO.value}-cutout.json"
