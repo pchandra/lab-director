@@ -21,6 +21,13 @@ def ondemand(tg, params, force=False):
     if not force and tg.check_keys():
         return True, helpers.msg('Already done')
 
+    # Write the inprogress temp file, upload it, and delete it
+    tempfile = f"{tg.scratch}/{Tasks.LYRC.value}.temp"
+    with open(tempfile, 'w') as f:
+        f.write("inprogress")
+    tg.put_file(tempfile, f"{Tasks.LYRC.value}.temp")
+    os.remove(tempfile)
+
     language = params.get('language', 'en')
 
     outdir = f"{tg.scratch}/{Tasks.LYRC.value}"
@@ -94,4 +101,6 @@ def ondemand(tg, params, force=False):
         ext = 'words.json' if fmt == 'json' else fmt
         output[fmt] = tg.put_file(outdir + f"/{filebase}.{ext}", f"{Tasks.LYRC.value}.{fmt}")
     ret['output'] = [ {'type':x,'file':output[x]} for x in output.keys()]
+    # Remove inprogress marker file
+    tg.remove_file(f"{Tasks.LYRC.value}.temp")
     return True, ret
