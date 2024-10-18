@@ -24,6 +24,7 @@ class Tasks(Enum):
     RDIO = 'radio' # Generate a radio edit for the song
     UPSZ = 'hires' # Generate a hires version of a pic
     OGAW = 'artwork' # Generate a web friendly version of cover art
+    LABL = 'label' # Bulk process a label account uploads
 
 class TaskState(Enum):
     INIT = "initial"
@@ -63,7 +64,8 @@ TASKS_ONDEMAND = [ Tasks.EXPT,
                    Tasks.KGFX,
                    Tasks.RDIO,
                    Tasks.LYRC,
-                   Tasks.UPSZ ]
+                   Tasks.UPSZ,
+                   Tasks.LABL ]
 
 # These tasks jump to the front of the queue
 TASKS_PRIORITY = [ Tasks.ORIG,

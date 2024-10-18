@@ -20,6 +20,7 @@ from . import coverart
 from . import radio
 from . import upsize
 from . import artwork
+from . import label
 
 __all__ = ["execute", "ondemand"]
 
@@ -47,3 +48,4 @@ ondemand[Tasks.KGFX.value] = kitgfx.ondemand
 ondemand[Tasks.RDIO.value] = radio.ondemand
 ondemand[Tasks.LYRC.value] = lyrics.ondemand
 ondemand[Tasks.UPSZ.value] = upsize.ondemand
+ondemand[Tasks.LABL.value] = label.ondemand

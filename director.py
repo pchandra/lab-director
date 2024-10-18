@@ -52,7 +52,7 @@ def _create_status(file_id, audio_type):
     ret['id'] = file_id
     ret['type'] = audio_type
     ret['watchdog'] = time.time()
-    target = None
+    target = []
     if audio_type == 'beat':
         target = TASKS_BEAT
     elif audio_type == 'song':
@@ -187,6 +187,17 @@ def upsize(file_id, key, fmt):
     STATUS[job_id] = params
     sender.send_string(f"{Tasks.UPSZ.value} {job_id}")
     return _msg(f"Sent {Tasks.UPSZ.value} for: {file_id} with {job_id}", params)
+
+@app.route('/label/<file_id>')
+@app.route('/label/<file_id>', methods=['POST'])
+def label_processing(file_id):
+    STATUS = flask_shelve.get_shelve()
+    STATUS[file_id] = _create_status(file_id, 'label')
+    params = {} if request.method == 'GET' else request.get_json(force=True)
+    job_id, params = _create_ondemand(file_id, Tasks.LABL.value, params)
+    STATUS[job_id] = params
+    sender.send_string(f"{Tasks.LABL.value} {job_id}")
+    return _msg(f"Sent {Tasks.LABL.value} for: {file_id} with {job_id}", params)
 
 @app.route('/stub_beat/<file_id>')
 def stub_beat(file_id):
