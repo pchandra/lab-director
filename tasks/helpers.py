@@ -231,7 +231,7 @@ class TaskGuard:
     def _get_bucketnames(self):
         self.status = api.get_status(self.file_id)
         private = None
-        if self.status['type'] == 'beat':
+        if self.status['type'] in ['beat', 'label']:
             private = FILESTORE_BEATS
         elif self.status['type'] == 'song':
             private = FILESTORE_SONGS
@@ -249,6 +249,9 @@ class TaskGuard:
 
     def put_file(self, file, key):
         return filestore.store_file(self.file_id, file, key, self.private)
+
+    def iterate_files(self):
+        return filestore.iterate_objects(self.file_id, self.private)
 
     def add_public(self, keys):
         self.priv_keys += keys
