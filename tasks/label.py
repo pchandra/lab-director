@@ -20,6 +20,7 @@ def ondemand(tg, params, force=False):
         with open(infofile, 'r') as f:
             info = json.load(f)
 
+    # Setup original to process if not already complete
     for file in tg.iterate_files():
         if file.key[-3:].lower() in fmt:
             if file.key not in [x["file"] for x in info]:
@@ -28,11 +29,15 @@ def ondemand(tg, params, force=False):
                 info.append(item)
                 index = f"{tg.file_id}_{item_id}"
                 tg.copy_file(file.key, f"{index}/{Tasks.ORIG.value}")
-                api.load_beat(index)
-            if lyrics:
-                api.lyrics(index)
-            if radio:
-                api.radio(index)
+
+    # Run lyrics and radio if requested
+    for item in info:
+        index = f"{tg.file_id}_{item['id']}"
+        api.load_beat(index)
+        if lyrics:
+            api.lyrics(index)
+        if radio:
+            api.radio(index)
 
     outfile = f"{tg.scratch}/{Tasks.LABL.value}.json"
     with open(outfile, 'w') as f:
