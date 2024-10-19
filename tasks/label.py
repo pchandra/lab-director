@@ -10,6 +10,8 @@ def ondemand(tg, params, force=False):
         return False, helpers.msg('ID is not label type')
 
     fmt = params.get('format', ['wav'])
+    lyrics = params.get('lyrics', True)
+    radio = params.get('radio', True)
 
     # Get the list from label directory
     infofile = tg.get_file(f"{Tasks.LABL.value}.json")
@@ -27,6 +29,10 @@ def ondemand(tg, params, force=False):
                 index = f"{tg.file_id}_{item_id}"
                 tg.copy_file(file.key, f"{index}/{Tasks.ORIG.value}")
                 api.load_beat(index)
+            if lyrics:
+                api.lyrics(index)
+            if radio:
+                api.radio(index)
 
     outfile = f"{tg.scratch}/{Tasks.LABL.value}.json"
     with open(outfile, 'w') as f:

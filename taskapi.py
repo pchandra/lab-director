@@ -37,6 +37,14 @@ def mark_failed(file_id, task, data=None):
     urlopen(BASE_URL + f"/update-failed/{file_id}/{task}", data)
     return
 
+def lyrics(file_id):
+    urlopen(BASE_URL + f"/lyrics/{file_id}")
+    return
+
+def radio(file_id):
+    urlopen(BASE_URL + f"/radio/{file_id}")
+    return
+
 def load_beat(file_id):
     urlopen(BASE_URL + f"/load_beat/{file_id}")
     return
