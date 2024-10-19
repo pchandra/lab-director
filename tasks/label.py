@@ -1,4 +1,5 @@
 import uuid
+import json
 from taskdef import *
 from . import helpers
 from config import CONFIG as conf
@@ -23,5 +24,11 @@ def ondemand(tg, params, force=False):
                 info.append(item)
             print(f"MATCH")
 
-    print(info)
-    return True, {}
+    outfile = f"{tg.scratch}/{Tasks.LABL.value}.json"
+    with open(outfile, 'w') as f:
+        f.write(json.dumps(info, indent=2))
+
+    ret = {}
+    ret['outfile'] = tg.put_file(outfile, f"{Tasks.LABL.value}.json")
+
+    return True, ret
