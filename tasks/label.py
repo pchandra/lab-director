@@ -34,6 +34,7 @@ def ondemand(tg, params, force=False):
         f.write(json.dumps(info, indent=2))
 
     ret = {}
+    ret['items'] = info
     ret['outfile'] = tg.put_file(outfile, f"{Tasks.LABL.value}.json")
 
     return True, ret
