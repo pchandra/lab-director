@@ -1,5 +1,6 @@
 import uuid
 import json
+import taskapi as api
 from taskdef import *
 from . import helpers
 from config import CONFIG as conf
@@ -25,7 +26,8 @@ def ondemand(tg, params, force=False):
                 info.append(item)
                 index = f"{tg.file_id}_{item_id}"
                 tg.copy_file(file.key, f"{index}/{Tasks.ORIG.value}")
-                print(f"MATCH")
+                api.load_beat(index)
+                print("NEW MATCH!")
 
     outfile = f"{tg.scratch}/{Tasks.LABL.value}.json"
     with open(outfile, 'w') as f:

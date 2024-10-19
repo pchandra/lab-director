@@ -37,6 +37,10 @@ def mark_failed(file_id, task, data=None):
     urlopen(BASE_URL + f"/update-failed/{file_id}/{task}", data)
     return
 
+def load_beat(file_id):
+    urlopen(BASE_URL + f"/load_beat/{file_id}")
+    return
+
 def requeue(file_id, task):
     # Slow it down since we're waiting for something else to finish
     time.sleep(1)
