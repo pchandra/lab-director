@@ -27,7 +27,6 @@ def ondemand(tg, params, force=False):
                 index = f"{tg.file_id}_{item_id}"
                 tg.copy_file(file.key, f"{index}/{Tasks.ORIG.value}")
                 api.load_beat(index)
-                print("NEW MATCH!")
 
     outfile = f"{tg.scratch}/{Tasks.LABL.value}.json"
     with open(outfile, 'w') as f:
