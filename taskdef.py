@@ -25,6 +25,7 @@ class Tasks(Enum):
     UPSZ = 'hires' # Generate a hires version of a pic
     OGAW = 'artwork' # Generate a web friendly version of cover art
     LABL = 'label' # Bulk process a label account uploads
+    LEXP = 'label-export' # Bulk export processed items to a label upload
 
 class TaskState(Enum):
     INIT = "initial"
@@ -65,7 +66,8 @@ TASKS_ONDEMAND = [ Tasks.EXPT,
                    Tasks.RDIO,
                    Tasks.LYRC,
                    Tasks.UPSZ,
-                   Tasks.LABL ]
+                   Tasks.LABL,
+                   Tasks.LEXP ]
 
 # These tasks jump to the front of the queue
 TASKS_PRIORITY = [ Tasks.ORIG,

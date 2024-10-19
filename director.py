@@ -199,6 +199,18 @@ def label_processing(file_id):
     sender.send_string(f"{Tasks.LABL.value} {job_id}")
     return _msg(f"Sent {Tasks.LABL.value} for: {file_id} with {job_id}", params)
 
+@app.route('/label-export/<file_id>')
+@app.route('/label-export/<file_id>', methods=['POST'])
+def label_export(file_id):
+    STATUS = flask_shelve.get_shelve()
+    if not file_id in STATUS:
+        return _err_no_file(file_id)
+    params = {} if request.method == 'GET' else request.get_json(force=True)
+    job_id, params = _create_ondemand(file_id, Tasks.LEXP.value, params)
+    STATUS[job_id] = params
+    sender.send_string(f"{Tasks.LEXP.value} {job_id}")
+    return _msg(f"Sent {Tasks.LEXP.value} for: {file_id} with {job_id}", params)
+
 @app.route('/stub_beat/<file_id>')
 def stub_beat(file_id):
     STATUS = flask_shelve.get_shelve()

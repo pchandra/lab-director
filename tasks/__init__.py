@@ -21,6 +21,7 @@ from . import radio
 from . import upsize
 from . import artwork
 from . import label
+from . import labelexport
 
 __all__ = ["execute", "ondemand"]
 
@@ -49,3 +50,4 @@ ondemand[Tasks.RDIO.value] = radio.ondemand
 ondemand[Tasks.LYRC.value] = lyrics.ondemand
 ondemand[Tasks.UPSZ.value] = upsize.ondemand
 ondemand[Tasks.LABL.value] = label.ondemand
+ondemand[Tasks.LEXP.value] = labelexport.ondemand
