@@ -20,9 +20,12 @@ def ondemand(tg, params, force=False):
     for file in tg.iterate_files():
         if file.key[-3:].lower() in fmt:
             if file.key not in [x["file"] for x in info]:
-                item = {"file" : file.key, "id" : str(uuid.uuid4())}
+                item_id = str(uuid.uuid4())
+                item = {"file" : file.key, "id" : item_id}
                 info.append(item)
-            print(f"MATCH")
+                index = f"{tg.file_id}_{item_id}"
+                tg.copy_file(file.key, f"{index}/{Tasks.ORIG.value}")
+                print(f"MATCH")
 
     outfile = f"{tg.scratch}/{Tasks.LABL.value}.json"
     with open(outfile, 'w') as f:

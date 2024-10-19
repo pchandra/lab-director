@@ -153,6 +153,17 @@ def _local_iterate_objects(file_id, section):
 def _s3_iterate_objects(file_id, section):
     return s3.Bucket(section).objects.filter(Prefix=f"{file_id}/")
 
+# Copy a single object inside one bucket
+def copy_object(file_id, srckey, dstkey, section):
+    return _backend['copy_object'](file_id, srckey, dstkey, section)
+
+def _local_copy_object(file_id, srckey, dstkey, section):
+    return None
+
+def _s3_copy_object(file_id, srckey, dstkey, section):
+    source = { 'Bucket' : section, 'Key': srckey }
+    return s3.Bucket(section).copy(source, dstkey)
+
 _backend_local = {}
 _backend_local['remove_file'] = _local_remove_file
 _backend_local['store_file'] = _local_store_file
@@ -160,6 +171,7 @@ _backend_local['retrieve_file'] = _local_retrieve_file
 _backend_local['key_exists'] = _local_key_exists
 _backend_local['copy_keys'] = _local_copy_keys
 _backend_local['iterate_objects'] = _local_iterate_objects
+_backend_local['copy_object'] = _local_copy_object
 
 _backend_s3 = {}
 _backend_s3['remove_file'] = _s3_remove_file
@@ -168,5 +180,6 @@ _backend_s3['retrieve_file'] = _s3_retrieve_file
 _backend_s3['key_exists'] = _s3_key_exists
 _backend_s3['copy_keys'] = _s3_copy_keys
 _backend_s3['iterate_objects'] = _s3_iterate_objects
+_backend_s3['copy_object'] = _s3_copy_object
 
 _backend = _backend_s3 if FILESTORE_BACKEND == "s3" else _backend_local

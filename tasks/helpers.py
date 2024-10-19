@@ -270,6 +270,9 @@ class TaskGuard:
         if self.force or not filestore.check_keys(self.file_id, self.pub_keys, self.public):
             filestore.copy_keys(self.file_id, self.pub_keys, self.private, self.public)
 
+    def copy_file(self, srckey, dstkey):
+        filestore.copy_object(self.file_id, srckey, dstkey, self.private)
+
     def get_perf(self):
         ret = {}
         ret['start'] = datetime.fromtimestamp(self.start).strftime('%Y-%m-%d %H:%M:%S')
