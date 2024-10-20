@@ -52,7 +52,8 @@ def main():
         while True:
             # Extract the queue from the shelf
             queue = store['queue']
-            time.sleep(0.01)
+            if len(queue) == 0:
+                time.sleep(0.1)
 
             # Do time sensitive checks first
             now = time.time()

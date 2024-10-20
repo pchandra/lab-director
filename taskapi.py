@@ -51,6 +51,6 @@ def load_beat(file_id):
 
 def requeue(file_id, task):
     # Slow it down since we're waiting for something else to finish
-    time.sleep(1)
+    time.sleep(0.1)
     urlopen(BASE_URL + f"/requeue/{file_id}/{task}")
     return
