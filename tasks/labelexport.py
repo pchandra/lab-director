@@ -9,7 +9,7 @@ def ondemand(tg, params, force=False):
     if tg.status['type'] not in [ 'label' ]:
         return False, helpers.msg('ID is not label type')
 
-    outlist = params.get('keys', [Tasks.ORIG.value])
+    keys = params.get('keys', [Tasks.ORIG.value])
 
     # Get the list from label directory
     infofile = tg.get_file(f"{Tasks.LABL.value}.json")
