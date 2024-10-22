@@ -11,7 +11,8 @@ def execute(tg, force=False):
         return False, helpers.msg('Track is not a beat or song')
     # Short-circuit if the filestore already has assets we would produce
     tg.add_public([ f"{Tasks.BARS.value}-desktop.png",
-                    f"{Tasks.BARS.value}-mobile.png" ])
+                    f"{Tasks.BARS.value}-mobile.png",
+                    f"{Tasks.BARS.value}-data.json" ])
     if not force and tg.check_keys():
         return True, helpers.msg('Already done')
 
@@ -22,6 +23,7 @@ def execute(tg, force=False):
 
     svgname = tg.scratch + f"/{Tasks.BARS.value}.svg"
     pngname = tg.scratch + f"/{Tasks.BARS.value}.png"
+    jsonname = tg.scratch + f"/{Tasks.BARS.value}.json"
 
     # Build the command line to run
     cmdline = []
@@ -29,6 +31,7 @@ def execute(tg, force=False):
     cmdline.extend([ "-i", filename,
                      "-o", svgname,
                      "-p", pngname,
+                     "-j", jsonname,
                      "-b", "200",
                      "-s", "2",
                      "-H", "200",
@@ -44,6 +47,7 @@ def execute(tg, force=False):
     # Save the desktop version
     ret = {}
     ret['desktop'] = tg.put_file(pngname, f"{Tasks.BARS.value}-desktop.png")
+    ret['jsondata'] = tg.put_file(jsonname, f"{Tasks.BARS.value}-data.json")
 
     # Run it again for the mobile version
     cmdline = []
