@@ -1,3 +1,4 @@
+import os
 import uuid
 import json
 import taskapi as api
@@ -22,8 +23,9 @@ def ondemand(tg, params, force=False):
     # Export files back to original location
     for item in info:
         index = f"{tg.file_id}_{item['id']}"
+        basename = os.path.splitext(item['file'])[0]
         for key in keys:
-            tg.copy_file(f"{index}/{key}", f"{tg.file_id}/{item['file']}/{key}")
+            tg.copy_file(f"{index}/{key}", f"{tg.file_id}/{basename}-{key}")
 
     ret = {}
     ret['items'] = info
