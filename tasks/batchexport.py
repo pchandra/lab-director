@@ -25,7 +25,7 @@ def ondemand(tg, params, force=False):
         index = f"{tg.file_id}_{item['id']}"
         basename = os.path.splitext(item['file'])[0]
         for key in keys:
-            tg.copy_file(f"{index}/{key}", f"{tg.file_id}/{basename}-{key}")
+            tg.copy_file(f"{index}/{key}", f"---BULK/{basename}-{key}")
 
     ret = {}
     ret['items'] = info
