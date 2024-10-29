@@ -10,7 +10,7 @@ def ondemand(tg, params, force=False):
     if tg.status['type'] not in [ 'batch' ]:
         return False, helpers.msg('ID is not batch type')
 
-    keys = params.get('keys', [f"{Tasks.RDIO.value}.wav", f"{Tasks.LYRC.value}.txt"])
+    keys = params.get('keys', [ f"{Tasks.ORIG.value}.wav" ])
 
     # Get the list from batch directory
     infofile = tg.get_file(f"{Tasks.BTCH.value}.json")

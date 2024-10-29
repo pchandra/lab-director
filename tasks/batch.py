@@ -10,8 +10,8 @@ def ondemand(tg, params, force=False):
         return False, helpers.msg('ID is not batch type')
 
     fmt = params.get('format', ['wav'])
-    lyrics = params.get('lyrics', True)
-    radio = params.get('radio', True)
+    lyrics = params.get('lyrics', False)
+    radio = params.get('radio', False)
 
     # Get the list from batch directory
     infofile = tg.get_file(f"{Tasks.BTCH.value}.json")
