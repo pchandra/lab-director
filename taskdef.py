@@ -58,6 +58,11 @@ TASKS_SOUNDKIT = [ Tasks.OGSK,
 # The tasks that are automatically run for each artist
 TASKS_ARTIST = [ ]
 
+# The tasks that are automatically run for each label item
+TASKS_LABELITEM = [ Tasks.ORIG,
+                    Tasks.STEM,
+                    Tasks.MAST ]
+
 # These are the on-demand only tasks
 TASKS_ONDEMAND = [ Tasks.EXPT,
                    Tasks.COVR,

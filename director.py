@@ -50,7 +50,8 @@ def _sanity_check(file_id, status, task=None, allow_upper=False):
 def _create_status(file_id, audio_type):
     ret = {}
     ret['id'] = file_id
-    ret['type'] = audio_type
+    # Hack to have label items pretend to be beats
+    ret['type'] = 'beat' if audio_type == 'label-item' else audio_type
     ret['watchdog'] = time.time()
     target = []
     if audio_type == 'beat':
@@ -61,6 +62,8 @@ def _create_status(file_id, audio_type):
         target = TASKS_SOUNDKIT
     elif audio_type == 'artist':
         target = TASKS_ARTIST
+    elif audio_type == 'label-item':
+        target = TASKS_LABELITEM
     for task in [x.value for x in target]:
         ret[task] = {}
         ret[task]['status'] = TaskState.INIT.value
@@ -85,6 +88,8 @@ def _init_object(file_id, category, status):
         todo = TASKS_SONG
     elif category == 'soundkit':
         todo = TASKS_SOUNDKIT
+    elif category == 'label-item':
+        todo = TASKS_LABELITEM
     else:
         raise Exception(f"Object type not recognized: {category}")
     status[file_id] = _create_status(file_id, category)
@@ -294,6 +299,15 @@ def load_soundkit(file_id):
         return _msg(f"Queued all tasks for soundkit: {file_id}")
     else:
         return _msg(f"Already loaded soundkit: {file_id}")
+
+@app.route('/load_label_item/<file_id>')
+def load_label_item(file_id):
+    STATUS = flask_shelve.get_shelve()
+    if not file_id in STATUS:
+        _init_object(file_id, 'label-item', STATUS)
+        return _msg(f"Queued all tasks for label-item: {file_id}")
+    else:
+        return _msg(f"Already loaded label-item: {file_id}")
 
 @app.route('/requeue/<file_id>/<task>')
 def requeue_task(file_id, task):

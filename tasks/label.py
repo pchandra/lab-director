@@ -33,7 +33,7 @@ def ondemand(tg, params, force=False):
     # Run lyrics and radio if requested
     for item in info:
         index = f"{tg.file_id}_{item['id']}"
-        api.load_beat(index)
+        api.load_label_item(index)
         if lyrics:
             api.lyrics(index)
         if radio:

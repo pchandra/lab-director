@@ -45,8 +45,8 @@ def radio(file_id):
     urlopen(BASE_URL + f"/radio/{file_id}")
     return
 
-def load_beat(file_id):
-    urlopen(BASE_URL + f"/load_beat/{file_id}")
+def load_label_item(file_id):
+    urlopen(BASE_URL + f"/load_label_item/{file_id}")
     return
 
 def requeue(file_id, task):
