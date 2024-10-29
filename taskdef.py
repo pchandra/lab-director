@@ -24,8 +24,8 @@ class Tasks(Enum):
     RDIO = 'radio' # Generate a radio edit for the song
     UPSZ = 'hires' # Generate a hires version of a pic
     OGAW = 'artwork' # Generate a web friendly version of cover art
-    LABL = 'label' # Bulk process a label account uploads
-    LEXP = 'label-export' # Bulk export processed items to a label upload
+    BTCH = 'batch' # Process batch items
+    BEXP = 'batch-export' # Export processed batch items
 
 class TaskState(Enum):
     INIT = "initial"
@@ -58,8 +58,8 @@ TASKS_SOUNDKIT = [ Tasks.OGSK,
 # The tasks that are automatically run for each artist
 TASKS_ARTIST = [ ]
 
-# The tasks that are automatically run for each label item
-TASKS_LABELITEM = [ Tasks.ORIG,
+# The tasks that are automatically run for each batch item
+TASKS_BATCHITEM = [ Tasks.ORIG,
                     Tasks.STEM,
                     Tasks.MAST ]
 
@@ -71,8 +71,8 @@ TASKS_ONDEMAND = [ Tasks.EXPT,
                    Tasks.RDIO,
                    Tasks.LYRC,
                    Tasks.UPSZ,
-                   Tasks.LABL,
-                   Tasks.LEXP ]
+                   Tasks.BTCH,
+                   Tasks.BEXP ]
 
 # These tasks jump to the front of the queue
 TASKS_PRIORITY = [ Tasks.ORIG,

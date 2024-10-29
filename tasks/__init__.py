@@ -20,8 +20,8 @@ from . import coverart
 from . import radio
 from . import upsize
 from . import artwork
-from . import label
-from . import labelexport
+from . import batch
+from . import batchexport
 
 __all__ = ["execute", "ondemand"]
 
@@ -49,5 +49,5 @@ ondemand[Tasks.KGFX.value] = kitgfx.ondemand
 ondemand[Tasks.RDIO.value] = radio.ondemand
 ondemand[Tasks.LYRC.value] = lyrics.ondemand
 ondemand[Tasks.UPSZ.value] = upsize.ondemand
-ondemand[Tasks.LABL.value] = label.ondemand
-ondemand[Tasks.LEXP.value] = labelexport.ondemand
+ondemand[Tasks.BTCH.value] = batch.ondemand
+ondemand[Tasks.BEXP.value] = batchexport.ondemand

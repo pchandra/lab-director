@@ -6,15 +6,15 @@ from . import helpers
 from config import CONFIG as conf
 
 def ondemand(tg, params, force=False):
-    if tg.status['type'] not in [ 'label' ]:
-        return False, helpers.msg('ID is not label type')
+    if tg.status['type'] not in [ 'batch' ]:
+        return False, helpers.msg('ID is not batch type')
 
     fmt = params.get('format', ['wav'])
     lyrics = params.get('lyrics', True)
     radio = params.get('radio', True)
 
-    # Get the list from label directory
-    infofile = tg.get_file(f"{Tasks.LABL.value}.json")
+    # Get the list from batch directory
+    infofile = tg.get_file(f"{Tasks.BTCH.value}.json")
     info = []
     if infofile is not None:
         with open(infofile, 'r') as f:
@@ -33,18 +33,18 @@ def ondemand(tg, params, force=False):
     # Run lyrics and radio if requested
     for item in info:
         index = f"{tg.file_id}_{item['id']}"
-        api.load_label_item(index)
+        api.load_batch_item(index)
         if lyrics:
             api.lyrics(index)
         if radio:
             api.radio(index)
 
-    outfile = f"{tg.scratch}/{Tasks.LABL.value}.json"
+    outfile = f"{tg.scratch}/{Tasks.BTCH.value}.json"
     with open(outfile, 'w') as f:
         f.write(json.dumps(info, indent=2))
 
     ret = {}
     ret['items'] = info
-    ret['outfile'] = tg.put_file(outfile, f"{Tasks.LABL.value}.json")
+    ret['outfile'] = tg.put_file(outfile, f"{Tasks.BTCH.value}.json")
 
     return True, ret

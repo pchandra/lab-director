@@ -7,15 +7,15 @@ from . import helpers
 from config import CONFIG as conf
 
 def ondemand(tg, params, force=False):
-    if tg.status['type'] not in [ 'label' ]:
-        return False, helpers.msg('ID is not label type')
+    if tg.status['type'] not in [ 'batch' ]:
+        return False, helpers.msg('ID is not batch type')
 
     keys = params.get('keys', [f"{Tasks.RDIO.value}.wav", f"{Tasks.LYRC.value}.txt"])
 
-    # Get the list from label directory
-    infofile = tg.get_file(f"{Tasks.LABL.value}.json")
+    # Get the list from batch directory
+    infofile = tg.get_file(f"{Tasks.BTCH.value}.json")
     if infofile is None:
-        return False, helpers.msg(f'Input file not found: {Tasks.LABL.value}.json')
+        return False, helpers.msg(f'Input file not found: {Tasks.BTCH.value}.json')
 
     with open(infofile, 'r') as f:
         info = json.load(f)

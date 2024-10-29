@@ -231,7 +231,7 @@ class TaskGuard:
     def _get_bucketnames(self):
         self.status = api.get_status(self.file_id)
         private = None
-        if self.status['type'] in ['beat', 'label']:
+        if self.status['type'] in ['beat', 'batch']:
             private = FILESTORE_BEATS
         elif self.status['type'] == 'song':
             private = FILESTORE_SONGS

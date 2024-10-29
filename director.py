@@ -50,8 +50,8 @@ def _sanity_check(file_id, status, task=None, allow_upper=False):
 def _create_status(file_id, audio_type):
     ret = {}
     ret['id'] = file_id
-    # Hack to have label items pretend to be beats
-    ret['type'] = 'beat' if audio_type == 'label-item' else audio_type
+    # Hack to have batch items pretend to be beats
+    ret['type'] = 'beat' if audio_type == 'batch-item' else audio_type
     ret['watchdog'] = time.time()
     target = []
     if audio_type == 'beat':
@@ -62,8 +62,8 @@ def _create_status(file_id, audio_type):
         target = TASKS_SOUNDKIT
     elif audio_type == 'artist':
         target = TASKS_ARTIST
-    elif audio_type == 'label-item':
-        target = TASKS_LABELITEM
+    elif audio_type == 'batch-item':
+        target = TASKS_BATCHITEM
     for task in [x.value for x in target]:
         ret[task] = {}
         ret[task]['status'] = TaskState.INIT.value
@@ -88,8 +88,8 @@ def _init_object(file_id, category, status):
         todo = TASKS_SONG
     elif category == 'soundkit':
         todo = TASKS_SOUNDKIT
-    elif category == 'label-item':
-        todo = TASKS_LABELITEM
+    elif category == 'batch-item':
+        todo = TASKS_BATCHITEM
     else:
         raise Exception(f"Object type not recognized: {category}")
     status[file_id] = _create_status(file_id, category)
@@ -193,28 +193,28 @@ def upsize(file_id, key, fmt):
     sender.send_string(f"{Tasks.UPSZ.value} {job_id}")
     return _msg(f"Sent {Tasks.UPSZ.value} for: {file_id} with {job_id}", params)
 
-@app.route('/label/<file_id>')
-@app.route('/label/<file_id>', methods=['POST'])
-def label_processing(file_id):
+@app.route('/batch-process/<file_id>')
+@app.route('/batch-process/<file_id>', methods=['POST'])
+def batch_processing(file_id):
     STATUS = flask_shelve.get_shelve()
-    STATUS[file_id] = _create_status(file_id, 'label')
+    STATUS[file_id] = _create_status(file_id, 'batch')
     params = {} if request.method == 'GET' else request.get_json(force=True)
-    job_id, params = _create_ondemand(file_id, Tasks.LABL.value, params)
+    job_id, params = _create_ondemand(file_id, Tasks.BTCH.value, params)
     STATUS[job_id] = params
-    sender.send_string(f"{Tasks.LABL.value} {job_id}")
-    return _msg(f"Sent {Tasks.LABL.value} for: {file_id} with {job_id}", params)
+    sender.send_string(f"{Tasks.BTCH.value} {job_id}")
+    return _msg(f"Sent {Tasks.BTCH.value} for: {file_id} with {job_id}", params)
 
-@app.route('/label-export/<file_id>')
-@app.route('/label-export/<file_id>', methods=['POST'])
-def label_export(file_id):
+@app.route('/batch-export/<file_id>')
+@app.route('/batch-export/<file_id>', methods=['POST'])
+def batch_export(file_id):
     STATUS = flask_shelve.get_shelve()
     if not file_id in STATUS:
         return _err_no_file(file_id)
     params = {} if request.method == 'GET' else request.get_json(force=True)
-    job_id, params = _create_ondemand(file_id, Tasks.LEXP.value, params)
+    job_id, params = _create_ondemand(file_id, Tasks.BEXP.value, params)
     STATUS[job_id] = params
-    sender.send_string(f"{Tasks.LEXP.value} {job_id}")
-    return _msg(f"Sent {Tasks.LEXP.value} for: {file_id} with {job_id}", params)
+    sender.send_string(f"{Tasks.BEXP.value} {job_id}")
+    return _msg(f"Sent {Tasks.BEXP.value} for: {file_id} with {job_id}", params)
 
 @app.route('/stub_beat/<file_id>')
 def stub_beat(file_id):
@@ -300,14 +300,14 @@ def load_soundkit(file_id):
     else:
         return _msg(f"Already loaded soundkit: {file_id}")
 
-@app.route('/load_label_item/<file_id>')
-def load_label_item(file_id):
+@app.route('/load_batch_item/<file_id>')
+def load_batch_item(file_id):
     STATUS = flask_shelve.get_shelve()
     if not file_id in STATUS:
-        _init_object(file_id, 'label-item', STATUS)
-        return _msg(f"Queued all tasks for label-item: {file_id}")
+        _init_object(file_id, 'batch-item', STATUS)
+        return _msg(f"Queued all tasks for batch-item: {file_id}")
     else:
-        return _msg(f"Already loaded label-item: {file_id}")
+        return _msg(f"Already loaded batch-item: {file_id}")
 
 @app.route('/requeue/<file_id>/<task>')
 def requeue_task(file_id, task):
