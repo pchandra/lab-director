@@ -379,6 +379,7 @@ def update_inprogress(file_id, task):
     if not ok:
         return msg
     current = STATUS[file_id]
+    current[task] = current.get(task, {})
     current[task]['status'] = TaskState.PROG.value
     if request.method == 'POST':
         current[task][TaskState.PROG.value] = request.get_json(force=True)
