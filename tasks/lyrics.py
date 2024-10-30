@@ -71,27 +71,24 @@ def ondemand(tg, params, force=False):
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE,
                                universal_newlines=True)
-    stdout, stderr = process.communicate(input="\n\n\n\n\n")
+    process.stdin.write("\n\n\n\n\n")
 
-    # Cannot set progress updates for ondamend tasks yet
-    # process.stdin.write("\n\n\n\n\n")
-
-    # helpers.setprogress(tg.file_id, Tasks.LYRC, 0)
-    # while True:
-    #     line = process.stderr.readline()
-    #     stderr += line
-    #     p = re.compile('[\s]*([\d]+)%')
-    #     m = p.match(line)
-    #     if m is not None:
-    #         percent = int(m.group(1))
-    #         helpers.setprogress(tg.file_id, Tasks.LYRC, percent)
-    #     if process.poll() is not None:
-    #         for line in process.stdout.readlines():
-    #             stdout += line
-    #         for line in process.stderr.readlines():
-    #             stderr += line
-    #         helpers.setprogress(tg.file_id, Tasks.LYRC, 100)
-    #         break
+    helpers.setprogress(tg.file_id, Tasks.LYRC, 0)
+    while True:
+        line = process.stderr.readline()
+        stderr += line
+        p = re.compile('[\s]*([\d]+)%')
+        m = p.match(line)
+        if m is not None:
+            percent = int(m.group(1))
+            helpers.setprogress(tg.file_id, Tasks.LYRC, percent)
+        if process.poll() is not None:
+            for line in process.stdout.readlines():
+                stdout += line
+            for line in process.stderr.readlines():
+                stderr += line
+            helpers.setprogress(tg.file_id, Tasks.LYRC, 100)
+            break
 
     # Build the dict to return to caller
     ret = { "command": { "stdout": stdout, "stderr": stderr } }
