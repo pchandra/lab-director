@@ -40,20 +40,6 @@ def ondemand(tg, params, force=False):
     if metadata['instrumental']:
         return False, helpers.msg('Track is an intrumental already')
 
-    # Grab all the stems
-    filenames = []
-    vocals = None
-    for stem in metadata['stems-core']:
-        filename = tg.get_file(stem)
-        if filename is None:
-            return False, helpers.msg(f'Input file not found: {stem}')
-        if stem == f'{Tasks.STEM.value}-vocals.wav':
-            vocals = filename
-            continue
-        filenames.append(filename)
-
-    vocalout = f"{tg.scratch}/edit.wav"
-
     # Build the command to bleep the vocal track
     cmdline = []
     cmdline.append(BLEEP_BLASTER_BIN)
@@ -70,6 +56,20 @@ def ondemand(tg, params, force=False):
                          "-w", BLEEP_WORD_LIST,
                          "-c", cutfile
                        ])
+
+    # Grab all the stems
+    filenames = []
+    vocals = None
+    for stem in metadata['stems-core']:
+        filename = tg.get_file(stem)
+        if filename is None:
+            return False, helpers.msg(f'Input file not found: {stem}')
+        if stem == f'{Tasks.STEM.value}-vocals.wav':
+            vocals = filename
+            continue
+        filenames.append(filename)
+
+    vocalout = f"{tg.scratch}/edit.wav"
 
     cmdline.extend([ "-b", bleep,
                      "-B", "5",
