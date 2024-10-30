@@ -10,8 +10,7 @@ def ondemand(tg, params, force=False):
         return False, helpers.msg('ID is not batch type')
 
     fmt = params.get('format', ['wav'])
-    lyrics = params.get('lyrics', False)
-    radio = params.get('radio', False)
+    processing = params.get('processing', [])
 
     # Get the list from batch directory
     infofile = tg.get_file(f"{Tasks.BTCH.value}.json")
@@ -30,14 +29,17 @@ def ondemand(tg, params, force=False):
                 index = f"{tg.file_id}_{item_id}"
                 tg.copy_file(file.key, f"{index}/{Tasks.ORIG.value}")
 
-    # Run lyrics and radio if requested
+    # Run the requested processing tasks
+    requeueable = [x for x in processing if x not in [Tasks.LYRC.value, Tasks.RDIO.value]]
     for item in info:
         index = f"{tg.file_id}_{item['id']}"
         api.load_batch_item(index)
-        if lyrics:
+        if f"{Tasks.LYRC.value}" in processing:
             api.lyrics(index)
-        if radio:
+        if f"{Tasks.RDIO.value}" in processing:
             api.radio(index)
+        for tsk in requeueable:
+            api.requeue(index, tsk)
 
     outfile = f"{tg.scratch}/{Tasks.BTCH.value}.json"
     with open(outfile, 'w') as f:

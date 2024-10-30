@@ -54,7 +54,7 @@ def _create_status(file_id, audio_type):
     ret['type'] = 'beat' if audio_type == 'batch-item' else audio_type
     ret['watchdog'] = time.time()
     target = []
-    if audio_type == 'beat':
+    if audio_type in [ 'beat', 'batch-item' ]:
         target = TASKS_BEAT
     elif audio_type == 'song':
         target = TASKS_SONG
@@ -62,8 +62,6 @@ def _create_status(file_id, audio_type):
         target = TASKS_SOUNDKIT
     elif audio_type == 'artist':
         target = TASKS_ARTIST
-    elif audio_type == 'batch-item':
-        target = TASKS_BATCHITEM
     for task in [x.value for x in target]:
         ret[task] = {}
         ret[task]['status'] = TaskState.INIT.value
