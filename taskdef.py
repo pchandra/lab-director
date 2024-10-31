@@ -59,9 +59,7 @@ TASKS_SOUNDKIT = [ Tasks.OGSK,
 TASKS_ARTIST = [ ]
 
 # The tasks that are automatically run for each batch item
-TASKS_BATCHITEM = [ Tasks.ORIG,
-                    Tasks.STEM,
-                    Tasks.MAST ]
+TASKS_BATCHITEM = [ Tasks.ORIG ]
 
 # These are the on-demand only tasks
 TASKS_ONDEMAND = [ Tasks.EXPT,
