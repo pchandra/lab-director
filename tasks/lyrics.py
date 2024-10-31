@@ -3,6 +3,7 @@ import re
 import json
 import wave
 import subprocess
+import taskapi as api
 from taskdef import *
 from . import helpers
 from config import CONFIG as conf
@@ -21,6 +22,19 @@ def ondemand(tg, params, force=False):
     if not force and tg.check_keys():
         return True, helpers.msg('Already done')
 
+    # Get the stem metadata from the filestore
+    stem_json = tg.get_file(f"{Tasks.STEM.value}.json")
+    if stem_json is None:
+        api.lyrics(tg.file_id, params)
+        return False, helpers.msg(f'Input file not found, requeuing task: {Tasks.STEM.value}.json')
+    metadata = None
+    with open(stem_json, 'r') as f:
+        metadata = json.load(f)
+
+    # Return quickly if stemmer says this is an instrumental
+    if metadata['instrumental']:
+        return False, helpers.msg('Track is an intrumental already')
+
     # Write the inprogress temp file, upload it, and delete it
     tempfile = f"{tg.scratch}/{Tasks.LYRC.value}.temp"
     with open(tempfile, 'w') as f:
@@ -31,18 +45,6 @@ def ondemand(tg, params, force=False):
     language = params.get('language', 'en')
 
     outdir = f"{tg.scratch}/{Tasks.LYRC.value}"
-
-    # Get the stem metadata from the filestore
-    stem_json = tg.get_file(f"{Tasks.STEM.value}.json")
-    if stem_json is None:
-        return False, helpers.msg(f'Input file not found: {Tasks.STEM.value}.json')
-    metadata = None
-    with open(stem_json, 'r') as f:
-        metadata = json.load(f)
-
-    # Return quickly if stemmer says this is an instrumental
-    if metadata['instrumental']:
-        return False, helpers.msg('Track is an intrumental already')
 
     # Grab the vocal track to analyze
     vocalsfile = tg.get_file(f"{Tasks.STEM.value}-vocals.mp3")

@@ -37,12 +37,16 @@ def mark_failed(file_id, task, data=None):
     urlopen(BASE_URL + f"/update-failed/{file_id}/{task}", data)
     return
 
-def lyrics(file_id):
-    urlopen(BASE_URL + f"/lyrics/{file_id}")
+def lyrics(file_id, data=None):
+    if data:
+        data = str(json.dumps(data)).encode('utf-8')
+    urlopen(BASE_URL + f"/lyrics/{file_id}", data=data)
     return
 
-def radio(file_id):
-    urlopen(BASE_URL + f"/radio/{file_id}")
+def radio(file_id, data=None):
+    if data:
+        data = str(json.dumps(data)).encode('utf-8')
+    urlopen(BASE_URL + f"/radio/{file_id}", data=data)
     return
 
 def load_batch_item(file_id):

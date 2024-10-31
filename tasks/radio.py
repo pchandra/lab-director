@@ -1,6 +1,7 @@
 import os
 import json
 import subprocess
+import taskapi as api
 from taskdef import *
 from . import helpers
 from config import CONFIG as conf
@@ -31,7 +32,8 @@ def ondemand(tg, params, force=False):
     # Get the stem metadata from the filestore
     stem_json = tg.get_file(f"{Tasks.STEM.value}.json")
     if stem_json is None:
-        return False, helpers.msg(f'Input file not found: {Tasks.STEM.value}.json')
+        api.radio(tg.file_id, params)
+        return False, helpers.msg(f'Input file not found, requeuing: {Tasks.STEM.value}.json')
     metadata = None
     with open(stem_json, 'r') as f:
         metadata = json.load(f)
@@ -51,7 +53,8 @@ def ondemand(tg, params, force=False):
     else:
         lyric_file = tg.get_file(f"{Tasks.LYRC.value}.json")
         if lyric_file is None:
-            return False, helpers.msg(f'Input file not found: {Tasks.LYRC.value}.json')
+            api.radio(tg.file_id, params)
+            return False, helpers.msg(f'Input file not found, requeuing: {Tasks.LYRC.value}.json')
         cmdline.extend([ "-l", lyric_file,
                          "-w", BLEEP_WORD_LIST,
                          "-c", cutfile
