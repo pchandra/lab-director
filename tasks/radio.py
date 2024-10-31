@@ -1,5 +1,6 @@
 import os
 import json
+import time
 import subprocess
 import taskapi as api
 from taskdef import *
@@ -32,6 +33,7 @@ def ondemand(tg, params, force=False):
     # Get the stem metadata from the filestore
     stem_json = tg.get_file(f"{Tasks.STEM.value}.json")
     if stem_json is None:
+        time.sleep(0.1)
         api.radio(tg.file_id, params)
         return False, helpers.msg(f'Input file not found, requeuing: {Tasks.STEM.value}.json')
     metadata = None
@@ -53,6 +55,7 @@ def ondemand(tg, params, force=False):
     else:
         lyric_file = tg.get_file(f"{Tasks.LYRC.value}.json")
         if lyric_file is None:
+            time.sleep(0.1)
             api.radio(tg.file_id, params)
             return False, helpers.msg(f'Input file not found, requeuing: {Tasks.LYRC.value}.json')
         cmdline.extend([ "-l", lyric_file,
