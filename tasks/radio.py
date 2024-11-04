@@ -19,9 +19,11 @@ def ondemand(tg, params, force=False):
     tg.add_private([ f"{Tasks.RDIO.value}.wav",
                      f"{Tasks.RDIO.value}.mp3" ])
 
+    bleep = params.get('bleep', 'silence')
+    job_id = params['job_id']
+
     # Force processing if the user cutlist is present
     user_cutlist = tg.get_file(f"{Tasks.RDIO.value}-cutlist-user.json")
-    bleep = params.get('bleep', 'silence')
     force = True if user_cutlist else params.get('update', False)
 
     if not force and tg.check_keys():
@@ -33,8 +35,7 @@ def ondemand(tg, params, force=False):
     # Get the stem metadata from the filestore
     stem_json = tg.get_file(f"{Tasks.STEM.value}.json")
     if stem_json is None:
-        time.sleep(0.1)
-        api.radio(tg.file_id, params)
+        api.requeue_ondemand(job_id, Task.RDIO.value)
         return False, helpers.msg(f'Input file not found, requeuing: {Tasks.STEM.value}.json')
     metadata = None
     with open(stem_json, 'r') as f:
@@ -55,8 +56,7 @@ def ondemand(tg, params, force=False):
     else:
         lyric_file = tg.get_file(f"{Tasks.LYRC.value}.json")
         if lyric_file is None:
-            time.sleep(0.1)
-            api.radio(tg.file_id, params)
+            api.requeue_ondemand(job_id, Task.RDIO.value)
             return False, helpers.msg(f'Input file not found, requeuing: {Tasks.LYRC.value}.json')
         cmdline.extend([ "-l", lyric_file,
                          "-w", BLEEP_WORD_LIST,

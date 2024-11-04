@@ -37,18 +37,6 @@ def mark_failed(file_id, task, data=None):
     urlopen(BASE_URL + f"/update-failed/{file_id}/{task}", data)
     return
 
-def lyrics(file_id, data=None):
-    if data:
-        data = str(json.dumps(data)).encode('utf-8')
-    urlopen(BASE_URL + f"/lyrics/{file_id}", data=data)
-    return
-
-def radio(file_id, data=None):
-    if data:
-        data = str(json.dumps(data)).encode('utf-8')
-    urlopen(BASE_URL + f"/radio/{file_id}", data=data)
-    return
-
 def load_batch_item(file_id):
     urlopen(BASE_URL + f"/load_batch_item/{file_id}")
     return
@@ -57,4 +45,10 @@ def requeue(file_id, task):
     # Slow it down since we're waiting for something else to finish
     time.sleep(0.1)
     urlopen(BASE_URL + f"/requeue/{file_id}/{task}")
+    return
+
+def requeue_ondemand(job_id, task):
+    # Slow it down since we're waiting for something else to finish
+    time.sleep(0.1)
+    urlopen(BASE_URL + f"/requeue-ondemand/{job_id}/{task}")
     return

@@ -325,6 +325,11 @@ def requeue_task(file_id, task):
     sender.send_string(f"{task} {file_id}")
     return _msg(f"Re-queued task: {task} for: {file_id}")
 
+@app.route('/requeue-ondemand/<job_id>/<task>')
+def requeue_ondemand(job_id, task):
+    sender.send_string(f"{task} {job_id}")
+    return _msg(f"Re-queued task: {task} for: {job_id}")
+
 @app.route('/status/<file_id>')
 def file_status(file_id):
     STATUS = flask_shelve.get_shelve()
