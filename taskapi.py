@@ -38,7 +38,7 @@ def mark_failed(file_id, task, data=None):
     return
 
 def load_batch_item(file_id):
-    urlopen(BASE_URL + f"/load_batch_item/{file_id}")
+    urlopen(BASE_URL + f"/load-batch-item/{file_id}")
     return
 
 def requeue(file_id, task):

@@ -298,7 +298,7 @@ def load_soundkit(file_id):
     else:
         return _msg(f"Already loaded soundkit: {file_id}")
 
-@app.route('/load_batch_item/<file_id>')
+@app.route('/load-batch-item/<file_id>')
 def load_batch_item(file_id):
     STATUS = flask_shelve.get_shelve()
     if not file_id in STATUS:
