@@ -28,7 +28,7 @@ def ondemand(tg, params, force=False):
     # Get the stem metadata from the filestore
     stem_json = tg.get_file(f"{Tasks.STEM.value}.json")
     if stem_json is None:
-        api.requeue_ondemand(job_id, Task.LYRC.value)
+        api.requeue_ondemand(job_id, Tasks.LYRC.value)
         return False, helpers.msg(f'Input file not found, requeuing task: {Tasks.STEM.value}.json')
     metadata = None
     with open(stem_json, 'r') as f:

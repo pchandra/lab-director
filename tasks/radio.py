@@ -35,7 +35,7 @@ def ondemand(tg, params, force=False):
     # Get the stem metadata from the filestore
     stem_json = tg.get_file(f"{Tasks.STEM.value}.json")
     if stem_json is None:
-        api.requeue_ondemand(job_id, Task.RDIO.value)
+        api.requeue_ondemand(job_id, Tasks.RDIO.value)
         return False, helpers.msg(f'Input file not found, requeuing: {Tasks.STEM.value}.json')
     metadata = None
     with open(stem_json, 'r') as f:
@@ -56,7 +56,7 @@ def ondemand(tg, params, force=False):
     else:
         lyric_file = tg.get_file(f"{Tasks.LYRC.value}.json")
         if lyric_file is None:
-            api.requeue_ondemand(job_id, Task.RDIO.value)
+            api.requeue_ondemand(job_id, Tasks.RDIO.value)
             return False, helpers.msg(f'Input file not found, requeuing: {Tasks.LYRC.value}.json')
         cmdline.extend([ "-l", lyric_file,
                          "-w", BLEEP_WORD_LIST,
