@@ -137,16 +137,12 @@ def kitgfx(file_id):
     return _msg(f"Sent {Tasks.KGFX.value} for: {file_id} with {job_id}", params)
 
 @app.route('/coverart/<file_id>')
-@app.route('/coverart/<file_id>/<prompt>')
 @app.route('/coverart/<file_id>', methods=['POST'])
-def coverart(file_id, prompt="a cool music album cover in any artistic style"):
+def coverart(file_id):
     STATUS = flask_shelve.get_shelve()
     if not file_id in STATUS:
         return _err_no_file(file_id)
-    if request.method == 'GET':
-        params = {'prompt': prompt}
-    else:
-        params = request.get_json(force=True)
+    params = {} if request.method == 'GET' else request.get_json(force=True)
     job_id, params = _create_ondemand(file_id, Tasks.COVR.value, params)
     STATUS[job_id] = params
     sender.send_string(f"{Tasks.COVR.value} {job_id}")

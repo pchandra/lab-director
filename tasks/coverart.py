@@ -26,7 +26,7 @@ def ondemand(tg, params, force=False):
     tg.put_file(tempfile, f"{Tasks.COVR.value}.altemp")
     os.remove(tempfile)
 
-    prompt = params['prompt']
+    prompt = params.get('prompt', 'a cool music album cover in any artistic style')
     job_id = params['job_id']
     # Execute the command
     cmdline = []
