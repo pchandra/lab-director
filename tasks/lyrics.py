@@ -14,6 +14,12 @@ WHISPER_MODEL = conf['WHISPER_MODEL']
 ML_DEVICE = conf['ML_DEVICE']
 
 def ondemand(tg, params, force=False):
+    # Hack to check if a run is in progress already
+    tg.add_private([ f"{Tasks.LYRC.value}.altemp" ])
+    if not force and tg.check_keys():
+        return True, helpers.msg('In progress already')
+    tg.priv_keys.remove(f"{Tasks.LYRC.value}.altemp")
+
     if tg.status['type'] not in [ 'beat', 'song' ]:
         return False, helpers.msg('Track is not a beat or song')
     # Short-circuit if the filestore already has assets we would produce
@@ -23,11 +29,19 @@ def ondemand(tg, params, force=False):
     if not force and tg.check_keys():
         return True, helpers.msg('Already done')
 
+    # Write the inprogress temp file, upload it, and delete it
+    tempfile = f"{tg.scratch}/{Tasks.LYRC.value}.altemp"
+    with open(tempfile, 'w') as f:
+        f.write("inprogress")
+    tg.put_file(tempfile, f"{Tasks.LYRC.value}.altemp")
+    os.remove(tempfile)
+
     job_id = params['job_id']
 
     # Get the stem metadata from the filestore
     stem_json = tg.get_file(f"{Tasks.STEM.value}.json")
     if stem_json is None:
+        tg.remove_file(f"{Tasks.LYRC.value}.altemp")
         api.requeue_ondemand(job_id, Tasks.LYRC.value)
         return False, helpers.msg(f'Input file not found, requeuing task: {Tasks.STEM.value}.json')
     metadata = None
@@ -37,13 +51,6 @@ def ondemand(tg, params, force=False):
     # Return quickly if stemmer says this is an instrumental
     if metadata['instrumental']:
         return False, helpers.msg('Track is an intrumental already')
-
-    # Write the inprogress temp file, upload it, and delete it
-    tempfile = f"{tg.scratch}/{Tasks.LYRC.value}.temp"
-    with open(tempfile, 'w') as f:
-        f.write("inprogress")
-    tg.put_file(tempfile, f"{Tasks.LYRC.value}.temp")
-    os.remove(tempfile)
 
     language = params.get('language', 'en')
 
@@ -103,6 +110,7 @@ def ondemand(tg, params, force=False):
         ext = 'words.json' if fmt == 'json' else fmt
         output[fmt] = tg.put_file(outdir + f"/{filebase}.{ext}", f"{Tasks.LYRC.value}.{fmt}")
     ret['output'] = [ {'type':x,'file':output[x]} for x in output.keys()]
-    # Remove inprogress marker file
+    # Remove inprogress marker files
     tg.remove_file(f"{Tasks.LYRC.value}.temp")
+    tg.remove_file(f"{Tasks.LYRC.value}.altemp")
     return True, ret
