@@ -50,10 +50,10 @@ def _sanity_check(file_id, status, task=None, allow_upper=False):
 def _create_status(file_id, audio_type):
     ret = {}
     ret['id'] = file_id
-    # Hack to have batch items pretend to be beats
-    ret['type'] = 'beat' if audio_type == 'batch-item' else audio_type
+    ret['type'] = audio_type
     ret['watchdog'] = time.time()
     target = []
+    # Hack to have batch items pretend to be beats
     if audio_type in [ 'beat', 'batch-item' ]:
         target = TASKS_BEAT
     elif audio_type == 'song':
