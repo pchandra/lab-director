@@ -68,6 +68,9 @@ CONFIG['FILESTORE_DIR'] = '/tmp/STORE'
 # Section name for public files, local: subdirectory, s3: bucket name
 CONFIG['FILESTORE_PUBLIC'] = '%%FILESTORE_PUBLIC%%'
 
+# Section name for batch files, local: subdirectory, s3: bucket name
+CONFIG['FILESTORE_BATCH'] = '%%FILESTORE_BATCH%%'
+
 # Section name for beat files, local: subdirectory, s3: bucket name
 CONFIG['FILESTORE_BEATS'] = '%%FILESTORE_BEATS%%'
 

@@ -19,6 +19,7 @@ WORK_DIR = conf['WORK_DIR']
 SILENCE_THRESHOLD = conf['SILENCE_THRESHOLD']
 SILENCE_PERCENT = conf['SILENCE_PERCENT']
 FILESTORE_PUBLIC = conf['FILESTORE_PUBLIC']
+FILESTORE_BATCH = conf['FILESTORE_BATCH']
 FILESTORE_BEATS = conf['FILESTORE_BEATS']
 FILESTORE_SONGS = conf['FILESTORE_SONGS']
 FILESTORE_SOUNDKITS = conf['FILESTORE_SOUNDKITS']
@@ -190,8 +191,9 @@ def make_sample_rate(infile, sampfile, sample_rate, bit_depth=16, channels=2):
 
 
 class TaskGuard:
-    def __init__(self, file_id, force=False):
+    def __init__(self, file_id, task, force=False):
         self.file_id = file_id
+        self.task = task
         self.force = force
         self.pub_keys = []
         self.priv_keys = []
@@ -201,6 +203,7 @@ class TaskGuard:
 
     def __enter__(self):
         self.start = time.time()
+        self.status = api.get_status(self.file_id)
         self.private, self.public = self._get_bucketnames()
         self._create_scratch_dir()
         return self
@@ -229,9 +232,8 @@ class TaskGuard:
         shutil.rmtree(self.scratch)
 
     def _get_bucketnames(self):
-        self.status = api.get_status(self.file_id)
-        private = None
-        if self.status['type'] in ['beat', 'batch']:
+        private = FILESTORE_BATCH
+        if self.status['type'] == 'beat':
             private = FILESTORE_BEATS
         elif self.status['type'] == 'song':
             private = FILESTORE_SONGS

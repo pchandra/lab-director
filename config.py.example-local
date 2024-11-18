@@ -68,6 +68,9 @@ CONFIG['FILESTORE_DIR'] = '/tmp/STORE'
 # Section name for public files, local: subdirectory, s3: bucket name
 CONFIG['FILESTORE_PUBLIC'] = 'licenselounge-public-test'
 
+# Section name for batch files, local: subdirectory, s3: bucket name
+CONFIG['FILESTORE_BATCH'] = 'licenselounge-batch-test'
+
 # Section name for beat files, local: subdirectory, s3: bucket name
 CONFIG['FILESTORE_BEATS'] = 'licenselounge-beats-test'
 

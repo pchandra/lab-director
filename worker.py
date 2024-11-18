@@ -55,7 +55,7 @@ def _run(file_id, task_type, force=False):
     api.mark_inprogress(file_id, task_type.value)
     log.info(f"Running \"{task_type.value}\" for {file_id}")
     success, ret = False, {}
-    with tasks.helpers.TaskGuard(file_id, force) as tg:
+    with tasks.helpers.TaskGuard(file_id, task_type, force) as tg:
         tg.success, ret = tasks.execute[task_type](tg, force=force)
     # Add the performance data and encode
     ret['perf'] = tg.get_perf()
@@ -152,7 +152,7 @@ def main():
             # Mark both the job and the item's task in progress
             [ api.mark_inprogress(i, task) for i in [ jid, fid ] ]
             success, ret = False, {}
-            with tasks.helpers.TaskGuard(fid) as tg:
+            with tasks.helpers.TaskGuard(fid, task) as tg:
                 tg.success, ret = tasks.ondemand[task](tg, status, force=force)
             ret['perf'] = tg.get_perf()
             data = json.dumps(ret).encode('ascii')
