@@ -309,7 +309,8 @@ def requeue_task(file_id, task):
     ok, msg = _sanity_check(file_id, STATUS, task, allow_upper=True)
     if not ok:
         return msg
-    if ((STATUS[file_id]['type'] != 'beat' or task.lower() not in [x.value for x in TASKS_BEAT]) and
+    if ((STATUS[file_id]['type'] != 'batch-item') and
+        (STATUS[file_id]['type'] != 'beat' or task.lower() not in [x.value for x in TASKS_BEAT]) and
         (STATUS[file_id]['type'] != 'song' or task.lower() not in [x.value for x in TASKS_SONG]) and
         (STATUS[file_id]['type'] != 'soundkit' or task.lower() not in [x.value for x in TASKS_SOUNDKIT])):
         return _err_bad_request(file_id, task)
