@@ -12,8 +12,8 @@ BLEEP_WORD_LIST = conf['BLEEP_WORD_LIST']
 WAVMIXER_BIN = conf['WAVMIXER_BIN']
 
 def ondemand(tg, params, force=False):
-    if tg.status['type'] not in [ 'beat', 'song' ]:
-        return False, helpers.msg('Track is not a beat or song')
+    if tg.status['type'] not in [ 'beat', 'song', 'batch-item' ]:
+        return False, helpers.msg('Track is not a beat, song, or batch-item')
     # Short-circuit if the filestore already has assets we would produce
     tg.add_public([ f"{Tasks.RDIO.value}.png" ])
     tg.add_private([ f"{Tasks.RDIO.value}.wav",
