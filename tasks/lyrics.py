@@ -53,6 +53,7 @@ def ondemand(tg, params, force=False):
         return False, helpers.msg('Track is an intrumental already')
 
     language = params.get('language', 'en')
+    prompt = params.get('prompt', None)
 
     outdir = f"{tg.scratch}/{Tasks.LYRC.value}"
 
@@ -73,6 +74,8 @@ def ondemand(tg, params, force=False):
                      "--punctuations_with_words", "False",
                      "--output_dir", outdir
                    ])
+    if prompt:
+        cmdline.extend([ "--initial_prompt", prompt ])
     cmdline.append(vocalsfile)
     # Execute the command if we don't already have output
     stdout = ""
