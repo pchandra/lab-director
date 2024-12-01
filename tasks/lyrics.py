@@ -68,7 +68,7 @@ def ondemand(tg, params, force=False):
                      "--language", language,
                      "--device", ML_DEVICE,
                      "--accurate",
-                     "--vad", "False",
+                     "--vad", "False" if language == "en" else "True",
                      "--detect_disfluencies", "True",
                      "--punctuations_with_words", "False",
                      "--output_dir", outdir
