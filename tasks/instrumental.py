@@ -39,6 +39,9 @@ def execute(tg, force=False):
     bitdepth = info['streams'][0]['bits_per_sample']
     sample_rate = info['streams'][0]['sample_rate']
 
+    # Build the dict to return to caller
+    ret = {}
+
     # Build the command line to run
     cmdline = []
     cmdline.append(WAVMIXER_BIN)
@@ -56,17 +59,23 @@ def execute(tg, force=False):
         if filename is None:
             return False, helpers.msg(f'Input file not found: {stem}')
         filenames.append(filename)
-    cmdline.extend(filenames)
 
-    # Connect stdin to prevent hang when in background
-    stdout = None
-    stderr = None
-    process = subprocess.Popen(cmdline,
-                               stdin=subprocess.PIPE,
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE,
-                               universal_newlines=True)
-    stdout, stderr = process.communicate(input="\n\n\n\n\n")
+    # Special case if there's only one stem
+    if len(filenames) == 1:
+        outfile = filenames[0]
+        ret["one-stem-only"] = True
+    else:
+        cmdline.extend(filenames)
+        # Connect stdin to prevent hang when in background
+        stdout = None
+        stderr = None
+        process = subprocess.Popen(cmdline,
+                                   stdin=subprocess.PIPE,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE,
+                                   universal_newlines=True)
+        stdout, stderr = process.communicate(input="\n\n\n\n\n")
+        ret["command"] = { "stdout": stdout, "stderr": stderr }
 
     # Store the resulting file
     stored_location = tg.put_file(outfile, f"{Tasks.INST.value}.wav")
@@ -80,8 +89,6 @@ def execute(tg, force=False):
     mp3_location = tg.put_file(mp3file, f"{Tasks.INST.value}.mp3")
     png_location = tg.put_file(mp3file + ".png", f"{Tasks.INST.value}.png")
 
-    # Build the dict to return to caller
-    ret = { "command": { "stdout": stdout, "stderr": stderr } }
     ret["output"] = stored_location
     ret['mp3'] = mp3_location
     ret['png'] = png_location
