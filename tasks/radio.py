@@ -140,4 +140,6 @@ def ondemand(tg, params, force=False):
     # Store the resulting files
     ret['mp3'] = tg.put_file(mp3file, f"{Tasks.RDIO.value}.mp3")
     ret['png'] = tg.put_file(mp3file + ".png", f"{Tasks.RDIO.value}.png")
+    # Remove inprogress marker files
+    tg.remove_file(f"{Tasks.RDIO.value}.temp")
     return True, ret
