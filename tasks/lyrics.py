@@ -42,8 +42,10 @@ def ondemand(tg, params, force=False):
     stem_json = tg.get_file(f"{Tasks.STEM.value}.json")
     if stem_json is None:
         tg.remove_file(f"{Tasks.LYRC.value}.altemp")
-        api.requeue_ondemand(job_id, Tasks.LYRC.value)
-        return False, helpers.msg(f'Input file not found, requeuing task: {Tasks.STEM.value}.json')
+        if tg.status['original']['status'] != "failed":
+            api.requeue_ondemand(job_id, Tasks.LYRC.value)
+            return False, helpers.msg(f'Input file not found, requeuing task: {Tasks.STEM.value}.json')
+        return False, helpers.msg(f'Original failed, not requeuing task')
     metadata = None
     with open(stem_json, 'r') as f:
         metadata = json.load(f)
