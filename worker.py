@@ -260,13 +260,6 @@ def main():
             else:
                 _requeue(file_id, task.upper() if force else task, Tasks.STEM)
 
-        # Lyrics from vocals
-        elif task == Tasks.LYRC.value:
-            if _check_ready(file_id, status, Tasks.STEM):
-                _run(file_id, Tasks.LYRC, force)
-            else:
-                _requeue(file_id, task.upper() if force else task, Tasks.STEM)
-
         # Waveform generation
         elif task == Tasks.WGFX.value:
             if not _check_ready(file_id, status, Tasks.ORIG):
