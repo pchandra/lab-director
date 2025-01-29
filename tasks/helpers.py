@@ -269,6 +269,8 @@ class TaskGuard:
         return False
 
     def copy_keys(self):
+        if self.status['type'] == 'batch-item':
+            return
         if self.force or not filestore.check_keys(self.file_id, self.pub_keys, self.public):
             filestore.copy_keys(self.file_id, self.pub_keys, self.private, self.public)
 
